@@ -33,7 +33,7 @@
 <div class="btnrow" style="margin-top:14px"><button class="btn" id="demo">Charger un exemple</button><button class="btn" id="clear">Réinitialiser</button></div><p class="hint" id="fileinfo">Aucun fichier chargé.</p><div class="notice">Les fichiers .xlsx ne sont pas décodés nativement dans cette version sans dépendance externe. Exportez votre feuille en CSV puis importez-la.</div></div>
 <div class="panel"><h2>Format attendu</h2><p class="sub">Les champs sont détectés automatiquement lorsque possible. Pour un CSV, privilégiez les colonnes nom, version, fournisseur, purl et licence.</p><span class="pill">CycloneDX</span> <span class="pill">SPDX</span> <span class="pill">CSV / Excel exporté</span></div>
 </div><div>
-<div class="panel weights-panel"><h2>Configuration des poids</h2><p class="sub">Chaque dimension est notée de 0 (faible) à 5 (élevé). Ajustez la pondération selon votre contexte.</p><div id="weights"></div><div class="weight-total"><span>Total des pondérations</span><strong id="weightTotal">100 %</strong></div><div class="notice" id="weightNotice" hidden>Le total doit être égal à 100 % pour calculer le score global.</div><button class="btn primary" id="analyze" style="width:100%;margin-top:15px">Analyser les composants →</button></div>
+<div class="panel weights-panel"><h2>Configuration des poids</h2><p class="sub">Chaque dimension est notée de 0 (faible) à 5 (élevé). Ajustez la pondération selon votre contexte.</p><div id="weights"><div class="weight" style="display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto 28px;gap:6px 12px;margin:10px 0"><label for="w_tech">Technique</label><output id="o_tech">25%</output><input id="w_tech" aria-label="Pondération Technique" type="range" min="0" max="100" step="5" value="25" style="display:block;width:100%;height:24px;accent-color:#9cff00;grid-column:1;grid-row:2"></div><div class="weight" style="display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto 28px;gap:6px 12px;margin:10px 0"><label for="w_supply">Supply chain</label><output id="o_supply">25%</output><input id="w_supply" aria-label="Pondération Supply chain" type="range" min="0" max="100" step="5" value="25" style="display:block;width:100%;height:24px;accent-color:#9cff00;grid-column:1;grid-row:2"></div><div class="weight" style="display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto 28px;gap:6px 12px;margin:10px 0"><label for="w_gov">Gouvernance</label><output id="o_gov">20%</output><input id="w_gov" aria-label="Pondération Gouvernance" type="range" min="0" max="100" step="5" value="20" style="display:block;width:100%;height:24px;accent-color:#9cff00;grid-column:1;grid-row:2"></div><div class="weight" style="display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto 28px;gap:6px 12px;margin:10px 0"><label for="w_geo">Géopolitique</label><output id="o_geo">20%</output><input id="w_geo" aria-label="Pondération Géopolitique" type="range" min="0" max="100" step="5" value="20" style="display:block;width:100%;height:24px;accent-color:#9cff00;grid-column:1;grid-row:2"></div><div class="weight" style="display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto 28px;gap:6px 12px;margin:10px 0"><label for="w_dep">Dépendances</label><output id="o_dep">10%</output><input id="w_dep" aria-label="Pondération Dépendances" type="range" min="0" max="100" step="5" value="10" style="display:block;width:100%;height:24px;accent-color:#9cff00;grid-column:1;grid-row:2"></div></div><div class="weight-total"><span>Total des pondérations</span><strong id="weightTotal">100 %</strong></div><div class="notice" id="weightNotice" hidden>Le total doit être égal à 100 % pour calculer le score global.</div><button class="btn primary" id="analyze" style="width:100%;margin-top:15px">Analyser les composants →</button></div>
 <div class="panel"><h2>Cycle d'analyse</h2><p class="sub">1. Importer · 2. Identifier · 3. Analyser · 4. Scorer · 5. Prioriser.</p></div>
 </div></div></section>
 <section class="view" id="results" hidden>
@@ -53,21 +53,29 @@ function parseSBOM(text,name){
  const lower=String(name||'').toLowerCase();
  if(lower.endsWith('.csv')||lower.endsWith('.txt'))return parseCSV(text);
  if(lower.endsWith('.xml'))return parseXML(text);
- let o;try{o=JSON.parse(text.replace(/^\uFEFF/,''))}catch(e){throw Error('JSON invalide : '+e.message)}
- let arr;
- if(Array.isArray(o))arr=o;
- else if(Array.isArray(o.components))arr=o.components;
- else if(Array.isArray(o.packages))arr=o.packages;
- else if(Array.isArray(o.SBOM?.components))arr=o.SBOM.components;
- else if(Array.isArray(o.bom?.components))arr=o.bom.components;
- else if(Array.isArray(o['@graph']))arr=o['@graph'];
- else throw Error('Format JSON non reconnu. Attendu : CycloneDX (components) ou SPDX (packages).');
- if(!arr.length)throw Error('Le fichier est valide, mais ne contient aucun composant dans components/packages.');
- return arr.filter(p=>p&&typeof p==='object').map(p=>{
-  const licenses=Array.isArray(p.licenses)?p.licenses.map(x=>x.expression||x.license?.id||x.license?.name).filter(Boolean).join(', '):'';
-  const supplier=typeof p.supplier==='object'?(p.supplier.name||p.supplier.url?.[0]||''):p.supplier;
-  return {...p,name:p.name??p.PackageName??p.packageName??p.SPDXID??p.spdxid??p['name'],version:p.version??p.versionInfo??p.PackageVersion??p.packageVersion??'Inconnue',supplier:supplier??p.originator??p.publisher??p.manufacturer?.name??'',purl:p.purl??p.externalRefs?.find?.(x=>x.referenceType==='purl')?.referenceLocator??'',license:p.licenseConcluded??p.licenseDeclared??p.licenseInfoInFile??licenses};
+ let o;try{o=JSON.parse(String(text).replace(/^\\uFEFF/,''))}catch(e){throw Error('JSON invalide : '+e.message)}
+ // Accepte CycloneDX, SPDX, tableaux d'objets et enveloppes courantes.
+ const candidates=[o,o?.bom,o?.sbom,o?.document,o?.data,o?.result,o?.SPDX,o?.spdx];
+ let arr=null;
+ for(const c of candidates){if(Array.isArray(c)) {arr=c;break} if(c&&typeof c==='object'){
+  for(const k of ['components','packages','Packages','package','software','items','dependencies'])if(Array.isArray(c[k])&&c[k].length){arr=c[k];break}
+  if(arr)break;
+ }}
+ if(!arr&&Array.isArray(o?.['@graph']))arr=o['@graph'];
+ if(!arr)throw Error('Structure JSON non reconnue. Attendu : CycloneDX (components) ou SPDX (packages).');
+ if(!arr.length)throw Error('Le JSON est valide mais la liste des composants est vide.');
+ const result=arr.filter(p=>p&&typeof p==='object').map(p=>{
+  const ext=Array.isArray(p.externalRefs)?p.externalRefs.find(x=>/purl/i.test(x.referenceType||x.referenceCategory||''))?.referenceLocator:'';
+  const lic=Array.isArray(p.licenses)?p.licenses.map(x=>x.expression||x.license?.id||x.license?.name).filter(Boolean).join(', '):'';
+  const sup=typeof p.supplier==='object'?(p.supplier.name||''):p.supplier;
+  return {...p,name:p.name??p.PackageName??p.packageName??p.spdxid??p.SPDXID??p.title??p.component?.name,
+   version:p.version??p.versionInfo??p.PackageVersion??p.packageVersion??p.component?.version??'Inconnue',
+   supplier:sup??p.originator??p.publisher??p.manufacturer?.name??'',
+   purl:p.purl??p.PURL??ext??'',
+   license:p.licenseConcluded??p.licenseDeclared??p.licenseInfoInFile??lic};
  });
+ if(!result.length)throw Error('Aucun objet composant trouvé dans le JSON.');
+ return result;
 }
 function score(p,i,n){const seed=[...p.name+p.version+p.supplier+p.purl+p.license].reduce((a,c)=>a+c.charCodeAt(0),0);const stable=x=>Math.min(5,Math.max(0,x));return {tech:stable(1.1+(p.version==='Inconnue'?1.4:0)+(p.purl?0:.5)+(seed%19)/10),supply:stable(1.2+(!p.supplier?1.1:.2)+(seed%17)/10),gov:stable(1.0+(!p.license?1.6:.2)+(seed%13)/10),geo:stable(1.4+(!p.supplier?1:.1)+(seed%11)/10),dep:stable(.8+Math.min(2.5,n/35)+(seed%9)/10)}}
 function prepare(arr){if(!Array.isArray(arr))throw Error('Le fichier ne contient pas une liste de composants exploitable.');let map=new Map();for(const raw of arr){const p=norm(raw);if(!p.name||p.name==='Composant sans nom')continue;const key=[p.name,p.version].join('@');if(!map.has(key))map.set(key,p)}if(!map.size)throw Error('Aucun composant exploitable trouvé. Vérifiez que le JSON contient des composants avec un champ name ou des packages SPDX avec un nom.');packages=[...map.values()].map((p,i,a)=>({...p,scores:score(p,i,a.length)}));selected=null;renderRows()}
@@ -134,5 +142,8 @@ const drop=$('drop');['dragenter','dragover'].forEach(n=>drop.addEventListener(n
 $('demo').onclick=()=>{prepare([{name:'openssl',version:'3.0.12',supplier:'OpenSSL Project',purl:'pkg:generic/openssl@3.0.12',license:'Apache-2.0'},{name:'log4j-core',version:'2.14.1',supplier:'Apache Software Foundation',purl:'pkg:maven/org.apache.logging.log4j/log4j-core@2.14.1',license:'Apache-2.0'},{name:'left-pad',version:'1.3.0',supplier:'',purl:'pkg:npm/left-pad@1.3.0',license:'WTFPL'},{name:'libxml2',version:'2.9.10',supplier:'GNOME',purl:'pkg:generic/libxml2@2.9.10',license:''},{name:'internal-auth-sdk',version:'Inconnue',supplier:'',purl:'',license:''},{name:'react',version:'18.2.0',supplier:'Meta',purl:'pkg:npm/react@18.2.0',license:'MIT'},{name:'zlib',version:'1.2.13',supplier:'zlib.net',purl:'pkg:generic/zlib@1.2.13',license:'Zlib'}]);$('fileinfo').textContent='Exemple de démonstration · '+packages.length+' composants';switchView('results')};
 $('clear').onclick=()=>{packages=[];selected=null;$('file').value='';$('fileinfo').textContent='Aucun fichier chargé.';renderRows();switchView('ingest')};
 $('export').onclick=()=>{const header=['name','version','supplier',...dims.map(d=>d.k),'global'];const lines=[header,...packages.map(p=>[p.name,p.version,p.supplier,...dims.map(d=>p.scores[d.k].toFixed(2)),global(p).toFixed(2)])].map(row=>row.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(','));const blob=new Blob(['\ufeff'+lines.join('\r\n')],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='maya-for-sbom-analysis.csv';a.click();URL.revokeObjectURL(url)};
-renderWeights();renderRows();
+// Branche les curseurs statiques : ils restent visibles même si le rendu dynamique échoue.
+dims.forEach(d=>{const input=$('w_'+d.k);if(input){input.addEventListener('input',e=>{weights[d.k]=Number(e.target.value);$('o_'+d.k).textContent=weights[d.k]+'%';$('weightTotal').textContent=totalWeight()+' %';$('weightNotice').hidden=totalWeight()===100;$('analyze').disabled=totalWeight()!==100;renderRows()})}});
+try{renderWeights()}catch(err){console.error('Rendu des pondérations',err)}
+$('weightTotal').textContent=totalWeight()+' %';$('analyze').disabled=totalWeight()!==100;renderRows();
 </script></body></html>
