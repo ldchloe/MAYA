@@ -69,12 +69,12 @@ async function enrichSecurity(){
   for(let i=0;i<packages.length;i++){
    const p=packages[i],pi=purlInfo(p);let ovs=[];
    try{
-    if(pi){const body={package:{purl:p.purl.split('?')[0]}};if(!p.purl.includes('@'+pi.version))body.version=p.version!=='Inconnue'?p.version:pi.version;const data=await fetchJSON('https://api.osv.dev/v1/query',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});ovs=(data.vulns||[]);osvOK++}
+    if(pi){const cleanPurl=p.purl.split('?')[0].replace(/@[^/@]+$/, '');const body={package:{purl:cleanPurl},version:p.version!=='Inconnue'?p.version:pi.version};const data=await fetchJSON('https://api.osv.dev/v1/query',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});ovs=(data.vulns||[]);osvOK++}
     else if(p.name){const data=await fetchJSON('https://api.osv.dev/v1/query',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({package:{name:p.name}})});ovs=(data.vulns||[]).filter(v=>!v.affected||v.affected.some(a=>!a.versions||a.versions.includes(p.version)));osvOK++}
    }catch(e){}
    for(const v of ovs){
     let cve=cveId(v),epss=null,nvd=null;let isKev=!!(cve&&kevSet.has(cve));
-    if(cve){try{const ed=await fetchJSON('https://api.first.org/data/v1/epss? cve='+encodeURIComponent(cve));epss=ed.data?.[0]?.epss??null;if(epss!==null)epssOK++}catch(e){}
+    if(cve){try{const ed=await fetchJSON('https://api.first.org/data/v1/epss?cve='+encodeURIComponent(cve));epss=ed.data?.[0]?.epss??null;if(epss!==null)epssOK++}catch(e){}
      try{const nd=await fetchJSON('https://services.nvd.nist.gov/rest/json/cves/2.0?cveId='+encodeURIComponent(cve));nvd=nd.vulnerabilities?.[0]?.cve||null;if(nvd)nvdOK++}catch(e){}
     }
     const desc=(v.summary||v.details||nvd?.descriptions?.find(x=>x.lang==='en')?.value||'Aucun résumé fourni par la source.').slice(0,500);
