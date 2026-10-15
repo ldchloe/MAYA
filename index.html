@@ -142,8 +142,21 @@ const drop=$('drop');['dragenter','dragover'].forEach(n=>drop.addEventListener(n
 $('demo').onclick=()=>{prepare([{name:'openssl',version:'3.0.12',supplier:'OpenSSL Project',purl:'pkg:generic/openssl@3.0.12',license:'Apache-2.0'},{name:'log4j-core',version:'2.14.1',supplier:'Apache Software Foundation',purl:'pkg:maven/org.apache.logging.log4j/log4j-core@2.14.1',license:'Apache-2.0'},{name:'left-pad',version:'1.3.0',supplier:'',purl:'pkg:npm/left-pad@1.3.0',license:'WTFPL'},{name:'libxml2',version:'2.9.10',supplier:'GNOME',purl:'pkg:generic/libxml2@2.9.10',license:''},{name:'internal-auth-sdk',version:'Inconnue',supplier:'',purl:'',license:''},{name:'react',version:'18.2.0',supplier:'Meta',purl:'pkg:npm/react@18.2.0',license:'MIT'},{name:'zlib',version:'1.2.13',supplier:'zlib.net',purl:'pkg:generic/zlib@1.2.13',license:'Zlib'}]);$('fileinfo').textContent='Exemple de démonstration · '+packages.length+' composants';switchView('results')};
 $('clear').onclick=()=>{packages=[];selected=null;$('file').value='';$('fileinfo').textContent='Aucun fichier chargé.';renderRows();switchView('ingest')};
 $('export').onclick=()=>{const header=['name','version','supplier',...dims.map(d=>d.k),'global'];const lines=[header,...packages.map(p=>[p.name,p.version,p.supplier,...dims.map(d=>p.scores[d.k].toFixed(2)),global(p).toFixed(2)])].map(row=>row.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(','));const blob=new Blob(['\ufeff'+lines.join('\r\n')],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='maya-for-sbom-analysis.csv';a.click();URL.revokeObjectURL(url)};
-// Branche les curseurs statiques : ils restent visibles même si le rendu dynamique échoue.
-dims.forEach(d=>{const input=$('w_'+d.k);if(input){input.addEventListener('input',e=>{weights[d.k]=Number(e.target.value);$('o_'+d.k).textContent=weights[d.k]+'%';$('weightTotal').textContent=totalWeight()+' %';$('weightNotice').hidden=totalWeight()===100;$('analyze').disabled=totalWeight()!==100;renderRows()})}});
-try{renderWeights()}catch(err){console.error('Rendu des pondérations',err)}
-$('weightTotal').textContent=totalWeight()+' %';$('analyze').disabled=totalWeight()!==100;renderRows();
+// Les curseurs sont statiques dans le HTML : délégation d'événement robuste, sans les remplacer.
+function syncWeights(changedKey){
+ dims.forEach(d=>{
+  const input=$('w_'+d.k),output=$('o_'+d.k);
+  if(input){weights[d.k]=Number(input.value);if(output)output.textContent=weights[d.k]+'%';}
+ });
+ const total=totalWeight();
+ $('weightTotal').textContent=total+' %';
+ $('weightNotice').hidden=total===100;
+ $('analyze').disabled=total!==100;
+ if(packages.length)renderRows();
+}
+$('weights').addEventListener('input',e=>{
+ if(e.target instanceof HTMLInputElement && e.target.matches('input[type="range"]'))syncWeights(e.target.id.replace(/^w_/, ''));
+});
+syncWeights();
+renderRows();
 </script></body></html>
