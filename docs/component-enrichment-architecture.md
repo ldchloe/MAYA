@@ -2,7 +2,7 @@
 
 The canonical CycloneDX document is the source of truth and is never mutated. This package defines only `EnrichmentDataset`, `ComponentEnrichment`, `Project`, `Repository`, `Evidence`, `Assertion`, `Conflict`, and `Decision`.
 
-- `ComponentEnrichment.selectedProjectId` and `.selectedRepositoryId` are nullable and require a verified assertion (`mapsToProject` or `officialRepository`) backed by evidence.
+- `ComponentEnrichment.selectedProjectId` and `.selectedRepositoryId` are nullable and require a selected assertion (`mapsToProject` or `officialRepository`) backed by verified local content and an applicable decision.
 - Candidate IDs are separate from selected IDs. Project-to-repository relations are many-to-many.
 - Each assertion references at least one existing evidence ID. Evidence has `evidenceKind`: `declarative`, `observed`, `verified`, or `derived`.
 - Evidence is defensively copied and recursively frozen. New observations use new IDs.
@@ -13,13 +13,7 @@ The canonical CycloneDX document is the source of truth and is never mutated. Th
 
 ## Limitations
 
-This is a local-data foundation only. The `verified` evidence kind is a classification of supplied evidence, not independent external verification by MAYA. The initial confidence policy is heuristic and not statistically calibrated. No external registries or APIs are consulted.
-
-## Corrections ciblées du lot A
-- `Evidence.evidenceKind='verified'` exige une source vérifiable (`official-document`, `repository` ou `registry`), une empreinte SHA-256 de source et `verificationMethod='independent-check'`. Les preuves déclaratives ne peuvent pas obtenir une confiance suffisante pour être automatiquement sélectionnées comme vérifiées. Ces métadonnées sont une **attestation**, pas une vérification externe cryptographiquement authentifiée.
-- `reviseStore(previousStore, nextDataset, document)` exige la conservation à l'identique des preuves, assertions et conflits antérieurs. Une nouvelle révision est obligatoire. Les appels isolés à `createStore` ne disposent pas d'un historique antérieur et ne peuvent pas le contrôler.
-- Le store calcule lui-même SHA-256 sur `document.originalContent` (chaîne UTF-8 exacte) et compare à `sourceDocument.sha256`. La valeur SHA-256 facultative anciennement fournie à l'API n'est plus utilisée pour établir la confiance.
-
+This is a local-data foundation only. The `verified` evidence kind requires a locally validated content-verification record; it does not establish the external source's authenticity. The initial confidence policy is heuristic and not statistically calibrated. No external registries or APIs are consulted.
 
 ## Lot A consolidation — evidence-to-decision contract
 
@@ -41,4 +35,6 @@ Frozen JavaScript objects prevent ordinary in-process mutation; they do not prev
 
 ### Scope
 
-No identity resolution, PURL normalization, registry lookups, repository collection, governance, geographical inference, trust events, risk scores or UI integration are introduced. `Organization` and `Foundation` remain future entities. Browser script order: `enrichment-canonical.js`, `enrichment-model.js`, `enrichment-evidence.js`, `enrichment-resolution.js`, `enrichment-store.js`.
+No identity resolution, PURL normalization, registry lookups, repository collection, governance, geographical inference, trust events, risk scores or UI integration are introduced. `Organization` and `Foundation` remain future entities. Direct resolver calls must supply `componentEnrichments` whenever a component-scoped Evidence refers to the canonical component ID rather than the ComponentEnrichment ID. Both `confidence()` and `resolve()` enforce the same subject and predicate scope checks as the store. Missing mapping is rejected, not silently assumed.
+
+Browser script order: `enrichment-canonical.js`, `enrichment-model.js`, `enrichment-evidence.js`, `enrichment-resolution.js`, `enrichment-store.js`.
