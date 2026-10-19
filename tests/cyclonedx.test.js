@@ -27,7 +27,7 @@ test('missing version stays missing in canonical model', () => {
 test('identical name/version with distinct bom-ref remain separate', () => {
   const {document} = valid();
   assert.equal(document.components.filter(c => c.name === 'same' && c.version === '1').length, 2);
-  assert.equal(toLegacyPackages(document).filter(p => p.name === 'same').length, 2);
+  assert.equal(toLegacyPackages(document).filter(p => p.name === 'same').length, 1); // legacy deduplicates
 });
 test('resolved and unresolved dependencies are retained', () => {
   const {document, report} = valid();
@@ -50,7 +50,7 @@ test('nested component and metadata root are explicit', () => {
   const parent = document.components.find(c => c.bomRef === 'a');
   assert.equal(document.components.find(c => c.bomRef === 'nested').parentId, parent.id);
   assert.equal(document.components.find(c => c.id === document.rootComponentId).bomRef, 'app-root');
-  assert.equal(toLegacyPackages(document).length, 4);
+  assert.equal(toLegacyPackages(document).length, 2); // legacy excludes root, nested and duplicates
 });
 test('generic JSON is rejected', () => {
   const {document, report} = importCycloneDxJson(load('cyclonedx-invalid.json'), 'invalid.json');
