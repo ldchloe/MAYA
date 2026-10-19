@@ -1,0 +1,75 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "serialNumber": "urn:uuid:fixture",
+  "metadata": {
+    "component": {
+      "type": "application",
+      "bom-ref": "app-root",
+      "name": "sample-app",
+      "version": "1.0"
+    }
+  },
+  "components": [
+    {
+      "type": "library",
+      "bom-ref": "a",
+      "name": "same",
+      "version": "1",
+      "purl": "pkg:npm/same@1",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        },
+        {
+          "expression": "Apache-2.0"
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "vcs",
+          "url": "https://example.org/source"
+        },
+        {
+          "type": "website",
+          "url": "https://example.org/docs"
+        }
+      ],
+      "components": [
+        {
+          "type": "library",
+          "bom-ref": "nested",
+          "name": "child"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "b",
+      "name": "same",
+      "version": "1"
+    },
+    {
+      "type": "library",
+      "bom-ref": "no-version",
+      "name": "unversioned"
+    }
+  ],
+  "dependencies": [
+    {
+      "ref": "a",
+      "dependsOn": [
+        "b",
+        "missing"
+      ]
+    },
+    {
+      "ref": "b",
+      "dependsOn": [
+        "nested"
+      ]
+    }
+  ]
+}
