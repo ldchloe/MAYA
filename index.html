@@ -29,21 +29,26 @@
 <section class="view" id="ingest">
 <div class="layout"><div>
 <div class="panel"><h2>Importer un SBOM</h2><p class="sub">Traitement local dans votre navigateur — le fichier n'est pas envoyé à un serveur.</p>
-<div class="drop" id="drop"><div class="glyph">⇧</div><strong>Déposez votre fichier ici</strong><p>CycloneDX JSON/XML, SPDX JSON ou CSV exporté depuis Excel</p><label class="btn primary filelabel">Choisir un fichier<input id="file" type="file" accept=".json,.xml,.spdx,.csv,.txt,.xlsx"></label></div>
-<div class="btnrow" style="margin-top:14px"><button class="btn" id="demo">Charger un exemple</button><button class="btn" id="clear">Réinitialiser</button></div><p class="hint" id="fileinfo">Aucun fichier chargé.</p><div class="notice">Les fichiers .xlsx ne sont pas décodés nativement dans cette version sans dépendance externe. Exportez votre feuille en CSV puis importez-la.</div></div>
-<div class="panel"><h2>Format attendu</h2><p class="sub">Les champs sont détectés automatiquement lorsque possible. Pour un CSV, privilégiez les colonnes nom, version, fournisseur, purl et licence.</p><span class="pill">CycloneDX</span> <span class="pill">SPDX</span> <span class="pill">CSV / Excel exporté</span></div>
+<div class="drop" id="drop"><div class="glyph">⇧</div><strong>Déposez votre fichier ici</strong><p>CycloneDX JSON uniquement</p><label class="btn primary filelabel">Choisir un fichier<input id="file" type="file" accept=".json,.cdx.json"></label></div>
+<div class="btnrow" style="margin-top:14px"><button class="btn" id="demo">Charger un exemple</button><button class="btn" id="clear">Réinitialiser</button></div><p class="hint" id="fileinfo">Aucun fichier chargé.</p><div id="importReportIngest" class="notice" aria-live="polite" hidden></div></div>
+<div class="panel"><h2>Format attendu</h2><p class="sub">Import canonique CycloneDX JSON : bomFormat et specVersion obligatoires. Les autres formats ne sont pas pris en charge dans cette tranche.</p><span class="pill">CycloneDX JSON</span></div>
 </div><div>
 <div class="panel weights-panel"><h2>Configuration des poids</h2><p class="sub">Chaque dimension est notée de 0 (faible) à 5 (élevé). Ajustez la pondération selon votre contexte.</p><div id="weights"><div class="weight" style="display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto 28px;gap:6px 12px;margin:10px 0"><label for="w_tech">Technique</label><output id="o_tech">25%</output><input id="w_tech" aria-label="Pondération Technique" type="range" min="0" max="100" step="5" value="25" oninput="window.mayaWeightChange(this)" onchange="window.mayaWeightChange(this)" style="display:block;width:100%;height:24px;accent-color:#9cff00;grid-column:1;grid-row:2"></div><div class="weight" style="display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto 28px;gap:6px 12px;margin:10px 0"><label for="w_supply">Supply chain</label><output id="o_supply">25%</output><input id="w_supply" aria-label="Pondération Supply chain" type="range" min="0" max="100" step="5" value="25" oninput="window.mayaWeightChange(this)" onchange="window.mayaWeightChange(this)" style="display:block;width:100%;height:24px;accent-color:#9cff00;grid-column:1;grid-row:2"></div><div class="weight" style="display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto 28px;gap:6px 12px;margin:10px 0"><label for="w_gov">Gouvernance</label><output id="o_gov">20%</output><input id="w_gov" aria-label="Pondération Gouvernance" type="range" min="0" max="100" step="5" value="20" oninput="window.mayaWeightChange(this)" onchange="window.mayaWeightChange(this)" style="display:block;width:100%;height:24px;accent-color:#9cff00;grid-column:1;grid-row:2"></div><div class="weight" style="display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto 28px;gap:6px 12px;margin:10px 0"><label for="w_geo">Géopolitique</label><output id="o_geo">20%</output><input id="w_geo" aria-label="Pondération Géopolitique" type="range" min="0" max="100" step="5" value="20" oninput="window.mayaWeightChange(this)" onchange="window.mayaWeightChange(this)" style="display:block;width:100%;height:24px;accent-color:#9cff00;grid-column:1;grid-row:2"></div><div class="weight" style="display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto 28px;gap:6px 12px;margin:10px 0"><label for="w_dep">Dépendances</label><output id="o_dep">10%</output><input id="w_dep" aria-label="Pondération Dépendances" type="range" min="0" max="100" step="5" value="10" oninput="window.mayaWeightChange(this)" onchange="window.mayaWeightChange(this)" style="display:block;width:100%;height:24px;accent-color:#9cff00;grid-column:1;grid-row:2"></div></div><div class="weight-total"><span>Total des pondérations</span><strong id="weightTotal">100 %</strong></div><div class="notice" id="weightNotice" hidden>Le total doit être égal à 100 % pour calculer le score global.</div><button class="btn primary" id="analyze" style="width:100%;margin-top:15px">Analyser les composants →</button></div>
 <div class="panel"><h2>Cycle d'analyse</h2><p class="sub">1. Importer · 2. Identifier · 3. Analyser · 4. Scorer · 5. Prioriser.</p></div>
 </div></div></section>
-<section class="view" id="results" hidden>
+<section class="view" id="results" hidden><div id="importReport" class="notice" aria-live="polite" hidden></div>
 <div class="metricgrid" id="metrics"><div class="metric"><small>Composants analysés</small><strong id="mCount">0</strong></div><div class="metric"><small>Risque élevé</small><strong id="mHigh">0</strong></div><div class="metric"><small>Score moyen</small><strong id="mAvg">—</strong><span class="unit">/ 5</span></div></div>
 <div class="panel" style="margin-top:18px"><h2>Inventaire & priorisation</h2><p class="sub">Sélectionnez un composant pour consulter ses scores indicatifs.</p><div class="toolbar"><input id="search" placeholder="Rechercher un composant, une version, un fournisseur…"><select id="filter"><option value="all">Tous les risques</option><option value="high">Élevé (≥ 3,5)</option><option value="medium">Modéré (2–3,49)</option><option value="low">Faible (&lt; 2)</option></select><button class="btn" id="export">Exporter CSV</button></div><div class="tablewrap"><table><thead><tr><th>Composant</th><th>Version</th><th>Technique</th><th>Supply chain</th><th>Gouvernance</th><th>Géopolitique</th><th>Dépendances</th><th>Global / 5</th></tr></thead><tbody id="rows"></tbody></table><div class="empty" id="empty"><strong>Aucun composant à afficher</strong>Importez un SBOM ou chargez l'exemple de démonstration.</div></div><div class="detail" id="detail">Aucun composant sélectionné.</div></div>
 <div class="panel" id="securityPanel"><h2>Enrichissement sécurité</h2><p class="sub">Recherche de vulnérabilités connues via OSV, NVD, CISA KEV et FIRST EPSS. Une correspondance ne confirme pas à elle seule l’applicabilité au produit.</p><div class="btnrow"><button class="btn primary" id="enrich">Rechercher les vulnérabilités connues →</button><span class="hint" id="enrichStatus" aria-live="polite">Importez un SBOM ou chargez l’exemple avant de lancer la recherche.</span></div><div id="sourceStatus" class="source-status" aria-live="polite"></div><div id="vulnResults"><div class="empty"><strong>Aucun enrichissement lancé</strong>Les résultats de sécurité apparaîtront ici avec leurs sources et leur niveau de confirmation.</div></div></div><div class="panel"><h2>À propos des scores</h2><p class="sub">Les scores sont des estimations heuristiques déterministes fondées sur les métadonnées disponibles (ex. présence d'une version, licence, identifiant de paquet et nombre de composants). Ils ne vérifient pas les CVE, l'activité des mainteneurs, les sanctions ni la provenance réelle. Les dimensions supply chain, gouvernance et géopolitique doivent être alimentées par des sources externes avant tout usage décisionnel.</p></div>
 </section><p class="foot">MAYA for SBOM · Prototype autonome · Aucune base de vulnérabilités ou de renseignements tiers connectée</p></main>
+<script src="js/sbom-model.js"></script>
+<script src="js/cyclonedx-json.js"></script>
+<script src="js/sbom-compat.js"></script>
+<script src="js/import-coordinator.js"></script>
 <script>
 const dims=[{k:'tech',n:'Technique',w:25},{k:'supply',n:'Supply chain',w:25},{k:'gov',n:'Gouvernance',w:20},{k:'geo',n:'Géopolitique',w:20},{k:'dep',n:'Dépendances',w:10}];
-let packages=[],selected=null,securityFindings=[],weights=Object.fromEntries(dims.map(d=>[d.k,d.w]));
+const importCoordinator=MayaImportCoordinator.createImportCoordinator();
+let canonicalDocument=null,importReport=null,packages=[],selected=null,securityFindings=[],weights=Object.fromEntries(dims.map(d=>[d.k,d.w]));
 const $=id=>document.getElementById(id);
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function norm(p){return {name:String(p.name??p.packageName??p.component??p['Package Name']??p.Name??p.title??'Composant sans nom'),version:String(p.version??p.packageVersion??p['Package Version']??p.Version??'Inconnue'),supplier:String(p.supplier?.name??p.supplier??p.publisher??p.manufacturer??p.Supplier??''),purl:String(p.purl??p.PURL??''),license:String(p.licenseConcluded??p.licenseDeclared??p.licenses?.[0]?.license?.id??p.license??p.License??''),group:String(p.group??p.namespace??''),raw:p}}
@@ -83,7 +88,7 @@ function totalWeight(){return dims.reduce((s,d)=>s+weights[d.k],0)}
 function global(p){return dims.reduce((s,d)=>s+p.scores[d.k]*weights[d.k],0)/100}
 function scoreHTML(n){let cls=n>=3.5?'high':n>=2?'mid':'';return '<span class="score '+cls+'">'+n.toFixed(1)+'</span>'}
 
-function purlInfo(p){let raw=p.purl||'';if(!raw)return null;let m=raw.match(/^pkg:([^/]+)\\/([^@]+)@([^?]+)/i);if(!m)return null;let type=m[1].toLowerCase(),name=m[2].replace(/\\/+/g,'/'),version=m[3];const eco={npm:'npm',pypi:'PyPI',maven:'Maven',golang:'Go',cargo:'crates.io',nuget:'NuGet',gem:'RubyGems',composer:'Packagist',hex:'Hex',pub:'Pub'};return {type,name,version,ecosystem:eco[type]||null}}
+function purlInfo(p){let raw=p.purl||'';if(!raw)return null;let m=raw.match(/^pkg:([^/]+)\/([^@]+)@([^?]+)/i);if(!m)return null;let type=m[1].toLowerCase(),name=m[2].replace(/\/+/g,'/'),version=m[3];const eco={npm:'npm',pypi:'PyPI',maven:'Maven',golang:'Go',cargo:'crates.io',nuget:'NuGet',gem:'RubyGems',composer:'Packagist',hex:'Hex',pub:'Pub'};return {type,name,version,ecosystem:eco[type]||null}}
 async function fetchJSON(url,opts={}){const r=await fetch(url,opts);if(!r.ok)throw Error('HTTP '+r.status);return r.json()}
 function cveId(v){let ids=[v.id,...(v.aliases||[])].filter(Boolean);return ids.find(x=>/^CVE-\\d{4}-\\d{4,}$/i.test(x))||null}
 function sourceChip(name,state){return '<span class="source-chip">'+esc(name)+' · '+esc(state)+'</span>'}
@@ -132,15 +137,100 @@ function renderWeights(){
  dims.forEach(d=>{const input=$('w_'+d.k);if(!input)return;input.addEventListener('input',e=>{weights[d.k]=Number(e.target.value);$('o_'+d.k).textContent=weights[d.k]+'%';$('weightTotal').textContent=totalWeight()+' %';$('weightNotice').hidden=totalWeight()===100;$('analyze').disabled=totalWeight()!==100;renderRows()})});
  $('weightTotal').textContent=totalWeight()+' %';$('analyze').disabled=totalWeight()!==100;
 }
-function renderRows(){const q=$('search').value.toLowerCase(),f=$('filter').value;let arr=packages.filter(p=>(p.name+' '+p.version+' '+p.supplier+' '+p.purl).toLowerCase().includes(q)).filter(p=>{let s=global(p);return f==='all'||f==='high'&&s>=3.5||f==='medium'&&s>=2&&s<3.5||f==='low'&&s<2}).sort((a,b)=>global(b)-global(a));$('rows').innerHTML=arr.map((p)=>'<tr data-key="'+esc(p.name+'@'+p.version)+'" tabindex="0"><td><strong>'+esc(p.name)+'</strong><br><span class="hint">'+esc(p.supplier||'Fournisseur inconnu')+'</span></td><td>'+esc(p.version)+'</td>'+dims.map(d=>'<td>'+scoreHTML(p.scores[d.k])+'</td>').join('')+'<td class="global">'+scoreHTML(global(p))+'</td></tr>').join('');$('empty').hidden=arr.length>0;[...$('rows').querySelectorAll('tr')].forEach(tr=>{const pick=()=>showDetail(packages.find(p=>p.name+'@'+p.version===tr.dataset.key));tr.onclick=pick;tr.onkeydown=e=>{if(e.key==='Enter')pick()}});$('mCount').textContent=packages.length;$('mHigh').textContent=packages.filter(p=>global(p)>=3.5).length;$('mAvg').textContent=packages.length?(packages.reduce((s,p)=>s+global(p),0)/packages.length).toFixed(1):'—';if(selected&&!packages.includes(selected))selected=null;if(!selected)$('detail').textContent='Sélectionnez une ligne pour afficher les métadonnées.'}
+function renderRows(){const q=$('search').value.toLowerCase(),f=$('filter').value;let arr=packages.filter(p=>(p.name+' '+p.version+' '+p.supplier+' '+p.purl).toLowerCase().includes(q)).filter(p=>{let s=global(p);return f==='all'||f==='high'&&s>=3.5||f==='medium'&&s>=2&&s<3.5||f==='low'&&s<2}).sort((a,b)=>global(b)-global(a));$('rows').innerHTML=arr.map((p)=>'<tr data-key="'+esc(p.occurrenceId||p.name+'@'+p.version)+'" tabindex="0"><td><strong>'+esc(p.name)+'</strong><br><span class="hint">'+esc(p.supplier||'Fournisseur inconnu')+'</span></td><td>'+esc(p.version)+'</td>'+dims.map(d=>'<td>'+scoreHTML(p.scores[d.k])+'</td>').join('')+'<td class="global">'+scoreHTML(global(p))+'</td></tr>').join('');$('empty').hidden=arr.length>0;[...$('rows').querySelectorAll('tr')].forEach(tr=>{const pick=()=>showDetail(packages.find(p=>(p.occurrenceId||p.name+'@'+p.version)===tr.dataset.key));tr.onclick=pick;tr.onkeydown=e=>{if(e.key==='Enter')pick()}});$('mCount').textContent=packages.length;$('mHigh').textContent=packages.filter(p=>global(p)>=3.5).length;$('mAvg').textContent=packages.length?(packages.reduce((s,p)=>s+global(p),0)/packages.length).toFixed(1):'—';if(selected&&!packages.includes(selected))selected=null;if(!selected)$('detail').textContent='Sélectionnez une ligne pour afficher les métadonnées.'}
 function showDetail(p){selected=p;if(!p)return;$('detail').innerHTML='<strong>'+esc(p.name)+' @ '+esc(p.version)+'</strong><br>Fournisseur : '+esc(p.supplier||'non renseigné')+' · PURL : '+esc(p.purl||'non renseigné')+' · Licence : '+esc(p.license||'non renseignée')+'<br>Score pondéré : <strong>'+global(p).toFixed(2)+'/5</strong>. Les scores individuels sont indicatifs.'}
 function switchView(v){document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.view===v));document.querySelectorAll('.view').forEach(s=>s.hidden=s.id!==v)}
 document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>switchView(b.dataset.view));
 $('enrich').onclick=enrichSecurity;$('search').oninput=renderRows;$('filter').onchange=renderRows;$('analyze').onclick=()=>{if(totalWeight()!==100)return;switchView('results');renderRows()};
-$('file').onchange=async e=>{const f=e.target.files[0];if(!f)return;if(f.name.toLowerCase().endsWith('.xlsx')){$('fileinfo').textContent='Format XLSX non pris en charge sans bibliothèque externe. Exportez en CSV.';return}try{prepare(parseSBOM(await f.text(),f.name));$('fileinfo').textContent='✓ '+f.name+' · '+packages.length+' composants importés';switchView('results')}catch(err){$('fileinfo').textContent='Erreur d’import : '+err.message}};
-const drop=$('drop');['dragenter','dragover'].forEach(n=>drop.addEventListener(n,e=>{e.preventDefault();drop.classList.add('drag')}));['dragleave','drop'].forEach(n=>drop.addEventListener(n,e=>{e.preventDefault();drop.classList.remove('drag')}));drop.addEventListener('drop',async e=>{const f=e.dataTransfer.files[0];if(!f)return;if(f.name.toLowerCase().endsWith('.xlsx')){$('fileinfo').textContent='XLSX non pris en charge sans bibliothèque externe. Exportez en CSV.';return}try{prepare(parseSBOM(await f.text(),f.name));$('fileinfo').textContent='✓ '+f.name+' · '+packages.length+' composants importés';switchView('results')}catch(err){$('fileinfo').textContent='Erreur d’import : '+err.message}});
-$('demo').onclick=()=>{prepare([{name:'openssl',version:'3.0.12',supplier:'OpenSSL Project',purl:'pkg:generic/openssl@3.0.12',license:'Apache-2.0'},{name:'log4j-core',version:'2.14.1',supplier:'Apache Software Foundation',purl:'pkg:maven/org.apache.logging.log4j/log4j-core@2.14.1',license:'Apache-2.0'},{name:'left-pad',version:'1.3.0',supplier:'',purl:'pkg:npm/left-pad@1.3.0',license:'WTFPL'},{name:'libxml2',version:'2.9.10',supplier:'GNOME',purl:'pkg:generic/libxml2@2.9.10',license:''},{name:'internal-auth-sdk',version:'Inconnue',supplier:'',purl:'',license:''},{name:'react',version:'18.2.0',supplier:'Meta',purl:'pkg:npm/react@18.2.0',license:'MIT'},{name:'zlib',version:'1.2.13',supplier:'zlib.net',purl:'pkg:generic/zlib@1.2.13',license:'Zlib'}]);$('fileinfo').textContent='Exemple de démonstration · '+packages.length+' composants';switchView('results')};
-$('clear').onclick=()=>{packages=[];selected=null;$('file').value='';$('fileinfo').textContent='Aucun fichier chargé.';renderRows();switchView('ingest')};
+function renderImportReport(report){
+ importReport=report;
+ const panels=[$('importReport'),$('importReportIngest')];
+ if(!report){panels.forEach(panel=>{panel.hidden=true;panel.textContent='' });return}
+ panels.forEach(panel=>{panel.hidden=false});
+ const fields=[
+  ['Statut',report.status],['Niveau de validation',report.validationLevel],['Format détecté',report.detectedFormat||'Non renseigné'],
+  ['Version CycloneDX',report.specVersion||'Non renseignée'],
+  ['Composants lus',report.componentsRead],['Composants créés',report.componentsCreated],
+  ['Déclarations de dépendances lues',report.dependencyDeclarationsRead],
+  ['Relations créées',report.dependencyRelationsCreated],
+  ['Déclarations invalides',report.invalidDependencyDeclarations],
+  ['Déclarations vides',report.emptyDependencyDeclarations],
+  ['Entités absentes du graphe',report.entitiesAbsentFromDependencyGraph],
+  ['Références manquantes',report.missingReferences],
+  ['Références ambiguës',report.ambiguousReferences],
+  ['Dépendances déclarées',report.dependenciesDeclared],
+  ['Dépendances résolues',report.dependenciesResolved],
+  ['Références non résolues',report.unresolvedReferences],
+  ['Avertissements',report.warnings.length],['Erreurs',report.errors.length]
+ ];
+ const html='<strong>Rapport d’import</strong><br>'+fields.map(([label,value])=>esc(label)+' : '+esc(value)).join('<br>')+
+  [...report.errors,...report.warnings].map(item=>'<br>• '+esc(item.code)+' : '+esc(item.message)).join('');
+ panels.forEach(panel=>{panel.innerHTML=html});
+}
+function prepareCanonical(document){
+ canonicalDocument=document;
+ const projected=MayaSbomCompat.toLegacyPackages(document);
+ packages=projected.map((p,i,a)=>({...p,scores:score(p,i,a.length)}));
+ selected=null;
+ renderRows();
+}
+function failedImportReport(error){
+ console.error('MAYA CycloneDX import failed:',error);
+ const report=MayaSbomModel.createReport();
+ MayaSbomModel.issue(report,'error','UNEXPECTED_IMPORT_ERROR',
+   'Échec de l’import. Vérifiez le fichier ou consultez la console pour le diagnostic.','$');
+ return MayaSbomModel.finalizeReport(report,true);
+}
+async function importCycloneDxFile(file){
+ if(!file)return;
+ const attempt=importCoordinator.begin();
+ try{
+  canonicalDocument=null;packages=[];selected=null;renderRows();
+  const text=await file.text();
+  if(!importCoordinator.isActive(attempt))return;
+  const {document,report}=MayaCycloneDx.importCycloneDxJson(text,file.name);
+  if(!importCoordinator.isActive(attempt))return;
+  if(!document){
+   renderImportReport(report);
+   $('fileinfo').textContent='Échec de l’import : '+file.name;
+   switchView('ingest');
+   return;
+  }
+  // Compute scores before publishing any canonical or display state.
+  const projected=MayaSbomCompat.toLegacyPackages(document);
+  const nextPackages=projected.map((p,i,a)=>({...p,scores:score(p,i,a.length)}));
+  if(!importCoordinator.isActive(attempt))return;
+  canonicalDocument=document;packages=nextPackages;selected=null;
+  renderRows();
+  renderImportReport(report);
+  $('fileinfo').textContent='✓ '+file.name+' · '+packages.length+' composants affichés';
+  switchView('results');
+ }catch(error){
+  if(!importCoordinator.isActive(attempt))return;
+  canonicalDocument=null;packages=[];selected=null;
+  const report=failedImportReport(error);
+  try{
+   renderRows();renderImportReport(report);
+   $('fileinfo').textContent='Échec de l’import : '+file.name;
+   switchView('ingest');
+  }catch(displayError){
+   console.error('MAYA failed to render import error:',displayError);
+   // Keep the failure visible even if the normal renderer itself fails.
+   const fallback=$('importReportIngest');
+   if(fallback){fallback.hidden=false;fallback.textContent='Statut : failed — erreur d’import.'}
+  }
+ }finally{
+  // Also reset on failure or stale attempts, but never clear a newer selection.
+  if(importCoordinator.isActive(attempt))$('file').value='';
+ }
+}
+$('file').onchange=e=>importCycloneDxFile(e.target.files[0]);
+const drop=$('drop');
+['dragenter','dragover'].forEach(name=>drop.addEventListener(name,e=>{e.preventDefault();drop.classList.add('drag')}));
+['dragleave','drop'].forEach(name=>drop.addEventListener(name,e=>{e.preventDefault();drop.classList.remove('drag')}));
+drop.addEventListener('drop',e=>{const file=e.dataTransfer.files[0];if(file)importCycloneDxFile(file)});
+$('demo').onclick=()=>{importCoordinator.invalidate();canonicalDocument=null;renderImportReport(null);prepare([{name:'openssl',version:'3.0.12',supplier:'OpenSSL Project',purl:'pkg:generic/openssl@3.0.12',license:'Apache-2.0'},{name:'log4j-core',version:'2.14.1',supplier:'Apache Software Foundation',purl:'pkg:maven/org.apache.logging.log4j/log4j-core@2.14.1',license:'Apache-2.0'},{name:'left-pad',version:'1.3.0',supplier:'',purl:'pkg:npm/left-pad@1.3.0',license:'WTFPL'},{name:'libxml2',version:'2.9.10',supplier:'GNOME',purl:'pkg:generic/libxml2@2.9.10',license:''},{name:'internal-auth-sdk',version:'Inconnue',supplier:'',purl:'',license:''},{name:'react',version:'18.2.0',supplier:'Meta',purl:'pkg:npm/react@18.2.0',license:'MIT'},{name:'zlib',version:'1.2.13',supplier:'zlib.net',purl:'pkg:generic/zlib@1.2.13',license:'Zlib'}]);$('fileinfo').textContent='Exemple de démonstration · '+packages.length+' composants';switchView('results')};
+$('clear').onclick=()=>{importCoordinator.invalidate();canonicalDocument=null;renderImportReport(null);packages=[];selected=null;$('file').value='';$('fileinfo').textContent='Aucun fichier chargé.';renderRows();switchView('ingest')};
 $('export').onclick=()=>{const header=['name','version','supplier',...dims.map(d=>d.k),'global'];const lines=[header,...packages.map(p=>[p.name,p.version,p.supplier,...dims.map(d=>p.scores[d.k].toFixed(2)),global(p).toFixed(2)])].map(row=>row.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(','));const blob=new Blob(['\ufeff'+lines.join('\r\n')],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='maya-for-sbom-analysis.csv';a.click();URL.revokeObjectURL(url)};
 // Callback global + delegation: keep slider updates working even if the controls are recreated.
 window.mayaWeightChange=function(el){
