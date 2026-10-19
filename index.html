@@ -86,7 +86,7 @@ function totalWeight(){return dims.reduce((s,d)=>s+weights[d.k],0)}
 function global(p){return dims.reduce((s,d)=>s+p.scores[d.k]*weights[d.k],0)/100}
 function scoreHTML(n){let cls=n>=3.5?'high':n>=2?'mid':'';return '<span class="score '+cls+'">'+n.toFixed(1)+'</span>'}
 
-function purlInfo(p){let raw=p.purl||'';if(!raw)return null;let m=raw.match(/^pkg:([^/]+)\\/([^@]+)@([^?]+)/i);if(!m)return null;let type=m[1].toLowerCase(),name=m[2].replace(/\\/+/g,'/'),version=m[3];const eco={npm:'npm',pypi:'PyPI',maven:'Maven',golang:'Go',cargo:'crates.io',nuget:'NuGet',gem:'RubyGems',composer:'Packagist',hex:'Hex',pub:'Pub'};return {type,name,version,ecosystem:eco[type]||null}}
+function purlInfo(p){let raw=p.purl||'';if(!raw)return null;let m=raw.match(/^pkg:([^/]+)\/([^@]+)@([^?]+)/i);if(!m)return null;let type=m[1].toLowerCase(),name=m[2].replace(/\/+/g,'/'),version=m[3];const eco={npm:'npm',pypi:'PyPI',maven:'Maven',golang:'Go',cargo:'crates.io',nuget:'NuGet',gem:'RubyGems',composer:'Packagist',hex:'Hex',pub:'Pub'};return {type,name,version,ecosystem:eco[type]||null}}
 async function fetchJSON(url,opts={}){const r=await fetch(url,opts);if(!r.ok)throw Error('HTTP '+r.status);return r.json()}
 function cveId(v){let ids=[v.id,...(v.aliases||[])].filter(Boolean);return ids.find(x=>/^CVE-\\d{4}-\\d{4,}$/i.test(x))||null}
 function sourceChip(name,state){return '<span class="source-chip">'+esc(name)+' · '+esc(state)+'</span>'}
