@@ -180,8 +180,8 @@ function failedImportReport(error){
 async function importCycloneDxFile(file){
  if(!file)return;
  const attempt=importCoordinator.begin();
- canonicalDocument=null;packages=[];selected=null;renderRows();
  try{
+  canonicalDocument=null;packages=[];selected=null;renderRows();
   const text=await file.text();
   if(!importCoordinator.isActive(attempt))return;
   const {document,report}=MayaCycloneDx.importCycloneDxJson(text,file.name);
