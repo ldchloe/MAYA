@@ -1,0 +1,8 @@
+/* Versioned, read-only enrichment dataset tied to an exact canonical document. */
+(function(root,factory){const model=typeof module==='object'&&module.exports?require('./enrichment-model.js'):root.MayaEnrichmentModel;const api=factory(model);if(typeof module==='object'&&module.exports)module.exports=api;else root.MayaEnrichmentStore=api;})(typeof globalThis!=='undefined'?globalThis:this,function(model){
+'use strict';
+function validateCanonical(dataset,document,sha256){model.check(document&&Array.isArray(document.components),'missing canonical document');model.check(dataset.sourceDocument.id===document.id,'document id mismatch');model.check(dataset.sourceDocument.sha256===sha256,'document digest mismatch');const ids=new Set(document.components.map(x=>x.id));for(const c of dataset.componentEnrichments)model.check(ids.has(c.componentId),'component not in canonical document: '+c.componentId);return true;}
+function createStore(input,document,sha256){const dataset=model.copy(input);model.validateDataset(dataset);validateCanonical(dataset,document,sha256);const frozen=model.freeze(dataset);return Object.freeze({snapshot:()=>model.freeze(model.copy(frozen)),exportJSON:()=>JSON.stringify(frozen),getComponent:id=>{const x=frozen.componentEnrichments.find(c=>c.componentId===id);return x?model.freeze(model.copy(x)):null;}});}
+function importJSON(json,document,sha256){model.check(typeof json==='string','JSON input required');return createStore(JSON.parse(json),document,sha256);}
+return {createStore,importJSON,validateCanonical};
+});
