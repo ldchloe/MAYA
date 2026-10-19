@@ -192,6 +192,9 @@
     };
     doc.services.push(service);
     addPartyRoles(doc,raw,path,id,'service');
+    for (const field of ['provenance','evidence'])
+      if (own(raw,field)) doc.provenance.push({id:'provenance:'+(doc.provenance.length+1),kind:field,
+        sourceEntityId:id,sourceEntityType:'service',sourcePath:path+'.'+field,raw:raw[field]});
     addDocumentReferences(doc,raw,path,id,'service');
     if (Array.isArray(raw.services))
       raw.services.forEach((child,i)=>addService(doc,child,path+'.services['+i+']',id));
@@ -216,6 +219,9 @@
     };
     doc.components.push(component);
     addPartyRoles(doc,raw,path,id,'component');
+    for (const field of ['pedigree','evidence','provenance'])
+      if (own(raw,field)) doc.provenance.push({id:'provenance:'+(doc.provenance.length+1),kind:field,
+        sourceEntityId:id,sourceEntityType:'component',sourcePath:path+'.'+field,raw:raw[field]});
     addIdentifier(doc, component, 'bom-ref', raw['bom-ref'], path + "['bom-ref']", raw['bom-ref']);
     addIdentifier(doc, component, 'purl', raw.purl, path + '.purl', raw.purl);
     addIdentifier(doc, component, 'cpe', raw.cpe, path + '.cpe', raw.cpe);
