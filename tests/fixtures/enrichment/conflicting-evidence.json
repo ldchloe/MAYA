@@ -1,0 +1,127 @@
+{
+  "schemaVersion": "1.0.0",
+  "datasetId": "d",
+  "sourceDocument": {
+    "id": "document:1",
+    "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  "createdAt": "2026-01-01T00:00:00Z",
+  "producer": {
+    "name": "MAYA",
+    "version": "0.1.0"
+  },
+  "policyVersion": "1.0.0",
+  "enrichmentVersion": "1",
+  "componentEnrichments": [
+    {
+      "id": "ce1",
+      "componentId": "component:1",
+      "selectedProjectId": null,
+      "selectedRepositoryId": null,
+      "projectCandidateIds": [],
+      "repositoryCandidateIds": [],
+      "assertionIds": [],
+      "conflictIds": [],
+      "status": "unknown",
+      "confidence": null,
+      "createdAt": "2026-01-01T00:00:00Z",
+      "updatedAt": "2026-01-01T00:00:00Z"
+    }
+  ],
+  "projects": [],
+  "repositories": [
+    {
+      "id": "r1",
+      "url": "https://example.org/r1",
+      "host": "example.org",
+      "hostRepositoryId": null,
+      "kind": "source",
+      "subpath": null,
+      "revision": null,
+      "assertionIds": [],
+      "status": "candidate",
+      "confidence": 0.5,
+      "createdAt": "2026-01-01T00:00:00Z",
+      "updatedAt": "2026-01-01T00:00:00Z"
+    },
+    {
+      "id": "r2",
+      "url": "https://example.org/r2",
+      "host": "example.org",
+      "hostRepositoryId": null,
+      "kind": "source",
+      "subpath": null,
+      "revision": null,
+      "assertionIds": [],
+      "status": "candidate",
+      "confidence": 0.5,
+      "createdAt": "2026-01-01T00:00:00Z",
+      "updatedAt": "2026-01-01T00:00:00Z"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "e1",
+      "sourceType": "fixture",
+      "evidenceKind": "declarative",
+      "sourceRef": "fixture.json",
+      "sourceDigest": null,
+      "subjectType": "component",
+      "subjectId": "component:1",
+      "attribute": "repository",
+      "observedValue": {
+        "url": "https://example.org/r1"
+      },
+      "sourcePath": "$.components[0]",
+      "observedAt": "2026-01-01T00:00:00Z",
+      "versionScope": null,
+      "verificationMethod": "fixture",
+      "independenceGroup": null
+    }
+  ],
+  "assertions": [
+    {
+      "id": "a1",
+      "subjectType": "componentEnrichment",
+      "subjectId": "ce1",
+      "predicate": "officialRepository",
+      "value": "r1",
+      "evidenceIds": [
+        "e1"
+      ],
+      "status": "candidate",
+      "confidence": 0.6,
+      "conflictIds": [],
+      "policyVersion": "1.0.0"
+    },
+    {
+      "id": "a2",
+      "subjectType": "componentEnrichment",
+      "subjectId": "ce1",
+      "predicate": "officialRepository",
+      "value": "r2",
+      "evidenceIds": [
+        "e1"
+      ],
+      "status": "candidate",
+      "confidence": 0.6,
+      "conflictIds": [],
+      "policyVersion": "1.0.0"
+    }
+  ],
+  "conflicts": [
+    {
+      "id": "c1",
+      "subjectId": "ce1",
+      "predicate": "officialRepository",
+      "assertionIds": [
+        "a1",
+        "a2"
+      ],
+      "conflictType": "contradictory-values",
+      "status": "conflicted",
+      "detectedAt": "2026-01-01T00:00:00Z"
+    }
+  ],
+  "decisions": []
+}
