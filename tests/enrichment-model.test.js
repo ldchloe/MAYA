@@ -22,7 +22,7 @@ test('FIX02 historical conflicts survive superseding assertion',()=>{const d=fix
 test('FIX03 SHA-256 known vectors',()=>{const crypto=require('node:crypto');for(const value of ['','abc','é🙂','hello'.repeat(500)])a.equal(s.sha256Text(value),crypto.createHash('sha256').update(value).digest('hex'));});
 test('FIX03 supplied digest ignored',()=>rejects(()=>s.createStore(fixture(),{...doc,originalContent:'forged'},SHA),/document digest mismatch/));
 test('T01 unrelated predicate rejected',()=>{const d=withClaim();d.evidence[0].attribute='license';rejects(()=>s.createStore(finalize(d),doc),/predicate mismatch/);});
-test('T02 unrelated subject rejected',()=>{const d=withClaim();d.evidence[0].subjectId='component:2';finalize(d);rejects(()=>s.createStore(d,doc),/subject mismatch|component missing/);});
+test('T02 unrelated subject rejected',()=>{const d=withClaim();d.evidence[0].subjectId='component:2';rejects(()=>finalize(d),/relation evidence subject mismatch/);});
 test('T03 assertion without supports rejected',()=>{const d=withClaim();d.evidenceRelations[0].relation='inconclusive';rejects(()=>finalize(d),/without supports/);});
 test('T07 empty decision reasons rejected',()=>{const d=withClaim();d.decisions[0].reasonCodes=[];d.revisionDigest=s.digestRevision(d);rejects(()=>s.createStore(d,doc),/reasonCodes/);});
 test('T08 decision mismatch rejected',()=>{const d=withClaim();d.decisions[0].rejectedAssertionIds=[];d.decisions[0].selectedAssertionId='a1';d.revisionDigest=s.digestRevision(d);rejects(()=>s.createStore(d,doc),/decision computation mismatch/);});
