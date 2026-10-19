@@ -3,7 +3,7 @@
 'use strict';
 const check=model.check;
 function validateCanonical(dataset,document){check(document&&Array.isArray(document.components),'missing canonical document');check(dataset.sourceDocument.id===document.id,'document id mismatch');check(typeof document.originalContent==='string','canonical originalContent required');check(dataset.sourceDocument.sha256===canonical.sha256Text(document.originalContent),'document digest mismatch');const ids=new Set(document.components.map(x=>x.id));for(const c of dataset.componentEnrichments)check(ids.has(c.componentId),'component not in canonical document: '+c.componentId);return true;}
-function digestRevision(d){const value=model.copy(d);delete value.revisionDigest;return canonical.digest(value);}
+function digestRevision(d){const value=model.copy(d);delete value.revisionDigest;return canonical.datasetDigest(value);}
 function semantic(d){
  const active=d.assertions.filter(a=>!d.assertions.some(x=>Array.isArray(x.supersedesAssertionIds)&&x.supersedesAssertionIds.includes(a.id)));
  const computed=resolution.resolve(active,d.evidence,d.evidenceRelations,{verifications:d.verifications,policyVersion:d.policyVersion,decidedAt:d.createdAt});
@@ -20,7 +20,7 @@ function semantic(d){
  return true;
 }
 function validateSnapshot(d,document){model.validateDataset(d);validateCanonical(d,document);semantic(d);return true;}
-function wrap(d,historyVerified){const frozen=model.freeze(d);return Object.freeze({snapshot:()=>model.freeze(model.copy(frozen)),exportJSON:()=>canonical.canonicalJSON(frozen),getComponent:id=>{const x=frozen.componentEnrichments.find(c=>c.componentId===id);return x?model.freeze(model.copy(x)):null;},historyVerified:()=>historyVerified});}
+function wrap(d,historyVerified){const frozen=model.freeze(d);return Object.freeze({snapshot:()=>model.freeze(model.copy(frozen)),exportJSON:()=>canonical.datasetJSON(frozen),getComponent:id=>{const x=frozen.componentEnrichments.find(c=>c.componentId===id);return x?model.freeze(model.copy(x)):null;},historyVerified:()=>historyVerified});}
 function createStore(input,document){const d=model.copy(input);check(d.previousRevisionId===null&&d.previousRevisionDigest===null,'linked revision requires reviseStore');validateSnapshot(d,document);return wrap(d,true);}
 function importJSON(json,document,previousStore){check(typeof json==='string','JSON input required');const d=JSON.parse(json);if(previousStore)return reviseStore(previousStore,d,document);validateSnapshot(d,document);return wrap(d,d.previousRevisionId===null);}
 function reviseStore(previousStore,input,document){check(previousStore&&typeof previousStore.snapshot==='function','previous store required');const prev=previousStore.snapshot(),next=model.copy(input);check(prev.sourceDocument.id===next.sourceDocument.id&&prev.sourceDocument.sha256===next.sourceDocument.sha256,'revision document mismatch');check(prev.enrichmentVersion!==next.enrichmentVersion,'revision version must change');check(next.previousRevisionId===prev.revisionId,'previousRevisionId mismatch');check(next.previousRevisionDigest===prev.revisionDigest,'previousRevisionDigest mismatch');check(next.revisionId!==prev.revisionId,'revisionId reused');
