@@ -1,0 +1,6 @@
+/* Immutable evidence collection; never returns mutable internal references. */
+(function(root,factory){const model=typeof module==='object'&&module.exports?require('./enrichment-model.js'):root.MayaEnrichmentModel;const api=factory(model);if(typeof module==='object'&&module.exports)module.exports=api;else root.MayaEnrichmentEvidence=api;})(typeof globalThis!=='undefined'?globalThis:this,function(model){
+'use strict';
+function createEvidenceStore(initial=[]){const entries=new Map();function add(input){const value=model.copy(input);model.validateEvidence(value);model.check(!entries.has(value.id),'duplicate evidence id');entries.set(value.id,model.freeze(value));return get(value.id);}function get(id){const item=entries.get(id);return item===undefined?null:model.freeze(model.copy(item));}function all(){return Array.from(entries.values(),x=>model.freeze(model.copy(x)));}for(const item of initial)add(item);return Object.freeze({add,get,all,has:id=>entries.has(id),size:()=>entries.size});}
+return {createEvidenceStore};
+});
