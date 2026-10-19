@@ -6,8 +6,7 @@ function validateCanonical(dataset,document){check(document&&Array.isArray(docum
 function digestRevision(d){const value=model.copy(d);delete value.revisionDigest;return canonical.datasetDigest(value);}
 function semantic(d){
  const active=d.assertions.filter(a=>!d.assertions.some(x=>Array.isArray(x.supersedesAssertionIds)&&x.supersedesAssertionIds.includes(a.id)));
- const computed=resolution.resolve(active,d.evidence,d.evidenceRelations,{verifications:d.verifications,policyVersion:d.policyVersion,decidedAt:d.createdAt});
- const activeConflicts=new Map(computed.conflicts.map(x=>[x.id,x]));
+ const computed=resolution.resolve(active,d.evidence,d.evidenceRelations,{verifications:d.verifications,policyVersion:d.policyVersion,decidedAt:d.createdAt,componentEnrichments:d.componentEnrichments});
  for(const x of computed.conflicts){const stored=d.conflicts.find(c=>c.id===x.id);check(stored&&canonical.canonicalJSON(stored.assertionIds.slice().sort())===canonical.canonicalJSON(x.assertionIds.slice().sort())&&stored.subjectId===x.subjectId&&stored.predicate===x.predicate,'active conflict mismatch '+x.id);}
  const decisions=new Map(d.decisions.map(x=>[x.id,x]));
  check(d.activeDecisionIds.length===computed.decisions.length,'active decision count mismatch');
