@@ -10,3 +10,8 @@
 - JSON export/import is standalone and does not modify the canonical model.
 
 A future schema change requires an explicit migration. No implicit major-version migration is supported.
+
+## Garantie d'historisation
+Toute révision d'un store existant doit passer par `reviseStore`. L'API refuse la suppression ou la réécriture d'une Evidence, Assertion ou Conflict existante. Le rattachement au SBOM et le changement de `enrichmentVersion` sont obligatoires.
+
+L'empreinte du SBOM est recalculée depuis `document.originalContent`, sans se fier à un hash fourni par l'appelant. La provenance du texte original reste la responsabilité de l'import canonique.
