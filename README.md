@@ -1,5 +1,6 @@
 # MAYA
 Monitoring Agent for Your Artifacts
+Analyse de confiance du patrimoine logiciel, gouvernance, supply chain, géopolitique, dépendances critiques
 
 ## Import SBOM (première tranche canonique)
 
