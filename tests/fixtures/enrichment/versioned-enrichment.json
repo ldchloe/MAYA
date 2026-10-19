@@ -12,6 +12,11 @@
   },
   "policyVersion": "1.0.0",
   "enrichmentVersion": "2",
+  "revisionId": "revision:2",
+  "previousRevisionId": null,
+  "previousRevisionDigest": null,
+  "revisionDigest": "419be8332bdde71dfdb34a0eb6cd31d5c8e7495880391da703d9b0bf2777a89a",
+  "activeDecisionIds": [],
   "componentEnrichments": [
     {
       "id": "ce1",
@@ -31,6 +36,8 @@
   "projects": [],
   "repositories": [],
   "evidence": [],
+  "evidenceRelations": [],
+  "verifications": [],
   "assertions": [],
   "conflicts": [],
   "decisions": []
