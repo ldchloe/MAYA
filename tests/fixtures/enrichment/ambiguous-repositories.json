@@ -12,6 +12,11 @@
   },
   "policyVersion": "1.0.0",
   "enrichmentVersion": "1",
+  "revisionId": "revision:1",
+  "previousRevisionId": null,
+  "previousRevisionDigest": null,
+  "revisionDigest": "4ca4f63c0fc888424ac2b363e50e12a7d04e1be3dc5ff09f4fe549da430da896",
+  "activeDecisionIds": [],
   "componentEnrichments": [
     {
       "id": "ce1",
@@ -35,34 +40,36 @@
   "repositories": [
     {
       "id": "r1",
-      "url": "https://example.org/r1",
+      "url": "https://example.org/repo",
       "host": "example.org",
       "hostRepositoryId": null,
       "kind": "source",
       "subpath": null,
       "revision": null,
       "assertionIds": [],
-      "status": "candidate",
-      "confidence": 0.5,
+      "status": "unknown",
+      "confidence": null,
       "createdAt": "2026-01-01T00:00:00Z",
       "updatedAt": "2026-01-01T00:00:00Z"
     },
     {
       "id": "r2",
-      "url": "https://example.org/r2",
+      "url": "https://example.org/repo",
       "host": "example.org",
       "hostRepositoryId": null,
       "kind": "source",
       "subpath": null,
       "revision": null,
       "assertionIds": [],
-      "status": "candidate",
-      "confidence": 0.5,
+      "status": "unknown",
+      "confidence": null,
       "createdAt": "2026-01-01T00:00:00Z",
       "updatedAt": "2026-01-01T00:00:00Z"
     }
   ],
   "evidence": [],
+  "evidenceRelations": [],
+  "verifications": [],
   "assertions": [],
   "conflicts": [],
   "decisions": []
