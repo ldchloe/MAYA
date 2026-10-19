@@ -201,7 +201,37 @@
     return service;
   }
   function addDocumentMetadata(doc, source) {
-    addPartyRoles(doc,source,'
+    addPartyRoles(doc,source,'$',doc.id,'document');
+    addDocumentReferences(doc,source,'$',doc.id,'document');
+    if (object(source.metadata)) {
+      addPartyRoles(doc,source.metadata,'$.metadata',doc.id,'document');
+      addDocumentReferences(doc,source.metadata,'$.metadata',doc.id,'document');
+      if (object(source.metadata.tools)) {
+        const tools=source.metadata.tools;
+        if (Array.isArray(tools.components))
+          tools.components.forEach((item,i)=>addPartyRoles(doc,item,'$.metadata.tools.components['+i+']',doc.id,'document'));
+        if (Array.isArray(tools.services))
+          tools.services.forEach((item,i)=>addPartyRoles(doc,item,'$.metadata.tools.services['+i+']',doc.id,'document'));
+      }
+    }
+    (source.compositions||[]).forEach((raw,i)=>doc.compositions.push({
+      id:'composition:'+(i+1),aggregate:raw?.aggregate,assemblies:raw?.assemblies,
+      dependencies:raw?.dependencies,vulnerabilities:raw?.vulnerabilities,
+      bomRef:raw?.['bom-ref'],sourcePath:'$.compositions['+i+']',raw
+    }));
+    for (const [field, value] of Object.entries(source)) {
+      if (field === 'formulation' || field === 'pedigree' || field === 'evidence')
+        doc.provenance.push({id:'provenance:'+(doc.provenance.length+1),kind:field,
+          sourcePath:'$.'+field,raw:value});
+    }
+    if (object(source.metadata)) {
+      for (const [field,value] of Object.entries(source.metadata))
+        if (field === 'lifecycles' || field === 'tools' || field === 'properties')
+          doc.provenance.push({id:'provenance:'+(doc.provenance.length+1),kind:field,
+            sourcePath:'$.metadata.'+field,raw:value});
+    }
+  }
+  function addComponent(doc, raw, path, parentId, isRoot) {
     if (!object(raw)) {
       issue(doc.importReport, 'warning', 'INVALID_COMPONENT', 'Composant non objet conservé dans le document brut.', path);
       return null;
@@ -234,7 +264,6 @@
     }
     return component;
   }
-
   function indexBomRefs(doc) {
     const index=new Map();
     for (const [type, entities] of [['component',doc.components],['service',doc.services]]) {
@@ -351,281 +380,6 @@
     components.forEach((raw, i) => addComponent(doc, raw, '$.components[' + i + ']', null, false));
     report.componentsCreated = doc.components.length;
     (source.services||[]).forEach((raw,i)=>addService(doc,raw,'$.services['+i+']',null));
-    addDependencies(doc, source.dependencies || []);
-    finalizeReport(report, false);
-    return { document: doc, report };
-  }
-  return { importCycloneDxJson };
-});
-,doc.id,'document');
-    addDocumentReferences(doc,source,'
-    if (!object(raw)) {
-      issue(doc.importReport, 'warning', 'INVALID_COMPONENT', 'Composant non objet conservé dans le document brut.', path);
-      return null;
-    }
-    validComponentShape(raw, path, doc.importReport);
-    const id = 'component:' + (doc.components.length + 1);
-    const component = {
-      id, documentId: doc.id, parentId: parentId ?? null, isRoot: Boolean(isRoot),
-      bomRef: raw['bom-ref'], name: raw.name, version: raw.version,
-      group: raw.group, type: raw.type, description: raw.description,
-      supplier: raw.supplier, purl: raw.purl,
-      identifierIds: [], licenseIds: [], externalReferenceIds: [],
-      enrichment: { github: null, organization: null, maintainers: null, country: null },
-      sourcePath: path, raw
-    };
-    doc.components.push(component);
-    addIdentifier(doc, component, 'bom-ref', raw['bom-ref'], path + "['bom-ref']", raw['bom-ref']);
-    addIdentifier(doc, component, 'purl', raw.purl, path + '.purl', raw.purl);
-    addIdentifier(doc, component, 'cpe', raw.cpe, path + '.cpe', raw.cpe);
-    addLicenses(doc, component, path);
-    addExternalReferences(doc, component, path);
-    if (raw.components !== undefined) {
-      if (!Array.isArray(raw.components)) {
-        issue(doc.importReport, 'warning', 'INVALID_NESTED_COMPONENTS', 'components imbriqués doit être un tableau.', path + '.components');
-      } else raw.components.forEach((child, i) => addComponent(doc, child, path + '.components[' + i + ']', id, false));
-    }
-    return component;
-  }
-  function indexBomRefs(doc) {
-    const index = new Map();
-    for (const component of doc.components) {
-      if (typeof component.bomRef !== 'string' || !component.bomRef) continue;
-      const matches = index.get(component.bomRef) || [];
-      matches.push(component.id);
-      index.set(component.bomRef, matches);
-    }
-    for (const [ref, ids] of index) {
-      if (ids.length > 1)
-        issue(doc.importReport, 'warning', 'DUPLICATE_BOM_REF',
-          'bom-ref dupliqué : ' + ref + ' (' + ids.length + ' occurrences).', '$.components');
-    }
-    return index;
-  }
-  function resolveReference(ref, index, unresolved) {
-    const matches = index.get(ref) || [];
-    if (matches.length === 1) return matches[0];
-    unresolved.add(String(ref));
-    return null;
-  }
-  function addInvalidDependency(doc, raw, path, reason) {
-    doc.invalidDependencyDeclarations.push({
-      id: 'invalid-dependency:' + (doc.invalidDependencyDeclarations.length + 1),
-      raw, sourcePath: path, reason
-    });
-    doc.importReport.invalidDependencyDeclarations++;
-    issue(doc.importReport, 'warning', 'INVALID_DEPENDENCY', reason, path);
-  }
-  function addDependencies(doc, declarations) {
-    const index = indexBomRefs(doc), unresolved = new Set();
-    doc.importReport.dependencyDeclarationsRead = declarations.length;
-    declarations.forEach((declaration, i) => {
-      const path = '$.dependencies[' + i + ']';
-      if (!object(declaration)) {
-        addInvalidDependency(doc, declaration, path, 'Déclaration non objet.');
-        return;
-      }
-      if (typeof declaration.ref !== 'string' || !declaration.ref) {
-        addInvalidDependency(doc, declaration, path, 'ref doit être une chaîne non vide.');
-        return;
-      }
-      if (declaration.dependsOn !== undefined &&
-          (!Array.isArray(declaration.dependsOn) || declaration.dependsOn.some(ref => typeof ref !== 'string' || !ref))) {
-        addInvalidDependency(doc, declaration, path, 'dependsOn doit être un tableau de références non vides.');
-        return;
-      }
-      const sourceId = resolveReference(declaration.ref, index, unresolved);
-      (declaration.dependsOn || []).forEach((targetRef, j) => {
-        const targetId = resolveReference(targetRef, index, unresolved);
-        const id = 'dependency:' + (doc.dependencies.length + 1);
-        doc.dependencies.push({
-          id, documentId: doc.id, sourceReference: declaration.ref,
-          targetReference: targetRef, sourceComponentId: sourceId,
-          targetComponentId: targetId, resolved: Boolean(sourceId && targetId),
-          sourcePath: path + '.dependsOn[' + j + ']', raw: declaration
-        });
-        doc.importReport.dependenciesDeclared++;
-        doc.importReport.dependencyRelationsCreated++;
-        if (sourceId && targetId) doc.importReport.dependenciesResolved++;
-      });
-    });
-    doc.importReport.unresolvedReferences = unresolved.size;
-    for (const ref of unresolved)
-      issue(doc.importReport, 'warning', 'UNRESOLVED_REFERENCE',
-        'Référence de dépendance absente ou ambiguë : ' + ref, '$.dependencies');
-  }
-  function importCycloneDxJson(text, filename) {
-    const report = createReport();
-    let source;
-    try { source = JSON.parse(String(text).replace(/^\uFEFF/, '')); }
-    catch (error) {
-      issue(report, 'error', 'INVALID_JSON', 'JSON invalide : ' + error.message, '$');
-      return { document: null, report: finalizeReport(report, true) };
-    }
-    if (!validateSource(source, report))
-      return { document: null, report: finalizeReport(report, true) };
-    const doc = createDocument(filename, text, source);
-    doc.importReport = report;
-    const components = source.components || [];
-    report.componentsRead = components.length;
-    if (object(source.metadata) && own(source.metadata, 'component')) {
-      const root = addComponent(doc, source.metadata.component, '$.metadata.component', null, true);
-      doc.rootComponentId = root?.id ?? null;
-    }
-    components.forEach((raw, i) => addComponent(doc, raw, '$.components[' + i + ']', null, false));
-    report.componentsCreated = doc.components.length;
-    addDependencies(doc, source.dependencies || []);
-    finalizeReport(report, false);
-    return { document: doc, report };
-  }
-  return { importCycloneDxJson };
-});
-,doc.id,'document');
-    if (object(source.metadata)) {
-      addPartyRoles(doc,source.metadata,'$.metadata',doc.id,'document');
-      addDocumentReferences(doc,source.metadata,'$.metadata',doc.id,'document');
-      if (object(source.metadata.tools)) {
-        const tools=source.metadata.tools;
-        if (Array.isArray(tools.components))
-          tools.components.forEach((item,i)=>addPartyRoles(doc,item,'$.metadata.tools.components['+i+']',doc.id,'document'));
-        if (Array.isArray(tools.services))
-          tools.services.forEach((item,i)=>addPartyRoles(doc,item,'$.metadata.tools.services['+i+']',doc.id,'document'));
-      }
-    }
-    (source.compositions||[]).forEach((raw,i)=>doc.compositions.push({
-      id:'composition:'+(i+1),aggregate:raw?.aggregate,assemblies:raw?.assemblies,
-      dependencies:raw?.dependencies,vulnerabilities:raw?.vulnerabilities,
-      bomRef:raw?.['bom-ref'],sourcePath:'$.compositions['+i+']',raw
-    }));
-    for (const [field, value] of Object.entries(source)) {
-      if (field === 'formulation' || field === 'pedigree' || field === 'evidence')
-        doc.provenance.push({id:'provenance:'+(doc.provenance.length+1),kind:field,
-          sourcePath:'$.'+field,raw:value});
-    }
-    if (object(source.metadata)) {
-      for (const [field,value] of Object.entries(source.metadata))
-        if (field === 'lifecycles' || field === 'tools' || field === 'properties')
-          doc.provenance.push({id:'provenance:'+(doc.provenance.length+1),kind:field,
-            sourcePath:'$.metadata.'+field,raw:value});
-    }
-  }
-
-  function addComponent(doc, raw, path, parentId, isRoot) {
-    if (!object(raw)) {
-      issue(doc.importReport, 'warning', 'INVALID_COMPONENT', 'Composant non objet conservé dans le document brut.', path);
-      return null;
-    }
-    validComponentShape(raw, path, doc.importReport);
-    const id = 'component:' + (doc.components.length + 1);
-    const component = {
-      id, documentId: doc.id, parentId: parentId ?? null, isRoot: Boolean(isRoot),
-      bomRef: raw['bom-ref'], name: raw.name, version: raw.version,
-      group: raw.group, type: raw.type, description: raw.description,
-      supplier: raw.supplier, purl: raw.purl,
-      identifierIds: [], licenseIds: [], externalReferenceIds: [],
-      enrichment: { github: null, organization: null, maintainers: null, country: null },
-      sourcePath: path, raw
-    };
-    doc.components.push(component);
-    addIdentifier(doc, component, 'bom-ref', raw['bom-ref'], path + "['bom-ref']", raw['bom-ref']);
-    addIdentifier(doc, component, 'purl', raw.purl, path + '.purl', raw.purl);
-    addIdentifier(doc, component, 'cpe', raw.cpe, path + '.cpe', raw.cpe);
-    addLicenses(doc, component, path);
-    addExternalReferences(doc, component, path);
-    if (raw.components !== undefined) {
-      if (!Array.isArray(raw.components)) {
-        issue(doc.importReport, 'warning', 'INVALID_NESTED_COMPONENTS', 'components imbriqués doit être un tableau.', path + '.components');
-      } else raw.components.forEach((child, i) => addComponent(doc, child, path + '.components[' + i + ']', id, false));
-    }
-    return component;
-  }
-  function indexBomRefs(doc) {
-    const index = new Map();
-    for (const component of doc.components) {
-      if (typeof component.bomRef !== 'string' || !component.bomRef) continue;
-      const matches = index.get(component.bomRef) || [];
-      matches.push(component.id);
-      index.set(component.bomRef, matches);
-    }
-    for (const [ref, ids] of index) {
-      if (ids.length > 1)
-        issue(doc.importReport, 'warning', 'DUPLICATE_BOM_REF',
-          'bom-ref dupliqué : ' + ref + ' (' + ids.length + ' occurrences).', '$.components');
-    }
-    return index;
-  }
-  function resolveReference(ref, index, unresolved) {
-    const matches = index.get(ref) || [];
-    if (matches.length === 1) return matches[0];
-    unresolved.add(String(ref));
-    return null;
-  }
-  function addInvalidDependency(doc, raw, path, reason) {
-    doc.invalidDependencyDeclarations.push({
-      id: 'invalid-dependency:' + (doc.invalidDependencyDeclarations.length + 1),
-      raw, sourcePath: path, reason
-    });
-    doc.importReport.invalidDependencyDeclarations++;
-    issue(doc.importReport, 'warning', 'INVALID_DEPENDENCY', reason, path);
-  }
-  function addDependencies(doc, declarations) {
-    const index = indexBomRefs(doc), unresolved = new Set();
-    doc.importReport.dependencyDeclarationsRead = declarations.length;
-    declarations.forEach((declaration, i) => {
-      const path = '$.dependencies[' + i + ']';
-      if (!object(declaration)) {
-        addInvalidDependency(doc, declaration, path, 'Déclaration non objet.');
-        return;
-      }
-      if (typeof declaration.ref !== 'string' || !declaration.ref) {
-        addInvalidDependency(doc, declaration, path, 'ref doit être une chaîne non vide.');
-        return;
-      }
-      if (declaration.dependsOn !== undefined &&
-          (!Array.isArray(declaration.dependsOn) || declaration.dependsOn.some(ref => typeof ref !== 'string' || !ref))) {
-        addInvalidDependency(doc, declaration, path, 'dependsOn doit être un tableau de références non vides.');
-        return;
-      }
-      const sourceId = resolveReference(declaration.ref, index, unresolved);
-      (declaration.dependsOn || []).forEach((targetRef, j) => {
-        const targetId = resolveReference(targetRef, index, unresolved);
-        const id = 'dependency:' + (doc.dependencies.length + 1);
-        doc.dependencies.push({
-          id, documentId: doc.id, sourceReference: declaration.ref,
-          targetReference: targetRef, sourceComponentId: sourceId,
-          targetComponentId: targetId, resolved: Boolean(sourceId && targetId),
-          sourcePath: path + '.dependsOn[' + j + ']', raw: declaration
-        });
-        doc.importReport.dependenciesDeclared++;
-        doc.importReport.dependencyRelationsCreated++;
-        if (sourceId && targetId) doc.importReport.dependenciesResolved++;
-      });
-    });
-    doc.importReport.unresolvedReferences = unresolved.size;
-    for (const ref of unresolved)
-      issue(doc.importReport, 'warning', 'UNRESOLVED_REFERENCE',
-        'Référence de dépendance absente ou ambiguë : ' + ref, '$.dependencies');
-  }
-  function importCycloneDxJson(text, filename) {
-    const report = createReport();
-    let source;
-    try { source = JSON.parse(String(text).replace(/^\uFEFF/, '')); }
-    catch (error) {
-      issue(report, 'error', 'INVALID_JSON', 'JSON invalide : ' + error.message, '$');
-      return { document: null, report: finalizeReport(report, true) };
-    }
-    if (!validateSource(source, report))
-      return { document: null, report: finalizeReport(report, true) };
-    const doc = createDocument(filename, text, source);
-    doc.importReport = report;
-    const components = source.components || [];
-    report.componentsRead = components.length;
-    if (object(source.metadata) && own(source.metadata, 'component')) {
-      const root = addComponent(doc, source.metadata.component, '$.metadata.component', null, true);
-      doc.rootComponentId = root?.id ?? null;
-    }
-    components.forEach((raw, i) => addComponent(doc, raw, '$.components[' + i + ']', null, false));
-    report.componentsCreated = doc.components.length;
     addDependencies(doc, source.dependencies || []);
     finalizeReport(report, false);
     return { document: doc, report };
