@@ -4,9 +4,9 @@
 - `enrichmentVersion`: revision of the enrichment snapshot, independent from canonical data.
 - `policyVersion`: decision rule version `1.0.0`.
 - `producer.version`: implementation version.
-- `sourceDocument.sha256`: SHA-256 of the original SBOM supplied by the caller; the caller is responsible for computing and authenticating it. The store checks its equality with the supplied digest and the canonical document ID.
+- `sourceDocument.sha256`: SHA-256 recalculated by the store from `document.originalContent`; the store compares the result to `sourceDocument.sha256` and verifies the canonical document ID. Source authenticity remains outside Lot A.
 - Evidence IDs are append-only across revisions. Existing evidence must not be rewritten.
-- Decisions are deterministic for identical assertions, evidence, policy and explicit `decidedAt`.
+- Decision results and input digests are deterministic for identical assertions, evidence and policy; `decidedAt` is recorded for audit but does not affect functional selection or input digests.
 - JSON export/import is standalone and does not modify the canonical model.
 
 A future schema change requires an explicit migration. No implicit major-version migration is supported.
