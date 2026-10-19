@@ -1,4 +1,6 @@
 /* Frozen reference from main: legacy CycloneDX JSON path and scoring. */
+const dims=[{k:'tech'},{k:'supply'},{k:'gov'},{k:'geo'},{k:'dep'}];
+const weights={tech:25,supply:25,gov:20,geo:20,dep:10};
 function norm(p){return {name:String(p.name??p.packageName??p.component??p['Package Name']??p.Name??p.title??'Composant sans nom'),version:String(p.version??p.packageVersion??p['Package Version']??p.Version??'Inconnue'),supplier:String(p.supplier?.name??p.supplier??p.publisher??p.manufacturer??p.Supplier??''),purl:String(p.purl??p.PURL??''),license:String(p.licenseConcluded??p.licenseDeclared??p.licenses?.[0]?.license?.id??p.license??p.License??''),group:String(p.group??p.namespace??''),raw:p}}
 
 function parseSBOM(text,name){
