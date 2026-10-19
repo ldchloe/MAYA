@@ -44,8 +44,10 @@
 <script src="js/sbom-model.js"></script>
 <script src="js/cyclonedx-json.js"></script>
 <script src="js/sbom-compat.js"></script>
+<script src="js/import-coordinator.js"></script>
 <script>
 const dims=[{k:'tech',n:'Technique',w:25},{k:'supply',n:'Supply chain',w:25},{k:'gov',n:'Gouvernance',w:20},{k:'geo',n:'Géopolitique',w:20},{k:'dep',n:'Dépendances',w:10}];
+const importCoordinator=MayaImportCoordinator.createImportCoordinator();
 let canonicalDocument=null,importReport=null,packages=[],selected=null,securityFindings=[],weights=Object.fromEntries(dims.map(d=>[d.k,d.w]));
 const $=id=>document.getElementById(id);
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
@@ -146,9 +148,12 @@ function renderImportReport(report){
  if(!report){panels.forEach(panel=>{panel.hidden=true;panel.textContent='' });return}
  panels.forEach(panel=>{panel.hidden=false});
  const fields=[
-  ['Statut',report.status],['Format détecté',report.detectedFormat||'Non renseigné'],
+  ['Statut',report.status],['Niveau de validation',report.validationLevel],['Format détecté',report.detectedFormat||'Non renseigné'],
   ['Version CycloneDX',report.specVersion||'Non renseignée'],
   ['Composants lus',report.componentsRead],['Composants créés',report.componentsCreated],
+  ['Déclarations de dépendances lues',report.dependencyDeclarationsRead],
+  ['Relations créées',report.dependencyRelationsCreated],
+  ['Déclarations invalides',report.invalidDependencyDeclarations],
   ['Dépendances déclarées',report.dependenciesDeclared],
   ['Dépendances résolues',report.dependenciesResolved],
   ['Références non résolues',report.unresolvedReferences],
@@ -165,31 +170,63 @@ function prepareCanonical(document){
  selected=null;
  renderRows();
 }
+function failedImportReport(error){
+ console.error('MAYA CycloneDX import failed:',error);
+ const report=MayaSbomModel.createReport();
+ MayaSbomModel.issue(report,'error','UNEXPECTED_IMPORT_ERROR',
+   'Échec de l’import. Vérifiez le fichier ou consultez la console pour le diagnostic.','$');
+ return MayaSbomModel.finalizeReport(report,true);
+}
 async function importCycloneDxFile(file){
  if(!file)return;
+ const attempt=importCoordinator.begin();
  canonicalDocument=null;packages=[];selected=null;renderRows();
- let text;
- try{text=await file.text()}
- catch(error){
-  const report=MayaSbomModel.createReport();
-  MayaSbomModel.issue(report,'error','READ_ERROR',error.message,'$');
-  renderImportReport(MayaSbomModel.finalizeReport(report,true));
-  $('fileinfo').textContent='Erreur de lecture : '+error.message;return;
+ try{
+  const text=await file.text();
+  if(!importCoordinator.isActive(attempt))return;
+  const {document,report}=MayaCycloneDx.importCycloneDxJson(text,file.name);
+  if(!importCoordinator.isActive(attempt))return;
+  if(!document){
+   renderImportReport(report);
+   $('fileinfo').textContent='Échec de l’import : '+file.name;
+   switchView('ingest');
+   return;
+  }
+  // Compute scores before publishing any canonical or display state.
+  const projected=MayaSbomCompat.toLegacyPackages(document);
+  const nextPackages=projected.map((p,i,a)=>({...p,scores:score(p,i,a.length)}));
+  if(!importCoordinator.isActive(attempt))return;
+  canonicalDocument=document;packages=nextPackages;selected=null;
+  renderRows();
+  renderImportReport(report);
+  $('fileinfo').textContent='✓ '+file.name+' · '+packages.length+' composants affichés';
+  switchView('results');
+ }catch(error){
+  if(!importCoordinator.isActive(attempt))return;
+  canonicalDocument=null;packages=[];selected=null;
+  const report=failedImportReport(error);
+  try{
+   renderRows();renderImportReport(report);
+   $('fileinfo').textContent='Échec de l’import : '+file.name;
+   switchView('ingest');
+  }catch(displayError){
+   console.error('MAYA failed to render import error:',displayError);
+   // Keep the failure visible even if the normal renderer itself fails.
+   const fallback=$('importReportIngest');
+   if(fallback){fallback.hidden=false;fallback.textContent='Statut : failed — erreur d’import.'}
+  }
+ }finally{
+  // Also reset on failure or stale attempts, but never clear a newer selection.
+  if(importCoordinator.isActive(attempt))$('file').value='';
  }
- const {document,report}=MayaCycloneDx.importCycloneDxJson(text,file.name);
- renderImportReport(report);
- if(!document){$('fileinfo').textContent='Échec de l’import : '+file.name;switchView('ingest');return}
- prepareCanonical(document);
- $('fileinfo').textContent='✓ '+file.name+' · '+packages.length+' composants affichés';
- switchView('results');
 }
 $('file').onchange=e=>importCycloneDxFile(e.target.files[0]);
 const drop=$('drop');
 ['dragenter','dragover'].forEach(name=>drop.addEventListener(name,e=>{e.preventDefault();drop.classList.add('drag')}));
 ['dragleave','drop'].forEach(name=>drop.addEventListener(name,e=>{e.preventDefault();drop.classList.remove('drag')}));
 drop.addEventListener('drop',e=>{const file=e.dataTransfer.files[0];if(file)importCycloneDxFile(file)});
-$('demo').onclick=()=>{canonicalDocument=null;renderImportReport(null);prepare([{name:'openssl',version:'3.0.12',supplier:'OpenSSL Project',purl:'pkg:generic/openssl@3.0.12',license:'Apache-2.0'},{name:'log4j-core',version:'2.14.1',supplier:'Apache Software Foundation',purl:'pkg:maven/org.apache.logging.log4j/log4j-core@2.14.1',license:'Apache-2.0'},{name:'left-pad',version:'1.3.0',supplier:'',purl:'pkg:npm/left-pad@1.3.0',license:'WTFPL'},{name:'libxml2',version:'2.9.10',supplier:'GNOME',purl:'pkg:generic/libxml2@2.9.10',license:''},{name:'internal-auth-sdk',version:'Inconnue',supplier:'',purl:'',license:''},{name:'react',version:'18.2.0',supplier:'Meta',purl:'pkg:npm/react@18.2.0',license:'MIT'},{name:'zlib',version:'1.2.13',supplier:'zlib.net',purl:'pkg:generic/zlib@1.2.13',license:'Zlib'}]);$('fileinfo').textContent='Exemple de démonstration · '+packages.length+' composants';switchView('results')};
-$('clear').onclick=()=>{canonicalDocument=null;renderImportReport(null);packages=[];selected=null;$('file').value='';$('fileinfo').textContent='Aucun fichier chargé.';renderRows();switchView('ingest')};
+$('demo').onclick=()=>{importCoordinator.invalidate();canonicalDocument=null;renderImportReport(null);prepare([{name:'openssl',version:'3.0.12',supplier:'OpenSSL Project',purl:'pkg:generic/openssl@3.0.12',license:'Apache-2.0'},{name:'log4j-core',version:'2.14.1',supplier:'Apache Software Foundation',purl:'pkg:maven/org.apache.logging.log4j/log4j-core@2.14.1',license:'Apache-2.0'},{name:'left-pad',version:'1.3.0',supplier:'',purl:'pkg:npm/left-pad@1.3.0',license:'WTFPL'},{name:'libxml2',version:'2.9.10',supplier:'GNOME',purl:'pkg:generic/libxml2@2.9.10',license:''},{name:'internal-auth-sdk',version:'Inconnue',supplier:'',purl:'',license:''},{name:'react',version:'18.2.0',supplier:'Meta',purl:'pkg:npm/react@18.2.0',license:'MIT'},{name:'zlib',version:'1.2.13',supplier:'zlib.net',purl:'pkg:generic/zlib@1.2.13',license:'Zlib'}]);$('fileinfo').textContent='Exemple de démonstration · '+packages.length+' composants';switchView('results')};
+$('clear').onclick=()=>{importCoordinator.invalidate();canonicalDocument=null;renderImportReport(null);packages=[];selected=null;$('file').value='';$('fileinfo').textContent='Aucun fichier chargé.';renderRows();switchView('ingest')};
 $('export').onclick=()=>{const header=['name','version','supplier',...dims.map(d=>d.k),'global'];const lines=[header,...packages.map(p=>[p.name,p.version,p.supplier,...dims.map(d=>p.scores[d.k].toFixed(2)),global(p).toFixed(2)])].map(row=>row.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(','));const blob=new Blob(['\ufeff'+lines.join('\r\n')],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='maya-for-sbom-analysis.csv';a.click();URL.revokeObjectURL(url)};
 // Callback global + delegation: keep slider updates working even if the controls are recreated.
 window.mayaWeightChange=function(el){
