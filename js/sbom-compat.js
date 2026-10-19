@@ -21,7 +21,7 @@
     };
   }
   function toLegacyPackages(document) {
-    return document.components.map(component => toLegacyPackage(document, component));
+    return document.components.filter(component => !component.isRoot).map(component => toLegacyPackage(document, component));
   }
   return { toLegacyPackage, toLegacyPackages };
 });
