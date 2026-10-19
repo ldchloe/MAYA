@@ -14,3 +14,8 @@ The canonical CycloneDX document is the source of truth and is never mutated. Th
 ## Limitations
 
 This is a local-data foundation only. The `verified` evidence kind is a classification of supplied evidence, not independent external verification by MAYA. The initial confidence policy is heuristic and not statistically calibrated. No external registries or APIs are consulted.
+
+## Corrections ciblées du lot A
+- `Evidence.evidenceKind='verified'` exige une source vérifiable (`official-document`, `repository` ou `registry`), une empreinte SHA-256 de source et `verificationMethod='independent-check'`. Les preuves déclaratives ne peuvent pas obtenir une confiance suffisante pour être automatiquement sélectionnées comme vérifiées. Ces métadonnées sont une **attestation**, pas une vérification externe cryptographiquement authentifiée.
+- `reviseStore(previousStore, nextDataset, document)` exige la conservation à l'identique des preuves, assertions et conflits antérieurs. Une nouvelle révision est obligatoire. Les appels isolés à `createStore` ne disposent pas d'un historique antérieur et ne peuvent pas le contrôler.
+- Le store calcule lui-même SHA-256 sur `document.originalContent` (chaîne UTF-8 exacte) et compare à `sourceDocument.sha256`. La valeur SHA-256 facultative anciennement fournie à l'API n'est plus utilisée pour établir la confiance.
