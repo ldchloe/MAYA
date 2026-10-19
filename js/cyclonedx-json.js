@@ -15,8 +15,46 @@
       formatVersion: source.specVersion, serialNumber: source.serialNumber,
       metadata: source.metadata ?? null, rootComponentId: null,
       components: [], dependencies: [], identifiers: [], licenses: [],
-      externalReferences: [], raw: source
+      externalReferences: [], invalidDependencyDeclarations: [], raw: source
     };
+  }
+  function validComponentShape(raw, path, report) {
+    if (!object(raw)) {
+      issue(report, 'warning', 'INVALID_COMPONENT', 'Composant non objet.', path);
+      return;
+    }
+    for (const field of ['name','version','group','type','description','purl','cpe','bom-ref']) {
+      if (raw[field] !== undefined && typeof raw[field] !== 'string')
+        issue(report, 'warning', 'INVALID_COMPONENT_FIELD', field + ' doit être une chaîne.', path + '.' + field);
+    }
+    if (raw.supplier !== undefined && raw.supplier !== null &&
+        !(typeof raw.supplier === 'string' || (object(raw.supplier) && (raw.supplier.name === undefined || typeof raw.supplier.name === 'string'))))
+      issue(report, 'warning', 'INVALID_SUPPLIER', 'supplier doit être un objet avec name texte ou une chaîne.', path + '.supplier');
+    for (const field of ['licenses','externalReferences','components']) {
+      if (raw[field] !== undefined && !Array.isArray(raw[field]))
+        issue(report, 'warning', 'INVALID_COMPONENT_COLLECTION', field + ' doit être un tableau.', path + '.' + field);
+    }
+    if (Array.isArray(raw.licenses)) raw.licenses.forEach((item, i) => {
+      if (!object(item) || (item.expression !== undefined && typeof item.expression !== 'string') ||
+          (item.license !== undefined && !object(item.license)) ||
+          (object(item.license) && ['id','name'].some(k => item.license[k] !== undefined && typeof item.license[k] !== 'string')))
+        issue(report, 'warning', 'INVALID_LICENSE', 'Entrée de licence non conforme.', path + '.licenses[' + i + ']');
+    });
+    if (Array.isArray(raw.externalReferences)) raw.externalReferences.forEach((item, i) => {
+      if (!object(item) || ['type','url','comment'].some(k => item[k] !== undefined && typeof item[k] !== 'string'))
+        issue(report, 'warning', 'INVALID_EXTERNAL_REFERENCE', 'Référence externe non conforme.', path + '.externalReferences[' + i + ']');
+    });
+  }
+  function validateDependencyShape(raw, path, report) {
+    if (!object(raw)) {
+      issue(report, 'warning', 'INVALID_DEPENDENCY', 'Déclaration non objet.', path);
+      return;
+    }
+    if (typeof raw.ref !== 'string' || !raw.ref)
+      issue(report, 'warning', 'INVALID_DEPENDENCY_REF', 'ref doit être une chaîne non vide.', path + '.ref');
+    if (raw.dependsOn !== undefined && (!Array.isArray(raw.dependsOn) ||
+        raw.dependsOn.some(ref => typeof ref !== 'string' || !ref)))
+      issue(report, 'warning', 'INVALID_DEPENDS_ON', 'dependsOn doit être un tableau de références non vides.', path + '.dependsOn');
   }
   function validateSource(source, report) {
     if (!object(source)) {
@@ -35,7 +73,12 @@
     }
     if (own(source, 'metadata') && source.metadata !== null && !object(source.metadata))
       issue(report, 'error', 'INVALID_METADATA', 'metadata doit être un objet.', '$.metadata');
-    return report.errors.length === 0;
+    if (report.errors.length) return false;
+    (source.components || []).forEach((raw, i) => validComponentShape(raw, '$.components[' + i + ']', report));
+    if (object(source.metadata) && source.metadata.component !== undefined)
+      validComponentShape(source.metadata.component, '$.metadata.component', report);
+    (source.dependencies || []).forEach((raw, i) => validateDependencyShape(raw, '$.dependencies[' + i + ']', report));
+    return true;
   }
   function addIdentifier(doc, component, type, value, path, raw) {
     if (typeof value !== 'string' || !value) return;
@@ -81,6 +124,7 @@
       issue(doc.importReport, 'warning', 'INVALID_COMPONENT', 'Composant non objet conservé dans le document brut.', path);
       return null;
     }
+    validComponentShape(raw, path, doc.importReport);
     const id = 'component:' + (doc.components.length + 1);
     const component = {
       id, documentId: doc.id, parentId: parentId ?? null, isRoot: Boolean(isRoot),
@@ -112,6 +156,11 @@
       matches.push(component.id);
       index.set(component.bomRef, matches);
     }
+    for (const [ref, ids] of index) {
+      if (ids.length > 1)
+        issue(doc.importReport, 'warning', 'DUPLICATE_BOM_REF',
+          'bom-ref dupliqué : ' + ref + ' (' + ids.length + ' occurrences).', '$.components');
+    }
     return index;
   }
   function resolveReference(ref, index, unresolved) {
@@ -120,16 +169,34 @@
     unresolved.add(String(ref));
     return null;
   }
+  function addInvalidDependency(doc, raw, path, reason) {
+    doc.invalidDependencyDeclarations.push({
+      id: 'invalid-dependency:' + (doc.invalidDependencyDeclarations.length + 1),
+      raw, sourcePath: path, reason
+    });
+    doc.importReport.invalidDependencyDeclarations++;
+    issue(doc.importReport, 'warning', 'INVALID_DEPENDENCY', reason, path);
+  }
   function addDependencies(doc, declarations) {
     const index = indexBomRefs(doc), unresolved = new Set();
+    doc.importReport.dependencyDeclarationsRead = declarations.length;
     declarations.forEach((declaration, i) => {
       const path = '$.dependencies[' + i + ']';
-      if (!object(declaration) || typeof declaration.ref !== 'string' || !Array.isArray(declaration.dependsOn)) {
-        issue(doc.importReport, 'warning', 'INVALID_DEPENDENCY', 'Déclaration de dépendance invalide, conservée dans le document brut.', path);
+      if (!object(declaration)) {
+        addInvalidDependency(doc, declaration, path, 'Déclaration non objet.');
+        return;
+      }
+      if (typeof declaration.ref !== 'string' || !declaration.ref) {
+        addInvalidDependency(doc, declaration, path, 'ref doit être une chaîne non vide.');
+        return;
+      }
+      if (declaration.dependsOn !== undefined &&
+          (!Array.isArray(declaration.dependsOn) || declaration.dependsOn.some(ref => typeof ref !== 'string' || !ref))) {
+        addInvalidDependency(doc, declaration, path, 'dependsOn doit être un tableau de références non vides.');
         return;
       }
       const sourceId = resolveReference(declaration.ref, index, unresolved);
-      declaration.dependsOn.forEach((targetRef, j) => {
+      (declaration.dependsOn || []).forEach((targetRef, j) => {
         const targetId = resolveReference(targetRef, index, unresolved);
         const id = 'dependency:' + (doc.dependencies.length + 1);
         doc.dependencies.push({
@@ -139,14 +206,14 @@
           sourcePath: path + '.dependsOn[' + j + ']', raw: declaration
         });
         doc.importReport.dependenciesDeclared++;
+        doc.importReport.dependencyRelationsCreated++;
         if (sourceId && targetId) doc.importReport.dependenciesResolved++;
       });
     });
     doc.importReport.unresolvedReferences = unresolved.size;
-    for (const ref of unresolved) {
+    for (const ref of unresolved)
       issue(doc.importReport, 'warning', 'UNRESOLVED_REFERENCE',
         'Référence de dépendance absente ou ambiguë : ' + ref, '$.dependencies');
-    }
   }
   function importCycloneDxJson(text, filename) {
     const report = createReport();
