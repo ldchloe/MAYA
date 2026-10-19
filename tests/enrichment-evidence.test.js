@@ -2,7 +2,7 @@
 test('B01 complete evidence accepted',()=>a.equal(createEvidenceStore([evidence()]).size(),1));
 test('B02 missing source rejected',()=>{const e=evidence();e.sourceRef='';a.throws(()=>createEvidenceStore([e]),/sourceRef/);});
 test('B03 assertion without evidence rejected',()=>{const x=assertion();x.evidenceIds=[];a.throws(()=>m.validateAssertion(x),/without evidence/);});
-test('B04 missing evidence reference rejected',()=>{const d=fixture();d.assertions=[assertion()];d.evidenceRelations=[relation()];a.throws(()=>m.validateDataset(finalize(d)),/missing e1/);});
+test('B04 missing evidence reference rejected',()=>{const d=fixture();d.assertions=[assertion()];d.evidenceRelations=[relation()];a.throws(()=>m.validateDataset(finalize(d)),/missing evidence e1|missing e1/);});
 test('B05 deep evidence immutability',()=>{const e=evidence(),store=createEvidenceStore([e]);e.observedValue.url='modified';const fetched=store.get('e1');a.throws(()=>{fetched.observedValue.url='bad';},/read only|Cannot assign/);a.equal(store.get('e1').observedValue.url,'https://example.org');});
 test('B06 new observation preserves prior',()=>{const st=createEvidenceStore([evidence()]);st.add({...evidence(),id:'e2',observedValue:{url:'changed'}});a.equal(st.get('e1').observedValue.url,'https://example.org');a.equal(st.size(),2);});
 test('B07 evidence may support multiple assertions',()=>{const d=fixture();d.evidence=[evidence()];d.assertions=[assertion(),{...assertion(),id:'a2'}];d.evidenceRelations=[relation(),relation('rel2','supports','e1','a2')];a.equal(m.validateDataset(finalize(d)),true);});
