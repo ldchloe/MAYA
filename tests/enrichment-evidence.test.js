@@ -1,0 +1,10 @@
+'use strict';
+const test=require('node:test'),a=require('node:assert/strict');const {createEvidenceStore}=require('../js/enrichment-evidence.js');const m=require('../js/enrichment-model.js');
+const {evidence,assertion}=require('./enrichment-evidence-helpers.js');
+test('B01 complete evidence accepted',()=>a.equal(createEvidenceStore([evidence()]).size(),1));
+test('B02 source missing rejected',()=>{const e=evidence();e.sourceRef='';a.throws(()=>createEvidenceStore([e]),/sourceRef/);});
+test('B03 assertion without evidence rejected',()=>{const x=assertion();x.evidenceIds=[];a.throws(()=>m.validateAssertion(x),/without evidence/);});
+test('B04 missing evidence reference rejected',()=>{const {fixture}=require('./enrichment-helpers.js');const d=fixture();d.assertions=[assertion()];a.throws(()=>m.validateDataset(d),/missing e1/);});
+test('B05 immutable nested evidence',()=>{const e=evidence(),store=createEvidenceStore([e]);e.observedValue.url='modified';const fetched=store.get('e1');a.throws(()=>{fetched.observedValue.url='bad';},/read only|Cannot assign/);a.equal(store.get('e1').observedValue.url,'https://example.org');});
+test('B06 new observation does not overwrite previous',()=>{const st=createEvidenceStore([evidence()]);st.add({...evidence(),id:'e2',observedValue:{url:'https://changed'}});a.equal(st.get('e1').observedValue.url,'https://example.org');a.equal(st.size(),2);});
+test('B07 evidence reusable by assertions',()=>{const {fixture}=require('./enrichment-helpers.js');const d=fixture();d.evidence=[evidence()];d.assertions=[assertion(),{...assertion(),id:'a2'}];a.equal(m.validateDataset(d),true);});
