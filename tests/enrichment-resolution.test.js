@@ -8,3 +8,5 @@ test('C06 conflict blocks verified',()=>{const x={...assertion(),status:'verifie
 test('C07 dependent evidence does not double count',()=>{const x={...assertion(),evidenceIds:['e1','e2']},e=evidence();const score=r.confidence(x,[e,{...e,id:'e2',independenceGroup:'shared'}]);a.ok(score<=.7);});
 test('C08 stable decisions regardless of assertion order',()=>{const x=assertion(),y={...x,id:'a2',value:'r2'};a.deepEqual(r.resolve([x,y],[evidence()],{decidedAt:now}),r.resolve([y,x],[evidence()],{decidedAt:now}));});
 test('C09 rejected assertions preserved in decision',()=>{const x=assertion();a.deepEqual(r.resolve([x],[evidence()],{decidedAt:now}).decisions[0].rejectedAssertionIds,['a1']);});
+test('FIX01 declarative evidence never reaches verified confidence',()=>{const x={...assertion(),status:'verified'};const e=evidence();a.ok(r.confidence(x,[e])<.95);a.equal(r.resolve([x],[e],{decidedAt:now}).decisions[0].selectedAssertionId,null);});
+test('FIX01 forged verified evidence rejected',()=>{const x=assertion();a.throws(()=>r.confidence(x,[{...evidence(),evidenceKind:'verified'}]),/verified evidence requires/);});
