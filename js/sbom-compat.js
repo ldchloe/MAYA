@@ -18,7 +18,7 @@
       version: String(raw.version ?? raw.versionInfo ?? raw.PackageVersion ?? raw.packageVersion ?? raw.component?.version ?? 'Inconnue'),
       supplier: String(supplier ?? raw.originator ?? raw.publisher ?? raw.manufacturer?.name ?? ''),
       purl: String(raw.purl ?? raw.PURL ?? ''),
-      license: String(raw.licenseConcluded ?? raw.licenseDeclared ?? raw.licenseInfoInFile ?? historicalLicense(raw)),
+      license: String(raw.licenseConcluded ?? raw.licenseDeclared ?? raw.licenses?.[0]?.license?.id ?? raw.license ?? raw.License ?? raw.licenseInfoInFile ?? historicalLicense(raw)),
       group: String(raw.group ?? raw.namespace ?? ''),
       raw
     };
