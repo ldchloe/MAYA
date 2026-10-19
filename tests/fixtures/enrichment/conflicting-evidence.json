@@ -1,0 +1,172 @@
+{
+  "schemaVersion": "1.0.0",
+  "datasetId": "d",
+  "sourceDocument": {
+    "id": "document:1",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "createdAt": "2026-01-01T00:00:00Z",
+  "producer": {
+    "name": "MAYA",
+    "version": "0.1.0"
+  },
+  "policyVersion": "1.0.0",
+  "enrichmentVersion": "1",
+  "revisionId": "revision:1",
+  "previousRevisionId": null,
+  "previousRevisionDigest": null,
+  "revisionDigest": "cd510015e45a6666cad32ee2c81c39d39c03a6b4ccaf41e805af952baa6fa25b",
+  "activeDecisionIds": [
+    "decision:7d8f022898ed83e01a3d3dac11b9dafee5425225ab6112441800866b7cc6f602"
+  ],
+  "componentEnrichments": [
+    {
+      "id": "ce1",
+      "componentId": "component:1",
+      "selectedProjectId": null,
+      "selectedRepositoryId": null,
+      "projectCandidateIds": [],
+      "repositoryCandidateIds": [],
+      "assertionIds": [
+        "a1",
+        "a2"
+      ],
+      "conflictIds": [],
+      "status": "conflicted",
+      "confidence": 0.6,
+      "createdAt": "2026-01-01T00:00:00Z",
+      "updatedAt": "2026-01-01T00:00:00Z"
+    }
+  ],
+  "projects": [],
+  "repositories": [],
+  "evidence": [
+    {
+      "id": "e1",
+      "sourceType": "fixture",
+      "evidenceKind": "declarative",
+      "sourceRef": "fixture.json",
+      "sourceDigest": null,
+      "subjectType": "component",
+      "subjectId": "component:1",
+      "attribute": "officialRepository",
+      "observedValue": {
+        "url": "https://example.org"
+      },
+      "sourcePath": "$.components[0]",
+      "observedAt": "2026-01-01T00:00:00Z",
+      "versionScope": null,
+      "verificationMethod": "fixture",
+      "independenceGroup": null
+    },
+    {
+      "id": "e2",
+      "sourceType": "fixture",
+      "evidenceKind": "declarative",
+      "sourceRef": "fixture.json",
+      "sourceDigest": null,
+      "subjectType": "component",
+      "subjectId": "component:1",
+      "attribute": "officialRepository",
+      "observedValue": {
+        "url": "https://example.org"
+      },
+      "sourcePath": "$.components[0]",
+      "observedAt": "2026-01-01T00:00:00Z",
+      "versionScope": null,
+      "verificationMethod": "fixture",
+      "independenceGroup": null
+    }
+  ],
+  "evidenceRelations": [
+    {
+      "id": "rel1",
+      "evidenceId": "e1",
+      "assertionId": "a1",
+      "relation": "supports",
+      "subjectId": "ce1",
+      "predicate": "officialRepository",
+      "valueDigest": null
+    },
+    {
+      "id": "rel2",
+      "evidenceId": "e2",
+      "assertionId": "a2",
+      "relation": "supports",
+      "subjectId": "ce1",
+      "predicate": "officialRepository",
+      "valueDigest": null
+    }
+  ],
+  "verifications": [],
+  "assertions": [
+    {
+      "id": "a1",
+      "subjectType": "componentEnrichment",
+      "subjectId": "ce1",
+      "predicate": "officialRepository",
+      "value": "r1",
+      "evidenceIds": [
+        "e1"
+      ],
+      "status": "conflicted",
+      "confidence": 0.6,
+      "conflictIds": [],
+      "policyVersion": "1.0.0"
+    },
+    {
+      "id": "a2",
+      "subjectType": "componentEnrichment",
+      "subjectId": "ce1",
+      "predicate": "officialRepository",
+      "value": "r2",
+      "evidenceIds": [
+        "e2"
+      ],
+      "status": "conflicted",
+      "confidence": 0.6,
+      "conflictIds": [],
+      "policyVersion": "1.0.0"
+    }
+  ],
+  "conflicts": [
+    {
+      "id": "conflict:7d8f022898ed83e01a3d3dac11b9dafee5425225ab6112441800866b7cc6f602",
+      "subjectId": "ce1",
+      "predicate": "officialRepository",
+      "assertionIds": [
+        "a1",
+        "a2"
+      ],
+      "conflictType": "contradictory-values",
+      "status": "conflicted",
+      "detectedAt": "2026-01-01T00:00:00Z"
+    }
+  ],
+  "decisions": [
+    {
+      "id": "decision:7d8f022898ed83e01a3d3dac11b9dafee5425225ab6112441800866b7cc6f602",
+      "subjectId": "ce1",
+      "predicate": "officialRepository",
+      "selectedAssertionId": null,
+      "rejectedAssertionIds": [
+        "a1",
+        "a2"
+      ],
+      "evidenceIds": [
+        "e1",
+        "e2"
+      ],
+      "conflictIds": [
+        "conflict:7d8f022898ed83e01a3d3dac11b9dafee5425225ab6112441800866b7cc6f602"
+      ],
+      "reasonCodes": [
+        "CONFLICT"
+      ],
+      "policyVersion": "1.0.0",
+      "engineVersion": "2.0.0",
+      "inputDigest": "7d8f022898ed83e01a3d3dac11b9dafee5425225ab6112441800866b7cc6f602",
+      "decidedAt": "2026-01-01T00:00:00Z"
+    }
+  ]
+}
