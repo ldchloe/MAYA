@@ -1,0 +1,10 @@
+const test=require('node:test'),a=require('node:assert/strict');const r=require('../js/enrichment-resolution.js');const {evidence,assertion}=require('./enrichment-evidence-helpers.js');const now='2026-01-01T00:00:00Z';
+test('C01 level high',()=>a.equal(r.level(.85),'high'));
+test('C02 confidence out of range rejected',()=>{a.throws(()=>r.level(-.1));a.throws(()=>r.level(1.1));});
+test('C03 candidates remain unselected',()=>{const x=assertion(),e=evidence();a.equal(r.resolve([x],[e],{decidedAt:now}).decisions[0].selectedAssertionId,null);});
+test('C04 contradictory values create conflict',()=>{const x=assertion(),y={...x,id:'a2',value:'r2'};a.equal(r.resolve([x,y],[evidence()],{decidedAt:now}).conflicts.length,1);});
+test('C05 conflicts retained in resolution result',()=>{const x=assertion(),y={...x,id:'a2',value:'r2'};const result=r.resolve([x,y],[evidence()],{decidedAt:now});a.equal(result.conflicts[0].assertionIds.length,2);});
+test('C06 conflict blocks verified',()=>{const x={...assertion(),status:'verified'},y={...x,id:'a2',value:'r2'};const e={...evidence(),evidenceKind:'verified'};a.equal(r.resolve([x,y],[e],{decidedAt:now}).decisions[0].selectedAssertionId,null);});
+test('C07 dependent evidence does not double count',()=>{const x={...assertion(),evidenceIds:['e1','e2']},e=evidence();const score=r.confidence(x,[e,{...e,id:'e2',independenceGroup:'shared'}]);a.ok(score<=.7);});
+test('C08 stable decisions regardless of assertion order',()=>{const x=assertion(),y={...x,id:'a2',value:'r2'};a.deepEqual(r.resolve([x,y],[evidence()],{decidedAt:now}),r.resolve([y,x],[evidence()],{decidedAt:now}));});
+test('C09 rejected assertions preserved in decision',()=>{const x=assertion();a.deepEqual(r.resolve([x],[evidence()],{decidedAt:now}).decisions[0].rejectedAssertionIds,['a1']);});
