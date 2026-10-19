@@ -1,0 +1,3 @@
+const now='2026-01-01T00:00:00Z';const evidence=()=>({id:'e1',sourceType:'fixture',evidenceKind:'declarative',sourceRef:'fixture.json',sourceDigest:null,subjectType:'component',subjectId:'component:1',attribute:'repository',observedValue:{url:'https://example.org'},sourcePath:'$.components[0]',observedAt:now,versionScope:null,verificationMethod:'fixture',independenceGroup:null});
+const assertion=()=>({id:'a1',subjectType:'componentEnrichment',subjectId:'ce1',predicate:'officialRepository',value:'r1',evidenceIds:['e1'],status:'candidate',confidence:.6,conflictIds:[],policyVersion:'1.0.0'});
+module.exports={evidence,assertion};
