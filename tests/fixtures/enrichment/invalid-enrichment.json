@@ -12,6 +12,11 @@
   },
   "policyVersion": "1.0.0",
   "enrichmentVersion": "1",
+  "revisionId": "revision:1",
+  "previousRevisionId": null,
+  "previousRevisionDigest": null,
+  "revisionDigest": "a36607616092b6a733a75bd8f5ff349007f3bd847c86b5185d73f353bbbcd4c3",
+  "activeDecisionIds": [],
   "componentEnrichments": [
     {
       "id": "ce1",
@@ -30,7 +35,38 @@
   ],
   "projects": [],
   "repositories": [],
-  "evidence": [],
+  "evidence": [
+    {
+      "id": "e1",
+      "sourceType": "fixture",
+      "evidenceKind": "declarative",
+      "sourceRef": "fixture.json",
+      "sourceDigest": null,
+      "subjectType": "component",
+      "subjectId": "component:1",
+      "attribute": "officialRepository",
+      "observedValue": {
+        "url": "https://example.org"
+      },
+      "sourcePath": "$.components[0]",
+      "observedAt": "2026-01-01T00:00:00Z",
+      "versionScope": null,
+      "verificationMethod": "fixture",
+      "independenceGroup": null
+    }
+  ],
+  "evidenceRelations": [
+    {
+      "id": "rel1",
+      "evidenceId": "e1",
+      "assertionId": "a1",
+      "relation": "inconclusive",
+      "subjectId": "ce1",
+      "predicate": "officialRepository",
+      "valueDigest": null
+    }
+  ],
+  "verifications": [],
   "assertions": [
     {
       "id": "a1",
@@ -38,8 +74,10 @@
       "subjectId": "ce1",
       "predicate": "officialRepository",
       "value": "r1",
-      "evidenceIds": [],
-      "status": "candidate",
+      "evidenceIds": [
+        "e1"
+      ],
+      "status": "unknown",
       "confidence": 0.6,
       "conflictIds": [],
       "policyVersion": "1.0.0"
