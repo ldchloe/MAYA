@@ -174,3 +174,26 @@ test('D14 D15 async out-of-order completion and reset do not publish', async () 
   coordinator.invalidate();finishOld();await pending;
   assert.deepEqual(published,['new']);
 });
+
+test('D01 legacy license concatenation fallback and supplier normalization', () => {
+  const {legacyPackages}=require('./legacy-scoring.js');
+  const source=JSON.stringify({
+    bomFormat:'CycloneDX',specVersion:'1.5',
+    components:[
+      {name:'expressions',version:'2',supplier:{name:'Example'},licenses:[{expression:'MIT'},{expression:'Apache-2.0'}]},
+      {name:'ids',version:'3',licenses:[{license:{id:'BSD-3-Clause'}},{license:{id:'MIT'}}]},
+      {name:'unnamed-nested-parent',components:[{name:'nested-only',version:'1'}]},
+      {version:'missing-name'}
+    ]
+  });
+  const old=legacyPackages(source);
+  const {document}=importCycloneDxJson(source,'licenses.json');
+  const projected=toLegacyPackages(document);
+  assert.equal(projected.length,old.length);
+  for(let i=0;i<old.length;i++)
+    for(const field of ['name','version','supplier','purl','license','group'])
+      assert.equal(projected[i][field],old[i][field],field+' at '+i);
+  assert.equal(projected[0].license,'MIT, Apache-2.0');
+  assert.equal(projected[1].license,'BSD-3-Clause');
+  assert.equal(document.components.length,5);
+});
