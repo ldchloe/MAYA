@@ -1,0 +1,37 @@
+{
+  "schemaVersion": "1.0.0",
+  "datasetId": "d",
+  "sourceDocument": {
+    "id": "document:1",
+    "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  "createdAt": "2026-01-01T00:00:00Z",
+  "producer": {
+    "name": "MAYA",
+    "version": "0.1.0"
+  },
+  "policyVersion": "1.0.0",
+  "enrichmentVersion": "2",
+  "componentEnrichments": [
+    {
+      "id": "ce1",
+      "componentId": "component:1",
+      "selectedProjectId": null,
+      "selectedRepositoryId": null,
+      "projectCandidateIds": [],
+      "repositoryCandidateIds": [],
+      "assertionIds": [],
+      "conflictIds": [],
+      "status": "unknown",
+      "confidence": null,
+      "createdAt": "2026-01-01T00:00:00Z",
+      "updatedAt": "2026-01-01T00:00:00Z"
+    }
+  ],
+  "projects": [],
+  "repositories": [],
+  "evidence": [],
+  "assertions": [],
+  "conflicts": [],
+  "decisions": []
+}
