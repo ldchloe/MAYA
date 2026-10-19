@@ -1,6 +1,6 @@
-const SHA='a'.repeat(64),now='2026-01-01T00:00:00Z';
+const SHA='e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',now='2026-01-01T00:00:00Z';
 function fixture(){return {schemaVersion:'1.0.0',datasetId:'d',sourceDocument:{id:'document:1',sha256:SHA},createdAt:now,producer:{name:'MAYA',version:'0.1.0'},policyVersion:'1.0.0',enrichmentVersion:'1',componentEnrichments:[{id:'ce1',componentId:'component:1',selectedProjectId:null,selectedRepositoryId:null,projectCandidateIds:[],repositoryCandidateIds:[],assertionIds:[],conflictIds:[],status:'unknown',confidence:null,createdAt:now,updatedAt:now}],projects:[],repositories:[],evidence:[],assertions:[],conflicts:[],decisions:[]};}
-const doc={id:'document:1',components:[{id:'component:1',raw:{name:'a'}}]};
+const doc={id:'document:1',originalContent:'',components:[{id:'component:1',raw:{name:'a'}}]};
 const project=()=>({id:'p1',name:'alpha',aliases:[],repositoryIds:[],assertionIds:[],status:'candidate',confidence:.5,createdAt:now,updatedAt:now});
 const repo=()=>({id:'r1',url:'https://example.org/repo',host:'example.org',hostRepositoryId:null,kind:'source',subpath:null,revision:null,assertionIds:[],status:'candidate',confidence:.5,createdAt:now,updatedAt:now});
 module.exports={fixture,doc,SHA,now,project,repo};
