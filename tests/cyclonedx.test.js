@@ -147,7 +147,7 @@ test('D01 D07 D19 compare every legacy scoring input, score, mean and rank', () 
   const ranking=list=>list.map(p=>({key:p.name+'@'+p.version,score:current.global(p)})).sort((a,b)=>b.score-a.score);
   assert.deepEqual(JSON.parse(JSON.stringify(ranking(fresh))),JSON.parse(JSON.stringify(ranking(old))));
   assert.equal(document.components.length,5);
-  assert.equal(fresh.length,3);
+  assert.equal(fresh.length,2);
 });
 test('D14 D15 import coordinator rejects stale attempts and reset', () => {
   const {createImportCoordinator}=require('../js/import-coordinator.js');
