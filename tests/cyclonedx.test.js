@@ -197,3 +197,129 @@ test('D01 legacy license concatenation fallback and supplier normalization', () 
   assert.equal(projected[1].license,'BSD-3-Clause');
   assert.equal(document.components.length,5);
 });
+
+const industrialFixture=()=>({
+ bomFormat:'CycloneDX',specVersion:'1.5',
+ metadata:{authors:[{name:'Auditor',email:'auditor@example.org'}],
+   component:{'bom-ref':'root',name:'plant-app',manufacturer:{name:'Plant OEM'}}},
+ components:[
+  {'bom-ref':'app',name:'app',supplier:{name:'Distributor',contact:[{email:'sales@example.org'}]},
+   manufacturer:{name:'Factory'},pedigree:{ancestors:[{name:'old-app'}]},
+   components:[{'bom-ref':'nested',name:'embedded'}]},
+  {'bom-ref':'lib',name:'lib'}
+ ],
+ services:[
+  {'bom-ref':'api',name:'Remote API',provider:{name:'Cloud Provider'},
+   endpoints:['https://example.org/api'],authenticated:true,trustBoundary:false,
+   data:[{flow:'inbound',classification:'public'}],properties:[{name:'tier',value:'external'}],
+   externalReferences:[{type:'website',url:'https://example.org'}],
+   services:[{'bom-ref':'subservice',name:'Internal Service'}]}
+ ],
+ externalReferences:[{type:'website',url:'https://example.org/bom'}],
+ compositions:[{aggregate:'complete',assemblies:['app']}],
+ dependencies:[
+  {ref:'app',dependsOn:['lib','api']},
+  {ref:'api',dependsOn:['app','subservice']},
+  {ref:'subservice',dependsOn:['api']},
+  {ref:'lib',dependsOn:[]},
+  {ref:'nested'},
+  {ref:'unknown',dependsOn:['app']},
+  {ref:'app',dependsOn:[42]}
+ ]
+});
+test('services preserve all requested canonical fields and nested services',()=>{
+ const {document}=importCycloneDxJson(JSON.stringify(industrialFixture()),'industrial.json');
+ const service=document.services.find(s=>s.bomRef==='api');
+ for(const field of ['id','bomRef','name','provider','endpoints','authenticated','trustBoundary','data','externalReferences','properties','raw','sourcePath'])
+  assert.ok(service[field]!==undefined,field);
+ assert.equal(document.services.find(s=>s.bomRef==='subservice').parentId,service.id);
+});
+for(const [label,from,to,sourceType,targetType] of [
+ ['component to component','app','lib','component','component'],
+ ['component to service','app','api','component','service'],
+ ['service to component','api','app','service','component'],
+ ['service to service','api','subservice','service','service']
+]) test(label+' dependency resolves typed endpoints',()=>{
+ const {document}=importCycloneDxJson(JSON.stringify(industrialFixture()),'industrial.json');
+ const edge=document.dependencies.find(d=>d.sourceReference===from&&d.targetReference===to);
+ assert.equal(edge.resolved,true);
+ assert.equal(edge.sourceEndpoint.resolutionStatus,'resolved');
+ assert.equal(edge.targetEndpoint.resolutionStatus,'resolved');
+ assert.equal(edge.sourceEndpoint.resolvedEntityType,sourceType);
+ assert.equal(edge.targetEndpoint.resolvedEntityType,targetType);
+ assert.ok(edge.sourceEndpoint.resolvedEntityId);
+ assert.ok(edge.targetEndpoint.resolvedEntityId);
+});
+test('component and service duplicate bom-ref is ambiguous and partial',()=>{
+ const fixture=industrialFixture();
+ fixture.services.push({'bom-ref':'app',name:'Collision'});
+ const {document,report}=importCycloneDxJson(JSON.stringify(fixture),'collision.json');
+ assert.equal(report.status,'partial');
+ assert.ok(report.ambiguousReferences>0);
+ assert.ok(report.warnings.some(w=>w.code==='DUPLICATE_BOM_REF'));
+ const edge=document.dependencies.find(d=>d.sourceReference==='app'&&d.targetReference==='api');
+ assert.equal(edge.sourceEndpoint.resolutionStatus,'ambiguous');
+ assert.equal(edge.sourceEndpoint.resolvedEntityId,null);
+ assert.equal(edge.resolved,false);
+});
+test('empty dependency declaration is preserved and distinguished',()=>{
+ const {document,report}=importCycloneDxJson(JSON.stringify(industrialFixture()),'industrial.json');
+ const empty=document.dependencyDeclarations.find(d=>d.ref==='lib');
+ const absentDependsOn=document.dependencyDeclarations.find(d=>d.ref==='nested');
+ assert.equal(empty.validationStatus,'declared-empty');
+ assert.deepEqual(empty.dependsOn,[]);
+ assert.equal(absentDependsOn.validationStatus,'declared-empty');
+ assert.equal(absentDependsOn.dependsOn,undefined);
+ assert.ok(report.emptyDependencyDeclarations>=2);
+ assert.equal(document.components.find(c=>c.bomRef==='lib').dependencyGraphStatus,'declared-empty');
+});
+test('absent from graph is explicitly unknown, not independent',()=>{
+ const {document,report}=importCycloneDxJson(JSON.stringify(industrialFixture()),'industrial.json');
+ assert.equal(document.components.find(c=>c.bomRef==='root').dependencyGraphStatus,'absent-from-graph');
+ assert.ok(report.entitiesAbsentFromDependencyGraph>=1);
+});
+test('invalid declaration is retained in both declaration and invalid collections',()=>{
+ const {document,report}=importCycloneDxJson(JSON.stringify(industrialFixture()),'industrial.json');
+ const declaration=document.dependencyDeclarations.find(d=>d.validationStatus==='invalid-declaration');
+ assert.equal(declaration.sourcePath,'$.dependencies[6]');
+ assert.equal(declaration.raw.dependsOn[0],42);
+ assert.equal(report.invalidDependencyDeclarations,1);
+ assert.equal(document.invalidDependencyDeclarations.length,1);
+ assert.equal(report.dependencyDeclarationsRead,7);
+ assert.equal(report.dependencyRelationsCreated,6);
+ assert.equal(report.missingReferences,1);
+});
+test('supplier and manufacturer are distinct party associations',()=>{
+ const {document}=importCycloneDxJson(JSON.stringify(industrialFixture()),'industrial.json');
+ const app=document.components.find(c=>c.bomRef==='app');
+ const supplier=document.partyAssociations.find(p=>p.sourceEntityId===app.id&&p.role==='supplier');
+ const manufacturer=document.partyAssociations.find(p=>p.sourceEntityId===app.id&&p.role==='manufacturer');
+ assert.equal(supplier.observedIdentity,'Distributor');
+ assert.equal(manufacturer.observedIdentity,'Factory');
+ assert.notEqual(supplier.id,manufacturer.id);
+ assert.equal(supplier.contacts.contact[0].email,'sales@example.org');
+ assert.ok(document.partyAssociations.some(p=>p.role==='author'&&p.sourceEntityType==='document'));
+ assert.ok(document.partyAssociations.some(p=>p.role==='provider'&&p.sourceEntityType==='service'));
+});
+test('document external references are canonical and source-preserving',()=>{
+ const {document}=importCycloneDxJson(JSON.stringify(industrialFixture()),'industrial.json');
+ const ref=document.externalReferences.find(r=>r.entityType==='document');
+ assert.equal(ref.url,'https://example.org/bom');
+ assert.equal(ref.sourcePath,'$.externalReferences[0]');
+});
+test('composition and provenance are preserved canonically',()=>{
+ const {document}=importCycloneDxJson(JSON.stringify(industrialFixture()),'industrial.json');
+ assert.equal(document.compositions.length,1);
+ assert.equal(document.compositions[0].aggregate,'complete');
+ assert.deepEqual(document.compositions[0].raw.assemblies,['app']);
+ assert.ok(document.provenance.some(p=>p.kind==='pedigree'&&p.sourcePath==='$.components[0].pedigree'));
+});
+test('root and nested component bom-refs resolve across service graph',()=>{
+ const fixture=industrialFixture();
+ fixture.dependencies.push({ref:'root',dependsOn:['nested']});
+ const {document}=importCycloneDxJson(JSON.stringify(fixture),'industrial.json');
+ const edge=document.dependencies.find(d=>d.sourceReference==='root');
+ assert.equal(edge.sourceEndpoint.resolutionStatus,'resolved');
+ assert.equal(edge.targetEndpoint.resolutionStatus,'resolved');
+ assert.equal(edge.targetEndpoint.resolvedEntityType,'component');
+});
