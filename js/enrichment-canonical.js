@@ -17,5 +17,8 @@ function normalize(value,seen){if(value===null||typeof value==='string'||typeof 
 function canonicalJSON(value){return JSON.stringify(normalize(value,new Set()));}
 function digest(value){return sha256Text(canonicalJSON(value));}
 function deterministicId(type,value){if(!/^[a-z][a-z-]*$/.test(type))throw new Error('invalid identity type');return type+':'+digest(value);}
-return {sha256Text,canonicalJSON,digest,deterministicId};
+const COLLECTIONS=new Set(['componentEnrichments','projects','repositories','evidence','evidenceRelations','verifications','assertions','conflicts','decisions']);
+function datasetJSON(value){const normalized=normalize(value,new Set());function sortCollections(x){if(Array.isArray(x))return x.map(sortCollections);if(x!==null&&typeof x==='object'){for(const key of Object.keys(x)){x[key]=sortCollections(x[key]);if(COLLECTIONS.has(key))x[key].sort((a,b)=>a.id.localeCompare(b.id));}return x;}return x;}return JSON.stringify(sortCollections(normalized));}
+function datasetDigest(value){return sha256Text(datasetJSON(value));}
+return {sha256Text,canonicalJSON,digest,datasetJSON,datasetDigest,deterministicId};
 });
