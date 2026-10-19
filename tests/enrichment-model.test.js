@@ -13,7 +13,7 @@ test('A08 duplicate ids rejected',()=>{const d=fixture();d.projects=[project(),p
 test('A09 canonical document unchanged',()=>{const before=JSON.stringify(doc);s.createStore(fixture(),doc,SHA);a.equal(JSON.stringify(doc),before);});
 test('D01 export and import roundtrip',()=>{const st=s.createStore(fixture(),doc,SHA);a.deepEqual(s.importJSON(st.exportJSON(),doc,SHA).snapshot(),st.snapshot());});
 test('D02 incompatible major rejected',()=>{const d=fixture();d.schemaVersion='2.0.0';rejects(()=>m.validateDataset(d),/unsupported schema/);});
-test('D03 document digest mismatch rejected',()=>rejects(()=>s.createStore(fixture(),doc,'b'.repeat(64)),/digest mismatch/));
+test('D03 document digest mismatch rejected',()=>rejects(()=>s.createStore(fixture(),{...doc,originalContent:'tampered'},SHA),/digest mismatch/));
 test('D04 revisions remain distinct',()=>{const d=fixture(),d2=fixture();d2.enrichmentVersion='2';a.equal(s.createStore(d,doc,SHA).snapshot().enrichmentVersion,'1');a.equal(s.createStore(d2,doc,SHA).snapshot().enrichmentVersion,'2');});
 test('D05 scoring compatibility projection is not changed',()=>{const fs=require('node:fs');const text=fs.readFileSync(require.resolve('../js/enrichment-store.js'),'utf8');a.ok(!/score\(|global\(/.test(text));});
 test('A10 duplicate enrichment for canonical component rejected',()=>{const d=fixture();d.componentEnrichments.push({...d.componentEnrichments[0],id:'ce2'});rejects(()=>m.validateDataset(d),/duplicate canonical component/);});
