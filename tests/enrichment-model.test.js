@@ -1,0 +1,18 @@
+const test=require('node:test'),a=require('node:assert/strict');
+const m=require('../js/enrichment-model.js'),s=require('../js/enrichment-store.js');
+const {fixture,doc,SHA,now,project,repo}=require('./enrichment-helpers.js');
+const rejects=(fn,re)=>a.throws(fn,re);
+test('A01 empty valid dataset',()=>a.equal(m.validateDataset(fixture()),true));
+test('A02 valid component linked to canonical',()=>a.ok(s.createStore(fixture(),doc,SHA).getComponent('component:1')));
+test('A03 unknown canonical component rejected',()=>{const d=fixture();d.componentEnrichments[0].componentId='bad';rejects(()=>s.createStore(d,doc,SHA),/component not in canonical/);});
+test('A04 unknown project stays null',()=>a.equal(s.createStore(fixture(),doc,SHA).getComponent('component:1').selectedProjectId,null));
+test('A05 unknown repository stays null',()=>a.equal(s.createStore(fixture(),doc,SHA).getComponent('component:1').selectedRepositoryId,null));
+test('A06 two components may share project candidate',()=>{const d=fixture();d.projects=[project()];d.componentEnrichments[0].projectCandidateIds=['p1'];d.componentEnrichments.push({...d.componentEnrichments[0],id:'ce2',componentId:'component:2'});a.equal(m.validateDataset(d),true);});
+test('A07 project may reference multiple repositories',()=>{const d=fixture();d.repositories=[repo(),{...repo(),id:'r2'}];d.projects=[{...project(),repositoryIds:['r1','r2']}];a.equal(m.validateDataset(d),true);});
+test('A08 duplicate ids rejected',()=>{const d=fixture();d.projects=[project(),project()];rejects(()=>m.validateDataset(d),/duplicate id/);});
+test('A09 canonical document unchanged',()=>{const before=JSON.stringify(doc);s.createStore(fixture(),doc,SHA);a.equal(JSON.stringify(doc),before);});
+test('D01 export and import roundtrip',()=>{const st=s.createStore(fixture(),doc,SHA);a.deepEqual(s.importJSON(st.exportJSON(),doc,SHA).snapshot(),st.snapshot());});
+test('D02 incompatible major rejected',()=>{const d=fixture();d.schemaVersion='2.0.0';rejects(()=>m.validateDataset(d),/unsupported schema/);});
+test('D03 document digest mismatch rejected',()=>rejects(()=>s.createStore(fixture(),doc,'b'.repeat(64)),/digest mismatch/));
+test('D04 revisions remain distinct',()=>{const d=fixture(),d2=fixture();d2.enrichmentVersion='2';a.equal(s.createStore(d,doc,SHA).snapshot().enrichmentVersion,'1');a.equal(s.createStore(d2,doc,SHA).snapshot().enrichmentVersion,'2');});
+test('D05 scoring compatibility projection is not changed',()=>{const fs=require('node:fs');const text=fs.readFileSync(require.resolve('../js/enrichment-store.js'),'utf8');a.ok(!/score\(|global\(/.test(text));});
