@@ -6,9 +6,11 @@
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   function createReport() {
     return {
-      status: 'failed', detectedFormat: null, specVersion: null,
+      status: 'failed', validationLevel: 'structural', detectedFormat: null, specVersion: null,
       componentsRead: 0, componentsCreated: 0,
       dependenciesDeclared: 0, dependenciesResolved: 0,
+      dependencyDeclarationsRead: 0, dependencyRelationsCreated: 0,
+      invalidDependencyDeclarations: 0,
       unresolvedReferences: 0, warnings: [], errors: []
     };
   }
