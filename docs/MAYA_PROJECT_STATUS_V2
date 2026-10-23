@@ -355,60 +355,46 @@ Date de clôture :
 
 ### Statut
 
-🟡 En cours
+✅ Terminé — MVP Maven (B-01 à B-04, validations B-05 et B-06)
+
+**Date de clôture technique : 23 octobre 2026.** Fusion vers `main` encore à effectuer : PR #25. La clôture de développement et de validation ne signifie pas que la révision est déjà fusionnée.
 
 ### Objectif
 
-Identifier de manière fiable un package logiciel à partir d'un composant SBOM.
+Identifier de manière fiable un package Maven depuis un composant SBOM CycloneDX canonique, sans mutation du document source, avec observation externe sourcée et décision reproductible.
 
-### B-01 — PackageIdentity & Maven Extraction
+### Livrables réalisés
 
-✅ Développé  
-🟡 En revue / validation
+- **B-01 — PackageIdentity et extraction Maven :** coordonnées déclarées ou natives, identité indépendante de la version, compatibilité Lot A.
+- **B-02 — Validation/normalisation PURL :** PURL déclaré, normalisé ou reconstruit, provenance conservée ; raccordement vérifié aux parcours live et archived.
+- **B-03 — Maven Central :** vérifications package/version, acquisition HTTP, distinction des résultats négatifs et incidents techniques.
+- **B-04 — MavenObservation et archivage :** sourceRef, archiveId, contentHash, observation, Evidence, Assertion, Decision ; contrôle SHA-256 et rejeu hors réseau.
+- **B-05 — Validation intégrée :** ComponentEnrichment et liens probatoires validés avec le modèle Lot A 1.0.0 ; Unknown/Conflicted préservés.
+- **B-06 — Recette :** trois SBOM CycloneDX réels de Apache Camel Kamelets, SCANOSS Java et Europeana Corelib, conservés sous `tests/fixtures/`.
 
-Livrables :
+### Résultats
 
-- extraction Maven depuis le modèle canonique ;
-- extraction depuis PURL ;
-- extraction depuis group + name + version ;
-- création de PackageIdentity ;
-- identityKey indépendante de la version ;
-- compatibilité Lot A ;
-- fonctionnement hors réseau ;
-- non-mutation du SBOM canonique.
+Révision intégrée `b0e71304e6ad6f22c53e3cc7e82fc9c68dac128c` : **58/58 tests Maven et 167/167 tests complets**, zéro échec. Exécution : https://github.com/ldchloe/MAYA/actions/runs/39932158374
 
-### B-02 — PURL Validation & Normalization
+PR d'intégration : https://github.com/ldchloe/MAYA/pull/25 (cible `main`). Issues de validation #19 et #20 clôturées.
 
-⬜ À faire
+### Limites connues
 
-Objectifs :
+- Périmètre livré : **Maven uniquement**. npm, PyPI, NuGet, crates.io et Go ne font pas partie de ce MVP.
+- B-06 vérifie un composant Maven représentatif par SBOM, pas chaque composant.
+- Backend d'archive **mémoire** dans la recette ; persistance durable non démontrée.
+- La recette B-06 interroge Maven Central en direct ; disponibilité réseau requise.
 
-- validation PURL ;
-- reconstruction contrôlée ;
-- normalisation Maven.
+### Dette technique documentée
 
-### B-03 — Maven Central Resolution
+- Stabiliser l'exécution des tests réseau (distinguer tests déterministes et recette externe).
+- Évaluer un backend persistant pour les archives avant usage opérationnel.
+- Revoir le workflow nommé `b01-node.yml` et son déclenchement `push` limité à une branche historique.
+- Conserver les journaux B-06 et les empreintes des fixtures pour audit.
 
-⬜ À faire
+### Condition de clôture Git
 
-Objectifs :
-
-- vérification package ;
-- vérification version ;
-- collecte de métadonnées observées ;
-- génération de preuves observées.
-
-### B-04 — Multi-Ecosystem Identity Resolution
-
-⬜ À faire
-
-Écosystèmes :
-
-- npm ;
-- PyPI ;
-- NuGet ;
-- crates.io ;
-- Go Packages.
+Fusionner la PR #25 vers `main` après revue finale et contrôle des protections de branche. Le statut « Terminé » désigne ici le lot **techniquement livré et validé**, non une fusion déjà réalisée.
 
 ---
 
