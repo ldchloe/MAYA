@@ -486,3 +486,18 @@ test('B-05 ComponentEnrichment dataset validates complete Evidence Assertion Dec
  assert.equal(result.decisions[0].subjectId,ceId);
  assert.equal(result.decisions[0].selectedAssertionId,result.assertions[0].id);
 });
+
+
+test('B-05 archived Found and NotFound remain Conflicted without arbitrary selection',async()=>{
+ const archive=createObservationArchive(createMemoryBackend());
+ const found=await archive.store(await provider().acquire(identity));
+ const absent=await archive.store(await provider(404,'').acquire(identity));
+ const component=canonicalComponent({group:'org.springframework',name:'spring-core',version:'6.1.3',purl});
+ const x=await resolveArchived({component,componentId:component.id,archive,archiveRefs:[found,absent],decidedAt:time});
+ assert.equal(x.result.status,'Conflicted');
+ assert.equal(x.observations.length,2);
+ assert.equal(x.assertions.length,2);
+ assert.ok(x.conflicts.length>=1);
+ assert.ok(x.decisions.every(d=>d.selectedAssertionId===null));
+ assert.ok(x.evidence.every(e=>e.sourceRef.includes('#observation:')));
+});
