@@ -18,15 +18,18 @@ function policy(version){check(version===PROJECT_POLICY_VERSION,'unsupported pro
 function date(value){check(typeof value==='string'&&/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$/.test(value)&&!Number.isNaN(Date.parse(value))&&new Date(value).toISOString().replace('.000Z','Z')===value.replace('.000Z','Z'),'invalid explicit createdAt');}
 function context(value){check(value!==null&&typeof value==='object'&&!Array.isArray(value),'attributionContext required');canonical.canonicalJSON(value);}
 function refs(values){check(Array.isArray(values)&&values.length>0&&values.every(x=>nonempty(x)&&/^evidence:[a-zA-Z0-9:_-]+$/.test(x))&&new Set(values).size===values.length,'invalid evidenceRefs');}
+function exactKeys(value,allowed,label){check(value&&typeof value==='object'&&!Array.isArray(value),'invalid '+label);for(const key of Object.keys(value))check(allowed.includes(key),'unknown property '+label+'.'+key);for(const key of allowed)check(Object.prototype.hasOwnProperty.call(value,key),'missing property '+label+'.'+key);}
 function ordered(data){return {policyVersion:PROJECT_POLICY_VERSION,projects:[...data.projects].sort((a,b)=>a.id.localeCompare(b.id)),links:[...data.links].sort((a,b)=>a.relationId.localeCompare(b.relationId))};}
 function digest(data){return canonical.digest(ordered(data));}
 function validateProjectIdentitySnapshot(snapshot){
  check(snapshot&&typeof snapshot==='object'&&!Array.isArray(snapshot),'invalid project snapshot');
  policy(snapshot.policyVersion);
+ exactKeys(snapshot,['policyVersion','projects','links','snapshotDigest'],'snapshot');
  check(Array.isArray(snapshot.projects)&&Array.isArray(snapshot.links),'invalid project snapshot collections');
  check(/^[a-f0-9]{64}$/.test(snapshot.snapshotDigest||''),'invalid project snapshot digest');
  const ids=new Set(),attributions=new Set(),relations=new Set();
- for(const p of snapshot.projects){
+ for(const [index,p] of snapshot.projects.entries()){
+  exactKeys(p,['id','attributionId','createdAt','attributionContext','name','url'],'projects['+index+']');
   check(p&&ID.test(p.id||''),'invalid opaque projectId');
   check(ATTRIBUTION.test(p.attributionId||''),'invalid attributionId');
   date(p.createdAt);context(p.attributionContext);
@@ -36,7 +39,8 @@ function validateProjectIdentitySnapshot(snapshot){
   if(p.name!==undefined&&p.name!==null)check(nonempty(p.name),'invalid descriptive project name');
   if(p.url!==undefined&&p.url!==null)check(nonempty(p.url),'invalid descriptive project url');
  }
- for(const link of snapshot.links){
+ for(const [index,link] of snapshot.links.entries()){
+  exactKeys(link,['relationId','packageIdentityId','projectId','attributionId','evidenceRefs','policyVersion','createdAt','attributionContext','versionScope'],'links['+index+']');
   check(link&&RELATION.test(link.relationId||''),'invalid relationId');
   check(!relations.has(link.relationId),'duplicate relationId');
   relations.add(link.relationId);
