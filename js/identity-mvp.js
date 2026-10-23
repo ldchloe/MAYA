@@ -5,6 +5,22 @@
  if(node)module.exports=api;else root.MayaIdentityMvp=api;
 })(typeof globalThis!=='undefined'?globalThis:this,function(purl,engine,lotA,canonical,resolution){
 'use strict';
+// Extract only explicit public URLs from a positively matched POM; never infer authority.
+function observedPomUrls(xml){
+ const one=(body,tag)=>{
+  const matches=[...body.matchAll(new RegExp('<'+tag+'\\s*>\\s*([^<]+?)\\s*<\\/'+tag+'>','g'))];
+  if(matches.length!==1)return null;
+  const value=matches[0][1].trim();
+  return /^https?:\\/\\/[^\\s<>"']+$/.test(value)?value:null;
+ };
+ const section=(tag)=>{
+  const matches=[...xml.matchAll(new RegExp('<'+tag+'(?:\\s[^>]*)?>([\\s\\S]*?)<\\/'+tag+'>','g'))];
+  return matches.length===1?matches[0][1]:'';
+ };
+ const withoutNested=xml.replace(/<parent\\b[^>]*>[\\s\\S]*?<\\/parent>/g,'').replace(/<dependencies\\b[^>]*>[\\s\\S]*?<\\/dependencies>/g,'').replace(/<scm\\b[^>]*>[\\s\\S]*?<\\/scm>/g,'').replace(/<issueManagement\\b[^>]*>[\\s\\S]*?<\\/issueManagement>/g,'');
+ const urls={homepageUrl:one(withoutNested,'url'),scmUrl:one(section('scm'),'url'),sourceRepositoryUrl:one(section('scm'),'url'),issueTrackerUrl:one(section('issueManagement'),'url')};
+ return Object.fromEntries(Object.entries(urls).filter(([,v])=>v!==null));
+}
 function interpretMaven(acquisition,identity,archiveId){
  if(!acquisition||!identity||typeof archiveId!=='string')throw new Error('invalid Maven interpretation input');
  const scope=acquisition.scope||'Version';
@@ -27,7 +43,8 @@ function interpretMaven(acquisition,identity,archiveId){
    }
   }
  }
- return Object.freeze({scope,packageKey:identity.key,version:scope==='Version'?identity.version:null,outcome,archiveId,observedAt:acquisition.observedAt,providerId:acquisition.providerId});
+ const urls=outcome==='Found'&&scope==='Version'&&typeof acquisition.body==='string'?observedPomUrls(acquisition.body):{};
+ return Object.freeze({scope,packageKey:identity.key,version:scope==='Version'?identity.version:null,outcome,archiveId,sourceRef:acquisition.url+'#'+archiveId,contentHash:canonical.sha256Text(acquisition.body),observedAt:acquisition.observedAt,providerId:acquisition.providerId,...urls});
 }
 function validateInput(component,componentId,decidedAt){
  if(!component||typeof componentId!=='string'||!componentId||typeof decidedAt!=='string'||Number.isNaN(Date.parse(decidedAt)))throw new Error('canonical component, componentId and explicit decidedAt required');
@@ -44,6 +61,7 @@ async function resolveArchived({component,componentId,archive,archiveRefs,decide
  for(const ref of archiveRefs){
   const archived=await archive.load(ref);
   const observation=interpretMaven(archived,identity,ref.id);
+  if(ref.contentHash&&observation.contentHash!==ref.contentHash)throw new Error('archive content hash mismatch');
   if(seen.has(ref.id))continue;
   seen.add(ref.id);observations.push(observation);
   if(!['Found','NotFoundObserved'].includes(observation.outcome))continue;
@@ -54,7 +72,7 @@ async function resolveArchived({component,componentId,archive,archiveRefs,decide
   const value={packageKey:identity.key,scope:observation.scope,version:observation.version,outcome:observation.outcome};
   const predicate=observation.scope==='Package'?'packageObserved':'packageVersionObserved';
   const claim={id:'identity-assertion:'+canonical.digest({subjectId,value,archiveId:ref.id}),subjectType:'componentEnrichment',subjectId,predicate,value,evidenceIds:[evidenceId],status:'unknown',conflictIds:[],policyVersion:resolution.POLICY_VERSION};
-  const proof={id:evidenceId,sourceType:'registry',evidenceKind:'verified',sourceRef:archived.url+'#'+ref.id,subjectType:'component',subjectId:componentId,attribute:predicate,observedValue:value,sourceDigest,sourcePath:null,versionScope:observation.version,independenceGroup:archived.providerId,verificationMethod:'sha256-content-match',verificationId,observedAt:archived.observedAt};
+  const proof={id:evidenceId,sourceType:'registry',evidenceKind:'verified',sourceRef:observation.sourceRef,subjectType:'component',subjectId:componentId,attribute:predicate,observedValue:value,sourceDigest,sourcePath:null,versionScope:observation.version,independenceGroup:archived.providerId,verificationMethod:'sha256-content-match',verificationId,observedAt:archived.observedAt};
   const link={id:'identity-relation:'+canonical.digest({evidenceId,assertionId:claim.id}),evidenceId,assertionId:claim.id,relation:'supports',subjectId,predicate,valueDigest:canonical.digest(value)};
   lotA.validateEvidence(proof);lotA.validateVerification(verification);lotA.validateRelation(link);lotA.validateEvidenceScope(claim,proof,link,[{id:subjectId,componentId}]);
   evidence.push(proof);verifications.push(verification);assertions.push(claim);evidenceRelations.push(link);
