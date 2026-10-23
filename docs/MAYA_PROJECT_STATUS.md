@@ -354,7 +354,9 @@ Lot A done on Oct 19th 2026
 
 Résultat CI final : **58 tests Maven / 167 tests complets réussis**, [journal d'exécution](https://github.com/ldchloe/MAYA/actions/runs/39932158374).
 
-Limites : Maven uniquement, un composant représentatif par SBOM de recette, archive mémoire dans les tests, réseau Maven Central requis pour B-06. Dette : backend d'archive persistant, séparation tests réseau, actualisation du workflow CI.
+**Validation opérationnelle :** 3 SBOM CycloneDX réels (Apache Camel Kamelets, SCANOSS Java, Europeana Corelib), 3 acquisitions Maven Central réelles avec archivage SHA-256, Evidence/Assertion/Decision et rejeu hors réseau. Références : [B-06 et journal CI](https://github.com/ldchloe/MAYA/issues/20#issuecomment-6361781723), [rapport de clôture](LOT_B_CLOTURE_2026-10-23.md).
+
+**Limites connues :** compatibilité PURL Maven partielle (qualifiers comme `?type=jar` rejetés, `INVALID_MAVEN_PURL`) ; déclarations PURL et champs natifs incompatibles rejetées sans arbitrage (`INCOMPATIBLE_DECLARATIONS`) ; un composant représentatif par SBOM, non une couverture exhaustive ; backend d'archive en mémoire pour les tests (persistance durable non démontrée) ; acquisitions Maven Central live dépendantes du réseau ; extraction d'URL POM conservatrice (POM ambigus/complexes potentiellement incomplets) ; SHA-256 = intégrité, non authenticité ; pas de présomption de dépôt ou projet officiel. Dette assumée : archivage persistant, isolation des tests réseau, maintenance du workflow CI. Aucun de ces points n'invalide le MVP Maven validé.
 
 La prise en charge de npm, PyPI, NuGet, crates.io et Go n'appartient **pas** au MVP Maven clôturé. Voir `docs/MAYA_PROJECT_STATUS_V2` pour le détail et la condition de fusion.
 
