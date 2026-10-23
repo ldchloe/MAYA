@@ -8,7 +8,7 @@ const {resolveComponent,resolveArchived}=require('../js/identity-mvp.js');
 const canonical=require('../js/enrichment-canonical.js');
 const lotA=require('../js/enrichment-model.js');
 const samples=[
- {name:'Spring Framework spring-core',file:'b06-spring-sonar-cryptography.json',purl:'pkg:maven/org.springframework/spring-core@6.1.21?type=jar'},
+ {name:'Spring Framework spring-core',file:'b06-spring-tutorial-sbom.json',purl:'pkg:maven/org.springframework/spring-core@5.0.1.RELEASE'},
  {name:'Apache Log4j log4j-core',file:'b06-europeana-corelib.json',purl:'pkg:maven/org.apache.logging.log4j/log4j-core@2.25.3'},
  {name:'JUnit junit',file:'b06-scanoss-java.json',purl:'pkg:maven/junit/junit',version:'4.13.1'}
 ];
