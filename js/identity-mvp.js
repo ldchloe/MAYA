@@ -80,7 +80,7 @@ async function resolveComponent({component,componentId,provider,archive,decidedA
  validateInput(component,componentId,decidedAt);
  const coordinates=purl.extractMavenCoordinates(component);
  const identity=coordinates?Object.freeze({...coordinates.identity,version:coordinates.version,purl:coordinates.purl}):null;
- if(!identity||!identity.version)return resolveArchived({component,componentId,archive,archiveRefs:[],decidedAt});
+ if(!identity||!identity.version)return resolveArchived({component,componentId,archive:archive||{load:async()=>{throw new Error('no archived observations');}},archiveRefs:[],decidedAt});
  if(!provider||typeof provider.acquire!=='function'||!archive||typeof archive.store!=='function')throw new Error('provider and archive required');
  const acquisition=await provider.acquire(identity);
  // Archive failure is fatal; never produce a purportedly verifiable decision.
