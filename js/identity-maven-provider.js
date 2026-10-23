@@ -32,7 +32,14 @@ function createMavenCentralProvider({fetchImpl,now,baseUrl=ORIGIN}={}){
   }
   return Object.freeze({providerId:'maven-central',providerVersion:'2',scope,url,query:{namespace:identity.namespace,name:identity.name,version:scope==='Version'?identity.version:null},observedAt,status,transport,error,body});
  }
- return Object.freeze({providerId:'maven-central',supports:ecosystem=>ecosystem==='maven',acquire});
+ async function checkPackage(identity){
+  return acquire(identity,{scope:'Package'});
+ }
+ async function checkVersion(identity,version){
+  if(typeof version!=='string'||!version)throw new Error('Maven version required');
+  return acquire({...identity,version},{scope:'Version'});
+ }
+ return Object.freeze({providerId:'maven-central',supports:ecosystem=>ecosystem==='maven',acquire,checkPackage,checkVersion});
 }
 return Object.freeze({createMavenCentralProvider});
 });
