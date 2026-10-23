@@ -242,7 +242,7 @@ test('B-01 unversioned native coordinates do not query Maven Central',async()=>{
  assert.equal(result.observations.length,0);
 });
 
-\n// B-02: declared, normalized and reconstructed PURLs remain distinguishable.
+// B-02: declared, normalized and reconstructed PURLs remain distinguishable.
 const {validateMavenPurl,normalizeMavenPurl,normalizeMavenComponent}=require('../js/identity-purl.js');
 test('B-02 complete Maven PURL validates and normalizes',()=>{
  const x=validateMavenPurl(purl);
