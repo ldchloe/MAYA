@@ -445,3 +445,44 @@ test('B-02 normalization is deterministic and idempotent',()=>{
  assert.equal(normalizeMavenPurl(a.coordinates),a.normalizedPurl);
  assert.deepEqual(normalizeMavenComponent({group:'org.springframework',name:'spring-core',version:'6.1.3'}),normalizeMavenComponent({group:'org.springframework',name:'spring-core',version:'6.1.3'}));
 });
+
+
+test('B-05 integrated path uses B-02 normalization for declared and reconstructed PURLs',async()=>{
+ const archive=createObservationArchive(createMemoryBackend());
+ const declared=canonicalComponent({group:'org.springframework',name:'spring-core',version:'6.1.3',purl});
+ const a=await resolveComponent({component:declared,componentId:declared.id,provider:provider(),archive,decidedAt:time});
+ assert.equal(a.identity.declaredPurl,purl);
+ assert.equal(a.identity.normalizedPurl,purl);
+ assert.equal(a.identity.reconstructedPurl,null);
+ assert.equal(a.identity.origin,'declared');
+ const native=canonicalComponent({group:'org.springframework',name:'spring-core',version:'6.1.3'});
+ const b=await resolveComponent({component:native,componentId:native.id,provider:provider(),archive:createObservationArchive(createMemoryBackend()),decidedAt:time});
+ assert.equal(b.identity.declaredPurl,null);
+ assert.equal(b.identity.normalizedPurl,null);
+ assert.equal(b.identity.reconstructedPurl,purl);
+ assert.equal(b.identity.origin,'native');
+ assert.equal(b.result.status,'Resolved');
+});
+test('B-05 conflicting PURL and native coordinates do not resolve or mutate',async()=>{
+ const component=canonicalComponent({group:'org.different',name:'spring-core',version:'6.1.3',purl});
+ const original=JSON.stringify(component);
+ const x=await resolveComponent({component,componentId:component.id,decidedAt:time});
+ assert.equal(x.result.status,'Unknown');
+ assert.equal(x.identity,null);
+ assert.equal(x.evidence.length,0);
+ assert.equal(JSON.stringify(component),original);
+});
+test('B-05 ComponentEnrichment dataset validates complete Evidence Assertion Decision linkage',async()=>{
+ const component=canonicalComponent({group:'org.springframework',name:'spring-core',version:'6.1.3',purl});
+ const result=await resolveComponent({component,componentId:component.id,provider:provider(),archive:createObservationArchive(createMemoryBackend()),decidedAt:time});
+ const model=require('../js/enrichment-model.js');
+ const ceId=result.assertions[0].subjectId;
+ const ce={id:ceId,componentId:component.id,selectedProjectId:null,selectedRepositoryId:null,projectCandidateIds:[],repositoryCandidateIds:[],assertionIds:result.assertions.map(x=>x.id),conflictIds:result.conflicts.map(x=>x.id),status:'verified',confidence:1,createdAt:time,updatedAt:time};
+ const dataset={schemaVersion:'1.0.0',datasetId:'b05-integration',sourceDocument:{id:'b05-source',sha256:'a'.repeat(64)},createdAt:time,producer:{name:'MAYA',version:'1.0.0'},policyVersion:'1.0.0',enrichmentVersion:'1.0.0',componentEnrichments:[ce],projects:[],repositories:[],evidence:result.evidence,evidenceRelations:result.evidenceRelations,verifications:result.verifications,assertions:result.assertions,conflicts:result.conflicts,decisions:result.decisions,activeDecisionIds:result.decisions.map(x=>x.id),revisionId:'b05-r1',previousRevisionId:null,previousRevisionDigest:null};
+ dataset.revisionDigest=canonical.datasetDigest(dataset);
+ assert.equal(model.validateDataset(dataset),true);
+ assert.equal(result.evidence[0].subjectId,component.id);
+ assert.equal(result.assertions[0].subjectId,ceId);
+ assert.equal(result.decisions[0].subjectId,ceId);
+ assert.equal(result.decisions[0].selectedAssertionId,result.assertions[0].id);
+});
