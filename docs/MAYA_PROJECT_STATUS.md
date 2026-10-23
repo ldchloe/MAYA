@@ -341,23 +341,22 @@ Lot A done on Oct 19th 2026
 
 ---
 
-## Lot B — Identity Resolution
+## Lot B — Identity Resolution (MVP Maven)
 
-⬜ PURL
+✅ Terminé techniquement le 23 octobre 2026 — fusion vers `main` en attente via [PR #25](https://github.com/ldchloe/MAYA/pull/25).
 
-⬜ Namespace
+- ✅ B-01 : PackageIdentity et extraction Maven depuis CycloneDX.
+- ✅ B-02 : validation, normalisation et reconstruction PURL Maven.
+- ✅ B-03 : acquisition Maven Central (package et version).
+- ✅ B-04 : MavenObservation, archivage SHA-256, Evidence, Assertion, Decision et rejeu.
+- ✅ B-05 : validation intégrée et raccordement ComponentEnrichment.
+- ✅ B-06 : trois SBOM réels conservés et recettes Maven Central exécutées.
 
-⬜ npm
+Résultat CI final : **58 tests Maven / 167 tests complets réussis**, [journal d'exécution](https://github.com/ldchloe/MAYA/actions/runs/39932158374).
 
-⬜ PyPI
+Limites : Maven uniquement, un composant représentatif par SBOM de recette, archive mémoire dans les tests, réseau Maven Central requis pour B-06. Dette : backend d'archive persistant, séparation tests réseau, actualisation du workflow CI.
 
-⬜ Maven Central
-
-⬜ NuGet
-
-⬜ crates.io
-
-⬜ Go Packages
+La prise en charge de npm, PyPI, NuGet, crates.io et Go n'appartient **pas** au MVP Maven clôturé. Voir `docs/MAYA_PROJECT_STATUS_V2` pour le détail et la condition de fusion.
 
 ---
 
