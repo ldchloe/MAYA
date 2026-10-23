@@ -241,3 +241,81 @@ test('B-01 unversioned native coordinates do not query Maven Central',async()=>{
  assert.equal(result.result.status,'Unknown');
  assert.equal(result.observations.length,0);
 });
+
+\n// B-02: declared, normalized and reconstructed PURLs remain distinguishable.
+const {validateMavenPurl,normalizeMavenPurl,normalizeMavenComponent}=require('../js/identity-purl.js');
+test('B-02 complete Maven PURL validates and normalizes',()=>{
+ const x=validateMavenPurl(purl);
+ assert.equal(x.status,'valid');
+ assert.equal(x.normalizedPurl,purl);
+ assert.equal(x.coordinates.version,'6.1.3');
+});
+test('B-02 unversioned Maven PURL is valid',()=>{
+ const x=validateMavenPurl('pkg:maven/org.springframework/spring-core');
+ assert.equal(x.status,'valid');
+ assert.equal(x.coordinates.version,null);
+ assert.equal(x.normalizedPurl,'pkg:maven/org.springframework/spring-core');
+});
+test('B-02 malformed, wrong-type and empty segments are invalid',()=>{
+ for(const input of ['pkg:maven/a/','pkg:maven//b@1','pkg:maven/a/b@','pkg:maven/a/b@1?type=jar','pkg:maven/a/%ZZ@1','pkg:npm/a@1']){
+  assert.equal(validateMavenPurl(input).status,'invalid');
+  assert.equal(normalizeMavenComponent({purl:input,group:'a',name:'b'}).identity,null);
+ }
+});
+test('B-02 native complete coordinates reconstruct versioned PURL',()=>{
+ const x=normalizeMavenComponent(canonicalComponent({group:'org.springframework',name:'spring-core',version:'6.1.3'}));
+ assert.equal(x.status,'reconstructed');
+ assert.equal(x.origin,'native');
+ assert.equal(x.declaredPurl,null);
+ assert.equal(x.normalizedPurl,null);
+ assert.equal(x.reconstructedPurl,purl);
+ assert.equal(x.identity.identityKey,'maven:org.springframework:spring-core');
+});
+test('B-02 native versionless coordinates reconstruct package PURL',()=>{
+ const x=normalizeMavenComponent(canonicalComponent({group:'org.springframework',name:'spring-core'}));
+ assert.equal(x.status,'reconstructed');
+ assert.equal(x.version,null);
+ assert.equal(x.reconstructedPurl,'pkg:maven/org.springframework/spring-core');
+});
+test('B-02 insufficient native coordinates never invent identity',()=>{
+ for(const component of [{name:'spring-core'},{group:'org.springframework'},{name:'spring-core',version:'6.1.3'}]){
+  const x=normalizeMavenComponent(canonicalComponent(component));
+  assert.equal(x.status,'insufficient');
+  assert.equal(x.identity,null);
+  assert.equal(x.reconstructedPurl,null);
+ }
+});
+test('B-02 coherent declared PURL preserves origin and declared bytes',()=>{
+ const declared='pkg:maven/org.springframework/spring%2Dcore@6.1.3';
+ const component=canonicalComponent({purl:declared,group:'org.springframework',name:'spring-core',version:'6.1.3'});
+ const before=JSON.stringify(component);
+ const x=normalizeMavenComponent(component);
+ assert.equal(x.status,'valid');
+ assert.equal(x.origin,'declared');
+ assert.equal(x.declaredPurl,declared);
+ assert.equal(x.normalizedPurl,purl);
+ assert.equal(x.reconstructedPurl,null);
+ assert.equal(JSON.stringify(component),before);
+});
+test('B-02 incompatible declarations never select or mutate',()=>{
+ const component=canonicalComponent({purl,group:'other.group',name:'spring-core',version:'6.1.3'});
+ const before=JSON.stringify(component);
+ const x=normalizeMavenComponent(component);
+ assert.equal(x.status,'conflicted');
+ assert.equal(x.identity,null);
+ assert.equal(x.declaredPurl,purl);
+ assert.equal(x.normalizedPurl,null);
+ assert.equal(JSON.stringify(component),before);
+});
+test('B-02 non-Maven declared PURL is not interpreted as Maven',()=>{
+ const x=normalizeMavenComponent(canonicalComponent({purl:'pkg:npm/react@18.2.0',name:'react',version:'18.2.0'}));
+ assert.equal(x.identity,null);
+ assert.equal(x.status,'invalid');
+});
+test('B-02 normalization is deterministic and idempotent',()=>{
+ const a=validateMavenPurl('pkg:maven/org.springframework/spring%2Dcore@6.1.3');
+ const b=validateMavenPurl(a.normalizedPurl);
+ assert.equal(a.normalizedPurl,b.normalizedPurl);
+ assert.equal(normalizeMavenPurl(a.coordinates),a.normalizedPurl);
+ assert.deepEqual(normalizeMavenComponent({group:'org.springframework',name:'spring-core',version:'6.1.3'}),normalizeMavenComponent({group:'org.springframework',name:'spring-core',version:'6.1.3'}));
+});
