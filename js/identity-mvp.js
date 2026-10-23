@@ -36,10 +36,16 @@ function interpretMaven(acquisition,identity,archiveId){
    if(scope==='Package'){
     if(/<metadata(?:\s[^>]*)?>/.test(xml)&&new RegExp('<groupId>\\s*'+identity.namespace.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\s*<\\/groupId>').test(xml)&&new RegExp('<artifactId>\\s*'+identity.name.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\s*<\\/artifactId>').test(xml))outcome='Found';
    }else if(/<project(?:\s[^>]*)?>/.test(xml)){
-    // Conservative: inherited or ambiguous coordinates are not positive proof.
-    const top=xml.replace(/<parent\b[^>]*>[\s\S]*?<\/parent>/g,'').replace(/<dependencies\b[^>]*>[\s\S]*?<\/dependencies>/g,'').replace(/<dependencyManagement\b[^>]*>[\s\S]*?<\/dependencyManagement>/g,'');
-    const value=tag=>{const matches=[...top.matchAll(new RegExp('<'+tag+'\\s*>\\s*([^<]+?)\\s*<\\/'+tag+'>','g'))];return matches.length===1?matches[0][1].trim():null;};
-    if(value('groupId')===identity.namespace&&value('artifactId')===identity.name&&value('version')===identity.version)outcome='Found';
+    // Only top-level coordinates count; Maven permits group/version inheritance from parent.
+    const parent=xml.match(/<parent\b[^>]*>([\s\S]*?)<\/parent>/);
+    const stripped=xml.replace(/<(parent|dependencies|dependencyManagement|properties|build|profiles|reporting|distributionManagement|repositories|pluginRepositories|licenses|developers|contributors|scm|issueManagement|mailingLists)\b[^>]*>[\s\S]*?<\/\1>/g,'');
+    const value=(body,tag)=>{
+     const matches=[...body.matchAll(new RegExp('<'+tag+'\\s*>\\s*([^<]+?)\\s*<\\/'+tag+'>','g'))];
+     return matches.length===1?matches[0][1].trim():null;
+    };
+    const group=value(stripped,'groupId')||(parent&&value(parent[1],'groupId'));
+    const version=value(stripped,'version')||(parent&&value(parent[1],'version'));
+    if(group===identity.namespace&&value(stripped,'artifactId')===identity.name&&version===identity.version)outcome='Found';
    }
   }
  }
