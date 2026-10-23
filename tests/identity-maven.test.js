@@ -297,3 +297,73 @@ test('B-03 missing version never triggers a version request',async()=>{
  const a=await provider.checkPackage(b03Identity);
  assert.equal(a.scope,'Package');
 });
+
+
+// B-04: archived acquisition -> observation -> Lot A Evidence.
+test('B-04 valid archive carries hash, sourceRef and provenance into Evidence',async()=>{
+ const archive=createObservationArchive(createMemoryBackend());
+ const acquisition=await provider().acquire(identity);
+ const ref=await archive.store(acquisition);
+ const result=await resolveArchived({component:{purl},componentId:'component:b04',archive,archiveRefs:[ref],decidedAt:time});
+ assert.equal(result.observation.contentHash,ref.contentHash);
+ assert.equal(result.observation.sourceRef,acquisition.url+'#'+ref.id);
+ assert.equal(result.observation.archiveId,ref.id);
+ assert.equal(result.observation.providerId,'maven-central');
+ assert.equal(result.observation.observedAt,time);
+ assert.equal(result.evidence[0].sourceRef,result.observation.sourceRef);
+ assert.equal(result.evidence[0].observedAt,result.observation.observedAt);
+ assert.equal(result.evidence[0].sourceType,'registry');
+ assert.equal(result.assertions.length,1);
+ assert.equal(result.decisions.length,1);
+});
+test('B-04 corrupted archive blocks observation and Evidence',async()=>{
+ const records=new Map();
+ const archive=createObservationArchive({put:async(k,v)=>records.set(k,v),get:async k=>records.get(k)});
+ const ref=await archive.store(await provider().acquire(identity));
+ records.set(ref.id,records.get(ref.id).replace('spring-core','different-core'));
+ await assert.rejects(()=>resolveArchived({component:{purl},componentId:'component:b04',archive,archiveRefs:[ref],decidedAt:time}),/integrity/);
+});
+test('B-04 unreadable archive fails explicitly',async()=>{
+ const archive=createObservationArchive({put:async()=>{},get:async()=>{throw Error('read-failed');}});
+ await assert.rejects(()=>resolveArchived({component:{purl},componentId:'component:b04',archive,archiveRefs:[{id:'observation:'+'a'.repeat(64)}],decidedAt:time}),/read-failed/);
+});
+test('B-04 failed write cannot produce a decision',async()=>{
+ const archive=createObservationArchive({put:async()=>{throw Error('write-failed');},get:async()=>null});
+ await assert.rejects(()=>resolveComponent({component:{purl},componentId:'component:b04',provider:provider(),archive,decidedAt:time}),/write-failed/);
+});
+test('B-04 absent optional metadata remains absent',async()=>{
+ const x=await runWith(async()=>({status:200,text:async()=>pom}));
+ for(const field of ['homepageUrl','scmUrl','sourceRepositoryUrl','issueTrackerUrl'])assert.equal(Object.hasOwn(x.observation,field),false);
+});
+test('B-04 present POM URLs are observed only, never endorsed',async()=>{
+ const body='<project><groupId>org.springframework</groupId><artifactId>spring-core</artifactId><version>6.1.3</version><url>https://example.org/home</url><scm><url>https://example.org/scm</url></scm><issueManagement><url>https://example.org/issues</url></issueManagement></project>';
+ const archive=createObservationArchive(createMemoryBackend());
+ const acquired=await provider(200,body).acquire(identity);
+ const ref=await archive.store(acquired);
+ const result=await resolveArchived({component:{purl},componentId:'component:b04',archive,archiveRefs:[ref],decidedAt:time});
+ const o=result.observation;
+ assert.equal(o.homepageUrl,'https://example.org/home');
+ assert.equal(o.scmUrl,'https://example.org/scm');
+ assert.equal(o.sourceRepositoryUrl,'https://example.org/scm');
+ assert.equal(o.issueTrackerUrl,'https://example.org/issues');
+ assert.equal(o.outcome,'Found');
+ assert.equal(o.contentHash,canonical.sha256Text(body));
+ assert.equal(Object.hasOwn(o,'official'),false);
+ assert.equal(Object.hasOwn(o,'validated'),false);
+ assert.equal(Object.hasOwn(o,'approved'),false);
+ assert.equal(result.evidence[0].sourceRef,o.sourceRef);
+ assert.equal(result.assertions[0].predicate,'packageVersionObserved');
+});
+test('B-04 URLs are not invented from invalid or negative POM responses',async()=>{
+ const body='<html><url>https://example.org/untrusted</url></html>';
+ const x=await runWith(async()=>({status:200,text:async()=>body}));
+ assert.equal(x.observation.outcome,'InvalidResponse');
+ assert.equal(Object.hasOwn(x.observation,'homepageUrl'),false);
+ const y=await runWith(async()=>({status:404,text:async()=>''}));
+ assert.equal(Object.hasOwn(y.observation,'scmUrl'),false);
+});
+test('B-04 archive reference hash mismatch is rejected even when archive bytes are intact',async()=>{
+ const archive=createObservationArchive(createMemoryBackend());
+ const ref=await archive.store(await provider().acquire(identity));
+ await assert.rejects(()=>resolveArchived({component:{purl},componentId:'component:b04',archive,archiveRefs:[{...ref,contentHash:'0'.repeat(64)}],decidedAt:time}),/content hash mismatch/);
+});
