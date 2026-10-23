@@ -1,0 +1,522 @@
+# MAYA – Vision, Architecture & Project Status
+Version : Octobre 2026
+
+---
+
+# 1. Vision
+
+MAYA est une plateforme d'analyse de confiance du patrimoine logiciel.
+
+L'objectif est de partir d'un SBOM (CycloneDX ou SPDX) afin de produire une analyse explicable, auditable et reproductible :
+
+- des risques techniques ;
+- des risques de gouvernance ;
+- des risques supply chain ;
+- des risques géopolitiques ;
+- des dépendances critiques.
+
+L'approche est européano-centrée et vise à mettre en évidence les dépendances vis-à-vis :
+
+- d'organisations ;
+- de juridictions ;
+- d'infrastructures ;
+- d'acteurs extra-européens.
+
+Toutes les analyses doivent être fondées sur :
+
+- des preuves consultables ;
+- des données sourcées ;
+- des règles explicites ;
+- des décisions reproductibles.
+
+MAYA ne doit jamais confondre :
+
+- les faits observés ;
+- les preuves ;
+- les assertions ;
+- les décisions ;
+- les interprétations ;
+- les scores.
+
+---
+
+# 2. ADR (Architecture Decision Records)
+
+## ADR-01
+
+Le SBOM canonique est séparé de toute donnée enrichie.
+
+## ADR-02
+
+Toute assertion repose sur au moins une preuve.
+
+## ADR-03
+
+Les entités Package, Project, Repository, Organization et Foundation sont distinctes.
+
+## ADR-04
+
+Aucune entité ne doit être fusionnée sur la seule similarité des noms.
+
+## ADR-05
+
+La collecte externe est réalisée hors navigateur et produit un enrichissement versionné.
+
+## ADR-06
+
+Aucune propagation automatique de pays, juridiction ou géographie.
+
+## ADR-07
+
+Les états Unknown et Conflicted sont considérés comme des résultats valides.
+
+## ADR-08
+
+Toutes les décisions doivent être auditables, explicables et reproductibles.
+
+---
+
+# 3. Modèle canonique
+
+Le modèle canonique représente fidèlement le contenu du SBOM sans enrichissement externe.
+
+## Entités principales
+
+### SbomDocument
+
+- contenu original ;
+- empreinte SHA-256 ;
+- format ;
+- version ;
+- métadonnées ;
+- rapport d'import.
+
+### SbomComponent
+
+- nom ;
+- version ;
+- type ;
+- groupe ;
+- licences ;
+- identifiants ;
+- propriétés ;
+- données source.
+
+### SbomService
+
+- endpoints ;
+- provider ;
+- trust boundary ;
+- métadonnées ;
+- références externes.
+
+### SbomDependency
+
+- composant → composant ;
+- composant → service ;
+- service → composant ;
+- service → service.
+
+### SbomIdentifier
+
+- PURL ;
+- CPE ;
+- bom-ref ;
+- SPDX ID ;
+- autres identifiants.
+
+### SbomLicense
+
+- licence déclarée ;
+- licence conclue ;
+- expressions SPDX ;
+- références.
+
+### SbomExternalReference
+
+- repository ;
+- documentation ;
+- VCS ;
+- distribution ;
+- issue tracker ;
+- références diverses.
+
+## Principe fondamental
+
+Le modèle canonique est immuable.
+
+Aucune donnée enrichie ne modifie le contenu d'origine.
+
+---
+
+# 4. Modèle d'enrichissement
+
+## ComponentEnrichment
+
+Point d'entrée principal du modèle d'enrichissement.
+
+Associe à un composant :
+
+- PackageIdentity ;
+- Project ;
+- Repository ;
+- preuves ;
+- assertions ;
+- conflits ;
+- décisions.
+
+## PackageIdentity
+
+Représente une identité technique de package indépendante de sa version.
+
+Exemple :
+
+- maven:org.springframework:spring-core
+- npm:@angular/core
+
+Le Lot B produit cette entité.
+
+## Project
+
+Représente un projet logiciel.
+
+Exemples :
+
+- Spring Framework ;
+- Kubernetes ;
+- OpenSSL ;
+- Terraform.
+
+Un projet peut produire plusieurs packages.
+
+## Repository
+
+Représente un dépôt source.
+
+Exemples :
+
+- GitHub ;
+- GitLab ;
+- Bitbucket.
+
+Un repository n'est pas automatiquement le dépôt officiel.
+
+## Evidence
+
+Entité centrale du système.
+
+Types :
+
+- declarative ;
+- observed ;
+- verified ;
+- derived.
+
+Les preuves sont immuables.
+
+## Assertion
+
+Affirmation vérifiable reposant sur une ou plusieurs preuves.
+
+## Conflict
+
+Conserve les contradictions :
+
+- identités ;
+- projets ;
+- repositories ;
+- licences ;
+- gouvernance.
+
+## Decision
+
+Journalise :
+
+- ce qui est retenu ;
+- ce qui est rejeté ;
+- pourquoi.
+
+Toutes les décisions doivent être reproductibles.
+
+---
+
+# 5. Invariants
+
+## INV-01
+
+Le document canonique n'est jamais modifié.
+
+## INV-02
+
+Chaque enrichissement référence un composant existant.
+
+## INV-03
+
+Toute assertion possède au moins une preuve valide.
+
+## INV-04
+
+Une preuve créée ne peut plus être modifiée.
+
+## INV-05
+
+Les conflits sont conservés.
+
+## INV-06
+
+Les informations inconnues restent null.
+
+## INV-07
+
+Les décisions sont reproductibles.
+
+## INV-08
+
+Les identifiants sont uniques.
+
+## INV-09
+
+Aucune association n'est créée sur une simple similarité de nom.
+
+## INV-10
+
+Aucun score de gouvernance, supply chain ou géopolitique n'est produit sans données explicites.
+
+## INV-11
+
+Le scoring historique reste inchangé.
+
+## INV-12
+
+Le socle d'enrichissement fonctionne sans accès réseau.
+
+---
+
+# 6. Règles géopolitiques
+
+Les inférences suivantes sont interdites :
+
+- déduire un pays à partir d'un namespace ;
+- déduire une nationalité à partir d'un nom ;
+- déduire une juridiction à partir d'un domaine Internet ;
+- déduire une géographie à partir d'une forge logicielle ;
+- déduire un risque géopolitique à partir de la langue d'un projet.
+
+Les futurs constats géopolitiques devront être fondés uniquement sur des relations documentées et vérifiables.
+
+---
+
+# 7. État d'avancement
+
+## Sprint 1 — Canonical Layer
+
+### Statut
+
+✅ Terminé
+
+### Livré
+
+- Import CycloneDX JSON
+- Composants
+- Services
+- Dépendances
+- Licences
+- Identifiants
+- Références externes
+- Graphe de dépendances
+- Compatibilité du scoring historique
+
+---
+
+## Sprint 2 — Foundation Layer (Lot A)
+
+### Statut
+
+✅ Terminé
+
+### Livré
+
+- ComponentEnrichment
+- Evidence
+- Assertion
+- Conflict
+- Decision
+- Moteur de confiance déterministe
+- Versionnement
+- Auditabilité
+- Trust Boundary
+
+Date de clôture :
+19 Octobre 2026
+
+---
+
+## Sprint 3 — Identity Resolution (Lot B)
+
+### Statut
+
+🟡 En cours
+
+### Objectif
+
+Identifier de manière fiable un package logiciel à partir d'un composant SBOM.
+
+### B-01 — PackageIdentity & Maven Extraction
+
+✅ Développé  
+🟡 En revue / validation
+
+Livrables :
+
+- extraction Maven depuis le modèle canonique ;
+- extraction depuis PURL ;
+- extraction depuis group + name + version ;
+- création de PackageIdentity ;
+- identityKey indépendante de la version ;
+- compatibilité Lot A ;
+- fonctionnement hors réseau ;
+- non-mutation du SBOM canonique.
+
+### B-02 — PURL Validation & Normalization
+
+⬜ À faire
+
+Objectifs :
+
+- validation PURL ;
+- reconstruction contrôlée ;
+- normalisation Maven.
+
+### B-03 — Maven Central Resolution
+
+⬜ À faire
+
+Objectifs :
+
+- vérification package ;
+- vérification version ;
+- collecte de métadonnées observées ;
+- génération de preuves observées.
+
+### B-04 — Multi-Ecosystem Identity Resolution
+
+⬜ À faire
+
+Écosystèmes :
+
+- npm ;
+- PyPI ;
+- NuGet ;
+- crates.io ;
+- Go Packages.
+
+---
+
+# 8. Roadmap
+
+## Lot C — Project Resolution
+
+Statut : ⬜
+
+Objectif :
+
+Package → Project
+
+Exemples :
+
+spring-core → Spring Framework
+
+log4j-core → Apache Log4j
+
+Livrables :
+
+- Package → Project
+- Project → Repository
+- Monorepos
+- Forks
+- Miroirs
+
+---
+
+## Lot D — Technical Metadata
+
+Statut : ⬜
+
+- Langages
+- Licences
+- SPDX
+- Conflits de licences
+
+---
+
+## Lot E — Governance Layer
+
+Statut : ⬜
+
+- Organization
+- Foundation
+- Maintainer
+- Relations de gouvernance
+
+---
+
+## Lot F — Geographic Facts
+
+Statut : ⬜
+
+- CountryRelationship
+- Juridictions
+- Hébergement
+- Localisation documentée
+
+---
+
+## Lot G — Trust Events
+
+Statut : ⬜
+
+- Acquisition
+- Changement de propriétaire
+- Changement de gouvernance
+- Changement de licence
+- Incident supply chain
+- Compromission
+
+---
+
+## Lot H — Trust Analysis
+
+Statut : ⬜
+
+- TrustAssessment
+- Gouvernance
+- Supply Chain
+- Concentration
+- Géopolitique
+- Dépendances critiques
+- Score de confiance sur 100
+
+---
+
+# 9. Architecture cible
+
+```text
+SBOM
+↓
+Canonical Model
+↓
+ComponentEnrichment
+↓
+Package Identity Resolution
+↓
+Project Resolution
+↓
+Governance Resolution
+↓
+Geographic Facts
+↓
+Trust Events
+↓
+Trust Assessment
+↓
+COMEX Reporting
