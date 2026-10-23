@@ -76,7 +76,7 @@ function linkPackageIdentity(registry,{relationId,packageIdentityId,projectId,ev
 }
 function getProjectIdentity(registry,projectId){validateProjectIdentitySnapshot(registry);return registry.projects.find(p=>p.id===projectId)||null;}
 function findLinksForPackageIdentity(registry,packageIdentityId){validateProjectIdentitySnapshot(registry);check(nonempty(packageIdentityId),'invalid packageIdentityId');return freeze(registry.links.filter(l=>l.packageIdentityId===packageIdentityId));}
-function exportProjectIdentitySnapshot(registry){validateProjectIdentitySnapshot(registry);return canonical.canonicalJSON(ordered(registry).snapshotDigest?registry:seal(registry));}
+function exportProjectIdentitySnapshot(registry){validateProjectIdentitySnapshot(registry);return canonical.canonicalJSON(registry);}
 function importProjectIdentitySnapshot(json){check(typeof json==='string','project snapshot JSON required');const value=JSON.parse(json);validateProjectIdentitySnapshot(value);return seal(copy(value));}
 return Object.freeze({PROJECT_POLICY_VERSION,createProjectIdentityRegistry,allocateProjectIdentity,linkPackageIdentity,getProjectIdentity,findLinksForPackageIdentity,exportProjectIdentitySnapshot,importProjectIdentitySnapshot,validateProjectIdentitySnapshot});
 });
