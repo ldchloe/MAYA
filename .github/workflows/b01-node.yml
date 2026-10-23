@@ -1,7 +1,7 @@
 name: B-01 Node validation
 on:
   push:
-    branches: [feature/component-enrichment]
+    branches: [main, feature/component-enrichment]
   pull_request:
 jobs:
   test:
