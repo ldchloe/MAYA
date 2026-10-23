@@ -380,6 +380,9 @@ PR d'intégration : https://github.com/ldchloe/MAYA/pull/25 (**fusionnée**). CI
 
 ### Limites connues
 
+- **Compatibilité PURL Maven partielle :** des qualifiers comme `?type=jar` sont rejetés (`INVALID_MAVEN_PURL`) ; les déclarations natives contradictoires restent non sélectionnées (`INCOMPATIBLE_DECLARATIONS`). Ces écarts ont été observés pendant B-06 ; aucun correctif Maven n'est prévu dans la clôture.
+- Extraction conservatrice des URL POM : données absentes ou POM complexes peuvent laisser des liens inconnus ; les URL observées ne valent pas preuve d'officialité.
+- SHA-256 prouve l'intégrité locale du contenu archivé, pas son authenticité d'origine.
 - Périmètre livré : **Maven uniquement**. npm, PyPI, NuGet, crates.io et Go ne font pas partie de ce MVP.
 - B-06 vérifie un composant Maven représentatif par SBOM, pas chaque composant.
 - Backend d'archive **mémoire** dans la recette ; persistance durable non démontrée.
