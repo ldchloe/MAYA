@@ -10,7 +10,7 @@ const lotA=require('../js/enrichment-model.js');
 const samples=[
  {name:'Apache Camel Kamelets',file:'b06-apache-camel-kamelets.json',purl:'pkg:maven/com.amazon.redshift/redshift-jdbc42@2.3.0'},
  {name:'SCANOSS Java',file:'b06-scanoss-java.json',purl:'pkg:maven/junit/junit',version:'4.13.1'},
- {name:'Content Sources Backend',file:'b06-content-sources.json',purl:'pkg:maven/org.springframework/spring-core@5.3.20'}
+ {name:'Europeana Corelib',file:'b06-europeana-corelib.json',purl:'pkg:maven/junit/junit@4.13.2'}
 ];
 for(const sample of samples)test('B-06 real SBOM: '+sample.name, {timeout:60000},async t=>{
  const file=path.join(__dirname,'fixtures',sample.file);
