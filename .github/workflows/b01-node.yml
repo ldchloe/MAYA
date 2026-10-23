@@ -1,0 +1,25 @@
+name: B-01 Node validation
+on:
+  push:
+    branches: [feature/component-enrichment]
+  pull_request:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax identity-purl
+        run: node --check js/identity-purl.js
+      - name: Syntax identity-mvp
+        run: node --check js/identity-mvp.js
+      - name: Maven tests
+        run: node --test tests/identity-maven.test.js
+      - name: Complete suite
+        run: node --test tests/*.test.js
+      - name: Diff whitespace
+        run: git diff --check HEAD^ HEAD
