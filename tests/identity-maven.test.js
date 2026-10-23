@@ -241,3 +241,59 @@ test('B-01 unversioned native coordinates do not query Maven Central',async()=>{
  assert.equal(result.result.status,'Unknown');
  assert.equal(result.observations.length,0);
 });
+
+
+const {createMavenCentralProvider: createB03Provider}=require('../js/identity-maven-provider.js');
+const b03Identity={ecosystem:'maven',namespace:'org.springframework',name:'spring-core'};
+function b03Provider(response){
+ return createB03Provider({now:()=> '2026-10-23T00:00:00.000Z',fetchImpl:async()=>response});
+}
+test('B-03 package Found acquisition and interpretation',async()=>{
+ const provider=b03Provider({status:200,text:async()=>'<metadata><groupId>org.springframework</groupId><artifactId>spring-core</artifactId></metadata>'});
+ const a=await provider.checkPackage(b03Identity);
+ assert.equal(a.scope,'Package');
+ assert.equal(a.query.version,null);
+ assert.equal(interpretMaven(a,{...b03Identity,key:'maven:org.springframework:spring-core'},'a').outcome,'Found');
+});
+test('B-03 version Found acquisition and interpretation',async()=>{
+ const provider=b03Provider({status:200,text:async()=>'<project><groupId>org.springframework</groupId><artifactId>spring-core</artifactId><version>6.1.3</version></project>'});
+ const a=await provider.checkVersion(b03Identity,'6.1.3');
+ assert.equal(a.scope,'Version');
+ assert.equal(a.query.version,'6.1.3');
+ assert.equal(interpretMaven(a,{...b03Identity,version:'6.1.3',key:'maven:org.springframework:spring-core'},'b').outcome,'Found');
+});
+test('B-03 package and version 404 are separately scoped negative observations',async()=>{
+ const provider=b03Provider({status:404,text:async()=>''});
+ const p=await provider.checkPackage(b03Identity);
+ const v=await provider.checkVersion(b03Identity,'6.1.3');
+ const identity={...b03Identity,version:'6.1.3',key:'maven:org.springframework:spring-core'};
+ assert.equal(interpretMaven(p,identity,'p').outcome,'NotFoundObserved');
+ assert.equal(interpretMaven(v,identity,'v').outcome,'NotFoundObserved');
+ assert.equal(p.query.version,null);
+ assert.equal(v.query.version,'6.1.3');
+});
+test('B-03 timeout and network errors never become package absence',async()=>{
+ for(const [error,expected] of [[Object.assign(new Error('abort'),{name:'AbortError'}),'Timeout'],[new Error('offline'),'NetworkError']]){
+  const provider=createB03Provider({now:()=> '2026-10-23T00:00:00Z',fetchImpl:async()=>{throw error;}});
+  const a=await provider.checkPackage(b03Identity);
+  assert.equal(a.transport,expected);
+  assert.equal(interpretMaven(a,{...b03Identity,key:'maven:org.springframework:spring-core'},'err').outcome,expected);
+ }
+});
+test('B-03 429 and 5xx remain technical failures',async()=>{
+ for(const [status,expected] of [[429,'RateLimited'],[500,'ProviderUnavailable'],[503,'ProviderUnavailable']]){
+  const a=await b03Provider({status,text:async()=>''}).checkPackage(b03Identity);
+  assert.equal(a.transport,expected);
+  assert.notEqual(interpretMaven(a,{...b03Identity,key:'maven:org.springframework:spring-core'},'http').outcome,'NotFoundObserved');
+ }
+});
+test('B-03 invalid XML is not Found or NotFoundObserved',async()=>{
+ const a=await b03Provider({status:200,text:async()=>'<metadata><groupId>wrong</groupId></metadata>'}).checkPackage(b03Identity);
+ assert.equal(interpretMaven(a,{...b03Identity,key:'maven:org.springframework:spring-core'},'xml').outcome,'InvalidResponse');
+});
+test('B-03 missing version never triggers a version request',async()=>{
+ const provider=b03Provider({status:200,text:async()=>''});
+ await assert.rejects(()=>provider.checkVersion(b03Identity,undefined),/version required/);
+ const a=await provider.checkPackage(b03Identity);
+ assert.equal(a.scope,'Package');
+});
