@@ -1,0 +1,587 @@
+# MAYA – Vision, Architecture & Project Status
+Version : 23 Octobre 2026
+
+---
+
+# 1. Vision
+
+MAYA est une plateforme d'analyse de confiance du patrimoine logiciel.
+
+L'objectif est de partir d'un SBOM (CycloneDX ou SPDX) afin de produire une analyse explicable, auditable et reproductible :
+
+- des risques techniques ;
+- des risques de gouvernance ;
+- des risques supply chain ;
+- des risques géopolitiques ;
+- des dépendances critiques.
+
+L'approche est européano-centrée et vise à mettre en évidence les dépendances vis-à-vis :
+
+- d'organisations ;
+- de juridictions ;
+- d'infrastructures ;
+- d'acteurs extra-européens.
+
+Toutes les analyses doivent être fondées sur :
+
+- des preuves consultables ;
+- des données sourcées ;
+- des règles explicites ;
+- des décisions reproductibles.
+
+MAYA ne doit jamais confondre :
+
+- les faits observés ;
+- les preuves ;
+- les assertions ;
+- les décisions ;
+- les interprétations ;
+- les scores.
+
+---
+
+# 2. ADR (Architecture Decision Records)
+
+## ADR-01
+
+Le SBOM canonique est séparé de toute donnée enrichie.
+
+## ADR-02
+
+Toute assertion repose sur au moins une preuve.
+
+## ADR-03
+
+Les entités Package, Project, Repository, Organization et Foundation sont distinctes.
+
+## ADR-04
+
+Aucune entité ne doit être fusionnée sur la seule similarité des noms.
+
+## ADR-05
+
+La collecte externe est réalisée hors navigateur et produit un enrichissement versionné.
+
+## ADR-06
+
+Aucune propagation automatique de pays, juridiction ou géographie.
+
+## ADR-07
+
+Les états Unknown et Conflicted sont considérés comme des résultats valides.
+
+## ADR-08
+
+Toutes les décisions doivent être auditables, explicables et reproductibles.
+
+---
+
+# 3. Modèle canonique
+
+Le modèle canonique représente fidèlement le contenu du SBOM sans enrichissement externe.
+
+## Entités principales
+
+### SbomDocument
+
+- contenu original ;
+- empreinte SHA-256 ;
+- format ;
+- version ;
+- métadonnées ;
+- rapport d'import.
+
+### SbomComponent
+
+- nom ;
+- version ;
+- type ;
+- groupe ;
+- licences ;
+- identifiants ;
+- propriétés ;
+- données source.
+
+### SbomService
+
+- endpoints ;
+- provider ;
+- trust boundary ;
+- métadonnées ;
+- références externes.
+
+### SbomDependency
+
+- composant → composant ;
+- composant → service ;
+- service → composant ;
+- service → service.
+
+### SbomIdentifier
+
+- PURL ;
+- CPE ;
+- bom-ref ;
+- SPDX ID ;
+- autres identifiants.
+
+### SbomLicense
+
+- licence déclarée ;
+- licence conclue ;
+- expressions SPDX ;
+- références.
+
+### SbomExternalReference
+
+- repository ;
+- documentation ;
+- VCS ;
+- distribution ;
+- issue tracker ;
+- références diverses.
+
+## Principe fondamental
+
+Le modèle canonique est immuable.
+
+Aucune donnée enrichie ne modifie le contenu d'origine.
+
+---
+
+# 4. Modèle d'enrichissement
+
+## ComponentEnrichment
+
+Point d'entrée principal du modèle d'enrichissement.
+
+Associe à un composant :
+
+- PackageIdentity ;
+- Project ;
+- Repository ;
+- preuves ;
+- assertions ;
+- conflits ;
+- décisions.
+
+## PackageIdentity
+
+Représente une identité technique de package indépendante de sa version.
+
+Exemples :
+
+- maven:org.springframework:spring-core
+- maven:org.apache.logging.log4j:log4j-core
+- maven:junit:junit
+
+### Statut
+
+✅ Implémenté et validé.
+
+## Project
+
+Représente un projet logiciel.
+
+Exemples :
+
+- Spring Framework
+- Apache Log4j
+- JUnit
+- Kubernetes
+
+Un projet peut produire plusieurs packages.
+
+## Repository
+
+Représente un dépôt source.
+
+Le repository n'est pas automatiquement officiel.
+
+## Evidence
+
+Types :
+
+- declarative ;
+- observed ;
+- verified ;
+- derived.
+
+Les preuves sont immuables.
+
+## Assertion
+
+Affirmation vérifiable reposant sur une ou plusieurs preuves.
+
+## Conflict
+
+Conserve les contradictions.
+
+## Decision
+
+Journalise les sélections, les rejets et leur justification.
+
+---
+
+# 5. Invariants
+
+## INV-01
+
+Le document canonique n'est jamais modifié.
+
+## INV-02
+
+Chaque enrichissement référence un composant existant.
+
+## INV-03
+
+Toute assertion possède au moins une preuve valide.
+
+## INV-04
+
+Une preuve créée ne peut plus être modifiée.
+
+## INV-05
+
+Les conflits sont conservés.
+
+## INV-06
+
+Les informations inconnues restent null.
+
+## INV-07
+
+Les décisions sont reproductibles.
+
+## INV-08
+
+Les identifiants sont uniques.
+
+## INV-09
+
+Aucune association n'est créée sur une simple similarité de nom.
+
+## INV-10
+
+Aucun score de gouvernance, supply chain ou géopolitique n'est produit sans données explicites.
+
+## INV-11
+
+Le scoring historique reste inchangé.
+
+## INV-12
+
+Le socle d'enrichissement fonctionne sans accès réseau.
+
+---
+
+# 6. État d'avancement
+
+## Sprint 1 — Canonical Layer
+
+### Statut
+
+✅ Terminé
+
+### Livré
+
+- Import CycloneDX JSON
+- Composants
+- Services
+- Dépendances
+- Licences
+- Identifiants
+- Références externes
+- Graphe de dépendances
+- Compatibilité scoring historique
+
+---
+
+## Sprint 2 — Foundation Layer (Lot A)
+
+### Statut
+
+✅ Terminé
+
+### Livré
+
+- ComponentEnrichment
+- Evidence
+- Assertion
+- Conflict
+- Decision
+- Versionnement
+- Auditabilité
+- Trust Boundary
+
+Date de clôture :
+
+19 octobre 2026
+
+---
+
+## Sprint 3 — Identity Resolution (Lot B)
+
+### Statut
+
+✅ Terminé
+
+### Date de clôture
+
+23 octobre 2026
+
+### Livrables
+
+#### B-01 — PackageIdentity & Maven Extraction
+
+✅ Livré
+
+#### B-02 — PURL Validation & Normalization
+
+✅ Livré
+
+#### B-03 — Maven Central Resolution
+
+✅ Livré
+
+#### B-04 — Maven Observation & Archiving
+
+✅ Livré
+
+#### B-05 — Intégration Lot A
+
+✅ Livré
+
+#### B-06 — Validation opérationnelle
+
+✅ Livré
+
+### Validation démontrée
+
+✅ Maven Central réel
+
+✅ Archivage SHA-256
+
+✅ Evidence
+
+✅ Assertion
+
+✅ Decision
+
+✅ Rejeu hors réseau
+
+✅ Non-mutation du SBOM
+
+✅ Intégration Lot A
+
+### Corpus opérationnel validé
+
+| Projet SBOM | Composant Maven validé | Résultat |
+|------------|------------|------------|
+| Apache Camel Kamelets | com.amazon.redshift:redshift-jdbc42:2.3.0 | ✅ Resolved |
+| SCANOSS Java | junit:junit:4.13.1 | ✅ Resolved |
+| Europeana Corelib | junit:junit:4.13.2 | ✅ Resolved |
+
+### Références
+
+- Rapport officiel de clôture Lot B
+- Validation B-06
+- CI intégrée sur main
+
+Le Lot B est officiellement clôturé.
+
+---
+
+# 7. Limites connues du Lot B
+
+### Compatibilité PURL Maven
+
+Partielle sur certains qualifiers atypiques.
+
+Exemple :
+
+```text
+?type=jar
+```
+
+### Déclarations incompatibles
+
+Certaines métadonnées Maven contradictoires sont volontairement rejetées.
+
+### Archivage
+
+Les tests utilisent un backend mémoire.
+
+### Métadonnées POM
+
+Extraction volontairement conservative des URL SCM, Homepage et Repository.
+
+---
+
+# 8. Roadmap
+
+## Lot C — Project Resolution
+
+### Statut
+
+🟡 Démarrage
+
+### Objectif
+
+Répondre à :
+
+```text
+PackageIdentity
+↓
+Project
+```
+
+Exemples :
+
+```text
+maven:org.springframework:spring-core
+↓
+Spring Framework
+
+maven:org.apache.logging.log4j:log4j-core
+↓
+Apache Log4j
+
+maven:junit:junit
+↓
+JUnit
+```
+
+### Ticket actif
+
+C-01
+
+PackageIdentity → Project à partir des observations Maven archivées.
+
+### Hors périmètre
+
+- Repository officiel
+- Organization
+- Foundation
+- Governance
+- Geographic Facts
+- Trust Analysis
+
+---
+
+## Lot D — Technical Metadata
+
+⬜ Non démarré
+
+---
+
+## Lot E — Governance Layer
+
+⬜ Non démarré
+
+---
+
+## Lot F — Geographic Facts
+
+⬜ Non démarré
+
+---
+
+## Lot G — Trust Events
+
+⬜ Non démarré
+
+---
+
+## Lot H — Trust Analysis
+
+⬜ Non démarré
+
+---
+
+# 9. Architecture validée
+
+```text
+SBOM
+↓
+Canonical Model
+↓
+ComponentEnrichment
+↓
+Package Identity Resolution
+↓
+Project Resolution
+↓
+Governance Resolution
+↓
+Geographic Facts
+↓
+Trust Events
+↓
+Trust Assessment
+↓
+COMEX Reporting
+```
+
+---
+
+# 10. Priorité actuelle
+
+## Priorité n°1
+
+C-01 :
+
+```text
+PackageIdentity
+↓
+Project
+```
+
+## Priorité n°2
+
+Valider les premiers cas réels :
+
+```text
+spring-core
+↓
+Spring Framework
+
+log4j-core
+↓
+Apache Log4j
+
+junit
+↓
+JUnit
+```
+
+## Priorité n°3
+
+Conserver le modèle probatoire du Lot A :
+
+```text
+Evidence
+↓
+Assertion
+↓
+Decision
+```
+
+pour chaque relation Package → Project.
+
+---
+
+# Statut global
+
+| Domaine | Statut |
+|----------|---------|
+| Canonical Layer | ✅ |
+| Foundation Layer | ✅ |
+| Lot B MVP Maven | ✅ |
+| Validation opérationnelle | ✅ |
+| Lot C | 🟡 Démarrage |
+| Lots D à H | ⬜ |
+
+Le Lot B est clôturé.
+
+Le chantier principal de MAYA devient désormais le Lot C : PackageIdentity → Project.
