@@ -55,5 +55,5 @@ for(const x of d.decisions){if(x.selectedAssertionId!==null)ref('assertions',x.s
 for(const c of d.componentEnrichments){for(const [field,predicate] of [['selectedProjectId','mapsToProject'],['selectedRepositoryId','officialRepository']])if(c[field]!==null){const decisions=d.decisions.filter(x=>d.activeDecisionIds.includes(x.id)&&x.subjectId===c.id&&x.predicate===predicate);check(decisions.length===1&&decisions[0].conflictIds.length===0&&decisions[0].selectedAssertionId!==null,'selected entity needs active decision');}}
 
 return true;}
-return {SCHEMA_VERSION,STATES,KINDS,copy,freeze,validateDataset,validateEvidence,validateAssertion,validateRelation,validateVerification,validateEvidenceScope,check};
+return {SCHEMA_VERSION,STATES,KINDS,copy,freeze,validateDataset,validateEvidence,validateAssertion,validateDecision,validateRelation,validateVerification,validateEvidenceScope,check};
 });
