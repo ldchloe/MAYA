@@ -174,7 +174,7 @@ test('unscored policy input is permitted but persisted assertion still requires 
  assert.throws(()=>model.validateAssertion({id:'a',subjectType:'componentEnrichment',subjectId:'x',predicate:'p',value:'v',evidenceIds:['e'],status:'unknown',conflictIds:[],policyVersion:'1.0.0'}),/confidence/);
 });
 
-\n// B-01: exercise the actual canonical CycloneDX importer, not guessed component shapes.
+// B-01: exercise the actual canonical CycloneDX importer, not guessed component shapes.
 const {importCycloneDxJson}=require('../js/cyclonedx-json.js');
 const {extractMavenCoordinates,createPackageIdentity}=require('../js/identity-purl.js');
 function canonicalComponent(raw){
