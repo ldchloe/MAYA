@@ -1,4 +1,8 @@
-/* C-01.1A: offline ProjectIdentity allocation and explicit package links. No Project selection. */
+/* C-01.1A: offline ProjectIdentity allocation and explicit package links. No Project selection.
+ * Opaque IDs are allocated externally and recorded explicitly, never derived here from
+ * names, URLs, namespaces, PURLs, Maven coordinates, forges or similarity.
+ * The caller is responsible for proving the independent attribution provenance.
+ */
 (function(root,factory){
  const canonical=typeof module==='object'&&module.exports?require('./enrichment-canonical.js'):root.MayaEnrichmentCanonical;
  const api=factory(canonical);
