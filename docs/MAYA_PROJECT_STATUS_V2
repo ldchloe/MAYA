@@ -357,7 +357,7 @@ Date de clôture :
 
 ✅ Terminé — MVP Maven (B-01 à B-04, validations B-05 et B-06)
 
-**Date de clôture technique : 23 octobre 2026.** Fusion vers `main` encore à effectuer : PR #25. La clôture de développement et de validation ne signifie pas que la révision est déjà fusionnée.
+**Date de clôture officielle : 23 octobre 2026.** PR #25 fusionnée dans `main` (commit `da62cf5b6ee592112006685d2cea86b1f7547b22`). CI Node post-fusion réussie sur `main` (58/58 Maven, 167/167 tests complets).
 
 ### Objectif
 
@@ -376,7 +376,7 @@ Identifier de manière fiable un package Maven depuis un composant SBOM CycloneD
 
 Révision intégrée `b0e71304e6ad6f22c53e3cc7e82fc9c68dac128c` : **58/58 tests Maven et 167/167 tests complets**, zéro échec. Exécution : https://github.com/ldchloe/MAYA/actions/runs/39932158374
 
-PR d'intégration : https://github.com/ldchloe/MAYA/pull/25 (cible `main`). Issues de validation #19 et #20 clôturées.
+PR d'intégration : https://github.com/ldchloe/MAYA/pull/25 (**fusionnée**). CI `main` : https://github.com/ldchloe/MAYA/actions/runs/39941824219. Issues #15 à #20 et issue parente #7 clôturées ; PR #21 à #24 fermées sans fusion car intégrées dans #25.
 
 ### Limites connues
 
@@ -392,9 +392,9 @@ PR d'intégration : https://github.com/ldchloe/MAYA/pull/25 (cible `main`). Issu
 - Revoir le workflow nommé `b01-node.yml` et son déclenchement `push` limité à une branche historique.
 - Conserver les journaux B-06 et les empreintes des fixtures pour audit.
 
-### Condition de clôture Git
+### Clôture Git
 
-Fusionner la PR #25 vers `main` après revue finale et contrôle des protections de branche. Le statut « Terminé » désigne ici le lot **techniquement livré et validé**, non une fusion déjà réalisée.
+**Réalisée** : PR #25 fusionnée vers `main`, workflow Node activé sur `main` et suite complète verte. Lot C non implémenté ; issue de préparation #26 uniquement.
 
 ---
 
