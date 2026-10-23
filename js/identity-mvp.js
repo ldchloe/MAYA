@@ -52,8 +52,9 @@ function validateInput(component,componentId,decidedAt){
 async function resolveArchived({component,componentId,archive,archiveRefs,decidedAt}){
  validateInput(component,componentId,decidedAt);
  if(!archive||typeof archive.load!=='function'||!Array.isArray(archiveRefs))throw new Error('archive and archiveRefs required');
- const coordinates=purl.extractMavenCoordinates(component);
- const identity=coordinates?Object.freeze({...coordinates.identity,version:coordinates.version,purl:coordinates.purl}):null;
+ const normalized=purl.normalizeMavenComponent(component);
+ const coordinates=(normalized.status==='valid'||normalized.status==='reconstructed')?purl.extractMavenCoordinates(component):null;
+ const identity=coordinates?Object.freeze({...coordinates.identity,version:coordinates.version,purl:normalized.normalizedPurl||normalized.reconstructedPurl,declaredPurl:normalized.declaredPurl,normalizedPurl:normalized.normalizedPurl,reconstructedPurl:normalized.reconstructedPurl,origin:normalized.origin}):null;
  if(!identity)return Object.freeze({identity:null,observation:null,observations:[],evidence:[],assertions:[],evidenceRelations:[],verifications:[],conflicts:[],decisions:[],result:engine.decide({identity:null})});
  const subjectId='identity-component:'+canonical.digest({componentId,packageKey:identity.key});
  const observations=[],evidence=[],assertions=[],evidenceRelations=[],verifications=[];
@@ -96,8 +97,9 @@ async function resolveArchived({component,componentId,archive,archiveRefs,decide
 }
 async function resolveComponent({component,componentId,provider,archive,decidedAt}){
  validateInput(component,componentId,decidedAt);
- const coordinates=purl.extractMavenCoordinates(component);
- const identity=coordinates?Object.freeze({...coordinates.identity,version:coordinates.version,purl:coordinates.purl}):null;
+ const normalized=purl.normalizeMavenComponent(component);
+ const coordinates=(normalized.status==='valid'||normalized.status==='reconstructed')?purl.extractMavenCoordinates(component):null;
+ const identity=coordinates?Object.freeze({...coordinates.identity,version:coordinates.version,purl:normalized.normalizedPurl||normalized.reconstructedPurl,declaredPurl:normalized.declaredPurl,normalizedPurl:normalized.normalizedPurl,reconstructedPurl:normalized.reconstructedPurl,origin:normalized.origin}):null;
  if(!identity||!identity.version)return resolveArchived({component,componentId,archive:archive||{load:async()=>{throw new Error('no archived observations');}},archiveRefs:[],decidedAt});
  if(!provider||typeof provider.acquire!=='function'||!archive||typeof archive.store!=='function')throw new Error('provider and archive required');
  const acquisition=await provider.acquire(identity);
