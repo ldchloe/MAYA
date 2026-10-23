@@ -1,7 +1,8 @@
 name: B-01 Node validation
 on:
   push:
-    branches: [main, feature/component-enrichment]
+    branches: [main, feature/component-enrichment, feature/c01-project-identity-foundation]
+  workflow_dispatch:
   pull_request:
 jobs:
   test:
@@ -19,7 +20,11 @@ jobs:
         run: node --check js/identity-mvp.js
       - name: Maven tests
         run: node --test tests/identity-maven.test.js
+      - name: Deterministic suite (offline C-01.1A)
+        if: github.ref == 'refs/heads/feature/c01-project-identity-foundation'
+        run: node --test $(find tests -maxdepth 1 -name '*.test.js' ! -name 'b06-*.test.js' | sort)
       - name: Complete suite
+        if: github.ref != 'refs/heads/feature/c01-project-identity-foundation'
         run: node --test tests/*.test.js
       - name: Diff whitespace
         run: git diff --check HEAD^ HEAD
