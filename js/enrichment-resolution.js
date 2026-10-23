@@ -4,7 +4,7 @@
 const POLICY_VERSION='1.0.0',ENGINE_VERSION='2.0.0';
 function level(score){model.check(typeof score==='number'&&Number.isFinite(score)&&score>=0&&score<=1,'invalid confidence');return score>=.95?'verified':score>=.8?'high':score>=.6?'moderate':score>0?'low':'unknown';}
 function evaluateEvidence(assertion,evidence,relations,verifications=[],componentEnrichments=[]){
- model.validateAssertion(assertion);const byId=new Map(evidence.map(e=>{model.validateEvidence(e);return [e.id,e];}));
+ model.validateAssertion(assertion,{computedConfidenceRequired:false});const byId=new Map(evidence.map(e=>{model.validateEvidence(e);return [e.id,e];}));
  const relevant=relations.filter(r=>r.assertionId===assertion.id);for(const r of relevant){model.validateRelation(r);model.check(byId.has(r.evidenceId),'missing evidence '+r.evidenceId);model.check(r.subjectId===assertion.subjectId&&r.predicate===assertion.predicate,'relation assertion scope mismatch');const e=byId.get(r.evidenceId);model.validateEvidenceScope(assertion,e,r,componentEnrichments);}
  model.check(relevant.some(r=>r.relation==='supports'),'assertion without supports relation');
  model.check(canonical.canonicalJSON(relevant.map(r=>r.evidenceId).sort())===canonical.canonicalJSON([...assertion.evidenceIds].sort()),'assertion evidence relation mismatch');
