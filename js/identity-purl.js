@@ -49,5 +49,47 @@ function extractMavenCoordinates(component){
  const coordinates={namespace:group,name,version:nativeVersion?version:null};
  return Object.freeze({...coordinates,identity:createPackageIdentity(coordinates),purl:null,source:'native'});
 }
-return Object.freeze({extractMavenPurl,extractMavenCoordinates,createPackageIdentity});
+// B-02 is deliberately Maven-only. Declared input is never rewritten.
+function normalizeMavenPurl(coordinates){
+ if(!coordinates||!valid(coordinates.namespace)||!valid(coordinates.name))return null;
+ const version=coordinates.version===undefined||coordinates.version===null||coordinates.version===''?null:coordinates.version;
+ if(version!==null&&!valid(version))return null;
+ const base=createPackageIdentity(coordinates).canonicalPurl;
+ return base+(version===null?'':'@'+encodeURIComponent(version));
+}
+function validateMavenPurl(value){
+ if(typeof value!=='string'||!value.startsWith('pkg:maven/'))
+  return Object.freeze({status:'invalid',reason:'NOT_MAVEN_PURL',coordinates:null,normalizedPurl:null});
+ const parsed=parseMavenPurl(value,true);
+ if(!parsed)return Object.freeze({status:'invalid',reason:'INVALID_MAVEN_PURL',coordinates:null,normalizedPurl:null});
+ return Object.freeze({status:'valid',reason:null,coordinates:Object.freeze(parsed),normalizedPurl:normalizeMavenPurl(parsed)});
+}
+function normalizeMavenComponent(component){
+ const declaredPurl=component&&typeof component.purl==='string'?component.purl:null;
+ const nativeGroup=component&&component.group;
+ const nativeName=component&&component.name;
+ const nativeVersion=component&&component.version;
+ const hasGroup=typeof nativeGroup==='string'&&nativeGroup.length>0;
+ const hasName=typeof nativeName==='string'&&nativeName.length>0;
+ const hasVersion=typeof nativeVersion==='string'&&nativeVersion.length>0;
+ const nativeValid=hasGroup&&hasName&&valid(nativeGroup)&&valid(nativeName)&&(!hasVersion||valid(nativeVersion));
+ const native= nativeValid?{namespace:nativeGroup,name:nativeName,version:hasVersion?nativeVersion:null}:null;
+ const parsed=declaredPurl!==null?validateMavenPurl(declaredPurl):null;
+ const empty=(status,reason)=>Object.freeze({status,reason,declaredPurl,normalizedPurl:null,reconstructedPurl:null,origin:null,identity:null,version:null});
+ if(parsed&&parsed.status!=='valid')return empty('invalid',parsed.reason);
+ if(parsed){
+  const c=parsed.coordinates;
+  if((hasGroup&&nativeGroup!==c.namespace)||(hasName&&nativeName!==c.name)||
+     (hasVersion&&c.version!==null&&nativeVersion!==c.version))
+   return empty('conflicted','INCOMPATIBLE_DECLARATIONS');
+  if((hasGroup&&!valid(nativeGroup))||(hasName&&!valid(nativeName))||(hasVersion&&!valid(nativeVersion)))
+   return empty('invalid','INVALID_NATIVE_COORDINATES');
+  const version=c.version===null&&hasVersion?nativeVersion:c.version;
+  const identity=createPackageIdentity(c);
+  return Object.freeze({status:'valid',reason:null,declaredPurl,normalizedPurl:parsed.normalizedPurl,reconstructedPurl:null,origin:'declared',identity,version});
+ }
+ if(!native)return empty('insufficient','INSUFFICIENT_COORDINATES');
+ return Object.freeze({status:'reconstructed',reason:null,declaredPurl:null,normalizedPurl:null,reconstructedPurl:normalizeMavenPurl(native),origin:'native',identity:createPackageIdentity(native),version:native.version});
+}
+return Object.freeze({extractMavenPurl,extractMavenCoordinates,createPackageIdentity,validateMavenPurl,normalizeMavenPurl,normalizeMavenComponent});
 });
