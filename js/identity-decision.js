@@ -22,7 +22,7 @@ function decide({identity,observations=[],policyVersion=POLICY_VERSION}){
  const absent=version.some(x=>x.outcome==='NotFoundObserved');
  const packageAbsent=packageFacts.some(x=>x.outcome==='NotFoundObserved');
  const packageFound=packageFacts.some(x=>x.outcome==='Found');
- const conflict=(found&&absent)||(packageFound&&packageAbsent)||(found&&packageAbsent);
+ const conflict=(found&&absent)||(packageFound&&packageAbsent);
  const status=conflict?'Conflicted':found?'Resolved':'Unknown';
  const reason=conflict?'CONFLICTING_OBSERVATIONS':found?'VERSION_OBSERVED':absent?'VERSION_NOT_FOUND_OBSERVED':packageAbsent?'PACKAGE_NOT_FOUND_OBSERVED':'INSUFFICIENT_OBSERVATIONS';
  const inputDigest=canonical.digest({identity:identity?{key:identity.key,version:identity.version}:null,observations:ordered,policyVersion});
