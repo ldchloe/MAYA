@@ -11,13 +11,13 @@ function observedPomUrls(xml){
   const matches=[...body.matchAll(new RegExp('<'+tag+'\\s*>\\s*([^<]+?)\\s*<\\/'+tag+'>','g'))];
   if(matches.length!==1)return null;
   const value=matches[0][1].trim();
-  return /^https?:\\/\\/[^\\s<>"']+$/.test(value)?value:null;
+  return /^https?:\/\/[^\s<>"']+$/.test(value)?value:null;
  };
  const section=(tag)=>{
   const matches=[...xml.matchAll(new RegExp('<'+tag+'(?:\\s[^>]*)?>([\\s\\S]*?)<\\/'+tag+'>','g'))];
   return matches.length===1?matches[0][1]:'';
  };
- const withoutNested=xml.replace(/<parent\\b[^>]*>[\\s\\S]*?<\\/parent>/g,'').replace(/<dependencies\\b[^>]*>[\\s\\S]*?<\\/dependencies>/g,'').replace(/<scm\\b[^>]*>[\\s\\S]*?<\\/scm>/g,'').replace(/<issueManagement\\b[^>]*>[\\s\\S]*?<\\/issueManagement>/g,'');
+ const withoutNested=xml.replace(/<parent\b[^>]*>[\s\S]*?<\/parent>/g,'').replace(/<dependencies\b[^>]*>[\s\S]*?<\/dependencies>/g,'').replace(/<scm\b[^>]*>[\s\S]*?<\/scm>/g,'').replace(/<issueManagement\b[^>]*>[\s\S]*?<\/issueManagement>/g,'');
  const urls={homepageUrl:one(withoutNested,'url'),scmUrl:one(section('scm'),'url'),sourceRepositoryUrl:one(section('scm'),'url'),issueTrackerUrl:one(section('issueManagement'),'url')};
  return Object.fromEntries(Object.entries(urls).filter(([,v])=>v!==null));
 }
