@@ -8,7 +8,7 @@ const {resolveComponent,resolveArchived}=require('../js/identity-mvp.js');
 const canonical=require('../js/enrichment-canonical.js');
 const lotA=require('../js/enrichment-model.js');
 const samples=[
- {name:'Apache Camel Kamelets',file:'b06-apache-camel-kamelets.json',purl:'pkg:maven/org.apache.commons/commons-dbcp2@2.14.0'},
+ {name:'Apache Camel Kamelets',file:'b06-apache-camel-kamelets.json',purl:'pkg:maven/com.amazon.redshift/redshift-jdbc42@2.3.0'},
  {name:'SCANOSS Java',file:'b06-scanoss-java.json',purl:'pkg:maven/junit/junit',version:'4.13.1'},
  {name:'Content Sources Backend',file:'b06-content-sources.json',purl:'pkg:maven/org.springframework/spring-core@5.3.20'}
 ];
