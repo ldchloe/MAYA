@@ -343,7 +343,7 @@ Lot A done on Oct 19th 2026
 
 ## Lot B — Identity Resolution (MVP Maven)
 
-✅ Terminé techniquement le 23 octobre 2026 — fusion vers `main` en attente via [PR #25](https://github.com/ldchloe/MAYA/pull/25).
+✅ **Terminé et clôturé officiellement le 23 octobre 2026** — [PR #25](https://github.com/ldchloe/MAYA/pull/25) fusionnée dans `main` (`da62cf5b6ee592112006685d2cea86b1f7547b22`). CI Node post-fusion : [58/58 Maven et 167/167 tests complets](https://github.com/ldchloe/MAYA/actions/runs/39941824219). Issues #15 à #20 et #7 clôturées.
 
 - ✅ B-01 : PackageIdentity et extraction Maven depuis CycloneDX.
 - ✅ B-02 : validation, normalisation et reconstruction PURL Maven.
