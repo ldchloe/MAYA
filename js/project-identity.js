@@ -15,7 +15,7 @@ const check=(condition,message)=>{if(!condition)fail(message);};
 const copy=value=>JSON.parse(canonical.canonicalJSON(value));
 const freeze=value=>{if(value&&typeof value==='object'&&!Object.isFrozen(value)){Object.values(value).forEach(freeze);Object.freeze(value);}return value;};
 function policy(version){check(version===PROJECT_POLICY_VERSION,'unsupported project policy version');}
-function date(value){check(nonempty(value)&&!Number.isNaN(Date.parse(value)),'invalid explicit createdAt');}
+function date(value){check(typeof value==='string'&&/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$/.test(value)&&!Number.isNaN(Date.parse(value))&&new Date(value).toISOString().replace('.000Z','Z')===value.replace('.000Z','Z'),'invalid explicit createdAt');}
 function context(value){check(value!==null&&typeof value==='object'&&!Array.isArray(value),'attributionContext required');canonical.canonicalJSON(value);}
 function refs(values){check(Array.isArray(values)&&values.length>0&&values.every(x=>nonempty(x)&&/^evidence:[a-zA-Z0-9:_-]+$/.test(x))&&new Set(values).size===values.length,'invalid evidenceRefs');}
 function ordered(data){return {policyVersion:PROJECT_POLICY_VERSION,projects:[...data.projects].sort((a,b)=>a.id.localeCompare(b.id)),links:[...data.links].sort((a,b)=>a.relationId.localeCompare(b.relationId))};}
