@@ -173,3 +173,71 @@ test('unscored policy input is permitted but persisted assertion still requires 
  const model=require('../js/enrichment-model.js');
  assert.throws(()=>model.validateAssertion({id:'a',subjectType:'componentEnrichment',subjectId:'x',predicate:'p',value:'v',evidenceIds:['e'],status:'unknown',conflictIds:[],policyVersion:'1.0.0'}),/confidence/);
 });
+
+\n// B-01: exercise the actual canonical CycloneDX importer, not guessed component shapes.
+const {importCycloneDxJson}=require('../js/cyclonedx-json.js');
+const {extractMavenCoordinates,createPackageIdentity}=require('../js/identity-purl.js');
+function canonicalComponent(raw){
+ const {document,report}=importCycloneDxJson(JSON.stringify({bomFormat:'CycloneDX',specVersion:'1.5',components:[{'bom-ref':'maven-case',type:'library',...raw}]}),'b01.json');
+ assert.notEqual(report.status,'failed');
+ return document.components[0];
+}
+test('B-01 canonical Maven PURL extraction retains package and requested version',()=>{
+ const component=canonicalComponent({group:'org.springframework',name:'spring-core',version:'6.1.3',purl});
+ const extracted=extractMavenCoordinates(component);
+ assert.equal(extracted.identity.identityKey,'maven:org.springframework:spring-core');
+ assert.equal(extracted.identity.canonicalPurl,'pkg:maven/org.springframework/spring-core');
+ assert.equal(extracted.version,'6.1.3');
+ assert.equal(extracted.source,'purl');
+});
+test('B-01 canonical native group/name/version produces identity without PURL',()=>{
+ const component=canonicalComponent({group:'org.springframework',name:'spring-core',version:'6.1.3'});
+ const extracted=extractMavenCoordinates(component);
+ assert.equal(extracted.identity.key,'maven:org.springframework:spring-core');
+ assert.equal(extracted.version,'6.1.3');
+ assert.equal(extracted.source,'native');
+ assert.equal(extracted.purl,null);
+});
+test('B-01 package identity is stable across versions and missing version',()=>{
+ const a=extractMavenCoordinates(canonicalComponent({group:'org.springframework',name:'spring-core',version:'6.1.3'}));
+ const b=extractMavenCoordinates(canonicalComponent({group:'org.springframework',name:'spring-core',version:'6.1.4'}));
+ const c=extractMavenCoordinates(canonicalComponent({group:'org.springframework',name:'spring-core'}));
+ assert.deepEqual(a.identity,b.identity);
+ assert.deepEqual(b.identity,c.identity);
+ assert.equal(c.version,null);
+ assert.equal(createPackageIdentity({namespace:'org.springframework',name:'spring-core'}).key,a.identity.key);
+});
+test('B-01 canonical incomplete and non-Maven components do not invent coordinates',()=>{
+ assert.equal(extractMavenCoordinates(canonicalComponent({name:'unversioned'})),null);
+ assert.equal(extractMavenCoordinates(canonicalComponent({group:'org.springframework'})),null);
+ assert.equal(extractMavenCoordinates(canonicalComponent({name:'spring-core',purl:'pkg:npm/spring-core@1'})),null);
+});
+test('B-01 incompatible declarations are not selected or mutated',()=>{
+ const component=canonicalComponent({group:'other.group',name:'spring-core',version:'6.1.3',purl});
+ const before=JSON.stringify(component);
+ assert.equal(extractMavenCoordinates(component),null);
+ assert.equal(JSON.stringify(component),before);
+});
+test('B-01 unversioned Maven PURL extracts identity without changing legacy parser',()=>{
+ const unversioned='pkg:maven/org.springframework/spring-core';
+ const component=canonicalComponent({purl:unversioned,name:'spring-core'});
+ assert.equal(extractMavenPurl(unversioned),null);
+ const extracted=extractMavenCoordinates(component);
+ assert.equal(extracted.identity.key,'maven:org.springframework:spring-core');
+ assert.equal(extracted.version,null);
+});
+test('B-01 native canonical coordinates resolve without network and preserve SBOM',async()=>{
+ const component=canonicalComponent({group:'org.springframework',name:'spring-core',version:'6.1.3'});
+ const before=JSON.stringify(component);
+ const result=await resolveComponent({component,componentId:component.id,provider:provider(),archive:createObservationArchive(createMemoryBackend()),decidedAt:time});
+ assert.equal(result.identity.key,'maven:org.springframework:spring-core');
+ assert.equal(result.result.status,'Resolved');
+ assert.equal(JSON.stringify(component),before);
+});
+test('B-01 unversioned native coordinates do not query Maven Central',async()=>{
+ const component=canonicalComponent({group:'org.springframework',name:'spring-core'});
+ const result=await resolveComponent({component,componentId:component.id,decidedAt:time});
+ assert.equal(result.identity.key,'maven:org.springframework:spring-core');
+ assert.equal(result.result.status,'Unknown');
+ assert.equal(result.observations.length,0);
+});
