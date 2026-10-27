@@ -1,0 +1,29 @@
+name: C01 H1 one-time approved JUnit ProjectIdentity allocation
+on:
+  pull_request:
+    paths:
+      - .github/workflows/c01-h1-allocation.yml
+jobs:
+  allocate:
+    if: github.event.pull_request.number == 31 && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/c01-package-project-evidence
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Allocate H1 ProjectIdentity at actual UTC time
+        run: node scripts/c01-allocate-junit-project.js
+      - name: Verify H1 tests offline
+        run: node --test tests/c01-junit-h1-allocation.test.js
+      - name: Persist sealed independent registry snapshot on existing PR
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add fixtures/c01/junit4-project-identity.snapshot.json
+          git commit -m 'data(c01): persist H1-approved independent JUnit ProjectIdentity snapshot'
+          git push origin HEAD:feature/c01-package-project-evidence
