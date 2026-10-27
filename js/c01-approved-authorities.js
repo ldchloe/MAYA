@@ -101,7 +101,7 @@ function springRepositoryBinding(claim){
   ['spring-framework-v6.1.3-spring-core.gradle','officialModuleGitBlob'],
   ['spring-framework-v6.1.3-build.gradle','officialBuildGitBlob']
  ];
- const blob=b=>crypto.createHash('sha1').update(Buffer.concat([Buffer.from('blob '+b.length+'\\0'),b])).digest('hex');
+ const blob=b=>crypto.createHash('sha1').update(Buffer.concat([Buffer.concat([Buffer.from('blob '+b.length),Buffer.from([0])]),b])).digest('hex');
  const sources=sourceFiles.map(([file,key])=>({file,bytes:read(file),expected:c[key]}));
  for(const source of sources)if(blob(source.bytes)!==source.expected)throw Error('SPRING_H2_SOURCE_INTEGRITY');
  if(sha(sources[0].bytes)!==c.projectReadmeSha256||snapshot.projects[0].attributionContext.projectSourceSha256!==c.projectReadmeSha256||snapshot.projects[0].attributionContext.scope!=='independent-project-identity-only')throw Error('SPRING_H2_Y_INDEPENDENCE');
