@@ -2,10 +2,11 @@
 const test=require('node:test'),assert=require('node:assert/strict');
 const api=require('../js/c01-project-attribution.js');
 const project=require('../js/project-identity.js');
+const crypto=require('node:crypto');const sha=x=>crypto.createHash('sha256').update(x).digest('hex');
 const P='project:'+'a'.repeat(32),A='attribution:'+'b'.repeat(32),T='2026-01-01T00:00:00Z';
 const registry=()=>project.allocateProjectIdentity(project.createProjectIdentityRegistry(),{projectId:P,attributionId:A,createdAt:T,attributionContext:{source:'independent-allocation'},name:'JUnit',url:null});
-const archive={id:'archive:1',sha256:'a'.repeat(64),packageIdentityId:'maven:junit:junit',externalIdentityId:'external:junit',sourceRef:'archived-pom',versionScope:'4.13.2',observedValue:'junit'};
-const bridge={id:'evidence:bridge',kind:'explicit-attribution',sourceRef:'archived-independent-record',sourceDigest:'b'.repeat(64),externalIdentityId:'external:junit',projectIdentityId:P,packageIdentityId:'maven:junit:junit',versionScope:'4.13.2'};
+const archive={id:'archive:1',sha256:sha('archived junit POM'),content:'archived junit POM',packageIdentityId:'maven:junit:junit',externalIdentityId:'external:junit',sourceRef:'archived-pom',versionScope:'4.13.2',observedValue:'junit'};
+const bridge={id:'evidence:bridge',kind:'explicit-attribution',sourceRef:'archived-independent-record',sourceDigest:sha('explicit signed attribution record'),content:'explicit signed attribution record',externalIdentityId:'external:junit',projectIdentityId:P,packageIdentityId:'maven:junit:junit',versionScope:'4.13.2'};
 const dossier=(changes={})=>({packageIdentityId:'maven:junit:junit',externalIdentityId:'external:junit',projectIdentityId:P,projectSnapshot:registry(),archives:[archive],bridgeEvidence:[bridge],...changes});
 test('T51 archived external identity V-X PASS',()=>assert.equal(api.evaluate(dossier()).validation.VX,'PASS'));
 test('T52 inconsistent X FAIL',()=>assert.equal(api.evaluate(dossier({externalIdentityId:'external:other'})).validation.VX,'FAIL'));
