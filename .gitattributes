@@ -1,2 +1,3 @@
 fixtures/c01/official-p1/headers.txt binary
 fixtures/c01/official-p1/dependency-info.html binary
+fixtures/c01/spring/spring-framework-v6.1.3-readme.md whitespace=-blank-at-eol

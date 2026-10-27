@@ -56,4 +56,25 @@ function verify(corpus,expected){
  const basis={packageIdentityId:expected.packageIdentityId,projectIdentityId:expected.projectIdentityId,snapshotDigest:expected.snapshotDigest,evidenceIds:sorted.map(x=>x.id),evidenceDigests:sorted.map(x=>x.canonicalDigest)};
  return freeze({status:'BRIDGE_EVIDENCE_COMPLETE',...basis,verificationDigest:digest(basis)});
 }
-module.exports={materialize,verify};
+
+function materializeApproved(binding){
+ if(!binding||binding.status!=='APPROVED'||!Array.isArray(binding.evidence)||!Array.isArray(binding.requiredEvidenceClasses)||binding.evidence.length!==binding.requiredEvidenceClasses.length)throw Error('APPROVED_CORPUS_REQUIRED');
+ return freeze(binding.evidence.map((entry,index)=>{
+  if(entry.evidenceClass!==binding.requiredEvidenceClasses[index]||!/^sha256:[a-f0-9]{64}$/.test(entry.evidenceId)||entry.evidenceId!=='sha256:'+entry.sha256)throw Error('APPROVED_CORPUS_EVIDENCE_INVALID');
+  const body={propositionId:'S'+(index+1),evidenceClass:entry.evidenceClass,evidenceKind:'official-project-bridge-proposition',scope:binding.contractDomain,sourceType:'repository-verified-archive',sourceRef:entry.sourceRef,archiveId:entry.evidenceId,sourceDigest:entry.sha256,contentDigest:entry.sha256,packageIdentityId:binding.packageIdentityId,projectIdentityId:binding.projectIdentityId,projectSnapshotDigest:binding.projectSnapshotDigest,manifestDigest:binding.manifestDigest};
+  const canonicalDigest=digest(body);
+  return freeze({...body,id:'evidence:'+canonicalDigest,canonicalDigest});
+ }));
+}
+function verifyApproved(corpus,expected,binding){
+ const fail=status=>freeze({status,verificationDigest:null});
+ if(!binding||binding.status!=='APPROVED'||!expected||expected.packageIdentityId!==binding.packageIdentityId||expected.projectIdentityId!==binding.projectIdentityId||expected.snapshotDigest!==binding.projectSnapshotDigest)return fail('BRIDGE_EVIDENCE_INVALID');
+ let canonical;try{canonical=materializeApproved(binding);}catch{return fail('BRIDGE_EVIDENCE_INVALID');}
+ if(!Array.isArray(corpus)||corpus.length!==canonical.length)return fail('BRIDGE_EVIDENCE_INCOMPLETE');
+ const sorted=[...corpus].sort((a,b)=>String(a?.propositionId).localeCompare(String(b?.propositionId)));
+ if(sorted.some((x,i)=>digest(x)!==digest(canonical[i])))return fail('BRIDGE_EVIDENCE_INVALID');
+ const basis={packageIdentityId:expected.packageIdentityId,projectIdentityId:expected.projectIdentityId,snapshotDigest:expected.snapshotDigest,evidenceIds:sorted.map(x=>x.id),evidenceDigests:sorted.map(x=>x.canonicalDigest)};
+ return freeze({status:'BRIDGE_EVIDENCE_COMPLETE',...basis,verificationDigest:digest(basis)});
+}
+
+module.exports={materialize,verify,materializeApproved,verifyApproved};

@@ -10,11 +10,17 @@ function issue(claim){
  try{
   resolution=authority.resolveApprovedAuthority(claim);
   if(!resolution||resolution.status!=='APPROVED')return reject();
-  corpus=propositions.materialize();
-  verification=propositions.verify(corpus,{packageIdentityId:claim.packageIdentityId,projectIdentityId:claim.projectIdentityId,snapshotDigest:resolution.projectSnapshotDigest});
+  const expected={packageIdentityId:claim.packageIdentityId,projectIdentityId:claim.projectIdentityId,snapshotDigest:resolution.projectSnapshotDigest};
+  if(resolution.evidenceMode==='repository-corpus'){
+   corpus=propositions.materializeApproved(resolution);
+   verification=propositions.verifyApproved(corpus,expected,resolution);
+  }else{
+   corpus=propositions.materialize();
+   verification=propositions.verify(corpus,expected);
+  }
   if(verification.status!=='BRIDGE_EVIDENCE_COMPLETE')return reject();
  }catch{return reject();}
- const bridgeBody={kind:'repository-verified-explicit-attribution',predicate:claim.predicate,packageIdentityId:claim.packageIdentityId,externalIdentityId:claim.externalIdentityId,projectIdentityId:claim.projectIdentityId,projectSnapshotDigest:resolution.projectSnapshotDigest,manifestDigest:resolution.manifestDigest,authorityResolutionDigest:resolution.resolutionDigest,verificationDigest:verification.verificationDigest,evidenceIds:verification.evidenceIds,evidenceDigests:verification.evidenceDigests,archiveIds:corpus.map(x=>x.archiveId),tag:corpus[2].subjectId,taggedPomBlobId:corpus[2].archiveId,scope:resolution.contractDomain};
+ const bridgeBody={kind:'repository-verified-explicit-attribution',predicate:claim.predicate,packageIdentityId:claim.packageIdentityId,externalIdentityId:claim.externalIdentityId,projectIdentityId:claim.projectIdentityId,projectSnapshotDigest:resolution.projectSnapshotDigest,manifestDigest:resolution.manifestDigest,authorityResolutionDigest:resolution.resolutionDigest,verificationDigest:verification.verificationDigest,evidenceIds:verification.evidenceIds,evidenceDigests:verification.evidenceDigests,archiveIds:corpus.map(x=>x.archiveId),tag:corpus[2].subjectId||resolution.contractDomain,taggedPomBlobId:corpus[2].archiveId,scope:resolution.contractDomain};
  const bridgeEvidence=freeze({...bridgeBody,id:'bridge-evidence:'+digest(bridgeBody),bridgeEvidenceDigest:digest(bridgeBody)});
  const ruleBody={ruleId:resolution.ruleId,ruleVersion:resolution.ruleVersion,manifestDigest:resolution.manifestDigest,authorityResolutionDigest:resolution.resolutionDigest,bridgeEvidenceDigest:bridgeEvidence.bridgeEvidenceDigest,packageIdentityId:claim.packageIdentityId,projectIdentityId:claim.projectIdentityId,projectSnapshotDigest:resolution.projectSnapshotDigest,predicate:claim.predicate,evidenceIds:verification.evidenceIds,evidenceDigests:verification.evidenceDigests,scope:resolution.contractDomain};
  const rule=freeze({...ruleBody,ruleDigest:digest(ruleBody)});

@@ -34,6 +34,8 @@ function resolveApprovedAuthority(claim){
  if(!claim||typeof claim!=='object'||Array.isArray(claim))return null;
  if(Object.keys(claim).sort().join(',')!=='externalIdentityId,packageIdentityId,predicate,projectIdentityId')return null;
  if(claim.predicate!=='attributedToProjectIdentity'||typeof claim.packageIdentityId!=='string'||typeof claim.externalIdentityId!=='string'||typeof claim.projectIdentityId!=='string')return null;
+ const approvedCorpus=APPROVED_CORPORA.find(x=>x.packageIdentityId===claim.packageIdentityId);
+ if(approvedCorpus)return resolveApprovedCorpus(claim,approvedCorpus);
  // A claimed identity cannot be inferred from a name, alias, URL or package namespace.
  const manifest=loadRepositoryCandidate();
  validateManifest(manifest);
@@ -73,4 +75,35 @@ function resolveRepositoryEvidenceBinding(){
 // No evidence-bound repository bridge rule has been approved or issued.
 // A caller's rules cannot be promoted by the manifest's mere approval.
 function isApprovedBridgeRule(){return false;}
+
+
+const APPROVED_CORPORA=require('./c01-corpus-registry.js').approved;
+const gitBlob=b=>crypto.createHash('sha1').update(Buffer.concat([Buffer.from('blob '+b.length),Buffer.from([0]),b])).digest('hex');
+function resolveApprovedCorpus(claim,descriptor){
+ const base=path.join(__dirname,'..');
+ const read=p=>fs.readFileSync(path.join(base,p));
+ const manifest=JSON.parse(read(descriptor.manifestRef));
+ const {manifestDigest,...unsigned}=manifest;
+ if(manifestDigest!==descriptor.manifestDigest||digest(unsigned)!==manifestDigest||manifest.manifestVersion!=='1.0.0'||!Array.isArray(manifest.rules)||manifest.rules.length!==1)throw Error('CORPUS_MANIFEST_INTEGRITY');
+ const r=manifest.rules[0],c=r.sourceCommitments;
+ const expectedClasses=['lot-b-maven-central-observation',...descriptor.sources.map(x=>x.evidenceClass),'approved-project-identity-snapshot'];
+ if(r.authorityRuleId!==descriptor.authorityRuleId||r.authorityRuleVersion!=='1.0.0'||r.contractDomain!==descriptor.contractDomain||r.predicate!=='attributedToProjectIdentity'||digest(r.scope)!==digest(descriptor.scope)||!exact(r.allowedEvidenceClasses,expectedClasses)||r.approvalProvenance?.status!=='APPROVED_H2'||r.approvalProvenance.decisionRef!==descriptor.approvalDecisionRef||r.validationRequirements?.allClassesRequired!==true||r.validationRequirements.exactOpaqueProjectIdentity!==true||r.validationRequirements.explicitBridgeEvidence!==true||r.validationRequirements.offlineReplay!==true)throw Error('CORPUS_MANIFEST_CONTRACT');
+ if(claim.projectIdentityId!==descriptor.projectIdentityId)return null;
+ const snapshot=JSON.parse(read(descriptor.sourceBase+'/'+descriptor.snapshot));
+ require('./project-identity.js').validateProjectIdentitySnapshot(snapshot);
+ if(snapshot.snapshotDigest!==c.projectSnapshotDigest||snapshot.projects.length!==1||snapshot.projects[0].id!==descriptor.projectIdentityId||snapshot.links.length!==0||snapshot.projects[0].attributionContext.scope!=='independent-project-identity-only')throw Error('CORPUS_Y_INTEGRITY');
+ const sources=descriptor.sources.map(x=>({definition:x,bytes:read(descriptor.sourceBase+'/'+x.file)}));
+ for(const x of sources)if(gitBlob(x.bytes)!==c[x.definition.commitment]||!x.bytes.toString('utf8').includes(x.definition.assertion))throw Error('CORPUS_OFFICIAL_SOURCE_INTEGRITY');
+ if(sha(sources[0].bytes)!==c.projectReadmeSha256||snapshot.projects[0].attributionContext.projectSourceSha256!==c.projectReadmeSha256)throw Error('CORPUS_Y_SOURCE_INTEGRITY');
+ const observed=JSON.parse(read(descriptor.sourceBase+'/'+descriptor.observation));
+ const pom=read(descriptor.sourceBase+'/'+descriptor.pom),acq=observed.acquisition;
+ if(acq?.status!==200||acq.providerId!=='maven-central'||acq.query.namespace!==descriptor.maven.groupId||acq.query.name!==descriptor.maven.artifactId||acq.query.version!==descriptor.maven.version||sha(pom)!==c.mavenBodySha256||sha(Buffer.from(acq.body,'utf8'))!==c.mavenBodySha256||observed.bodySha256!==c.mavenBodySha256||observed.reference?.contentHash!==c.mavenBodySha256||observed.reference?.id!=='observation:'+observed.reference.sha256)throw Error('CORPUS_MAVEN_INTEGRITY');
+ const xml=pom.toString('utf8');
+ if(!xml.includes('<groupId>'+descriptor.maven.groupId+'</groupId>')||!xml.includes('<artifactId>'+descriptor.maven.artifactId+'</artifactId>')||!xml.includes('<version>'+descriptor.maven.version+'</version>'))throw Error('CORPUS_MAVEN_COORDINATES');
+ const sourcePaths=[descriptor.observation,...descriptor.sources.map(x=>x.file),descriptor.snapshot];
+ const hashes=[c.mavenBodySha256,...sources.map(x=>sha(x.bytes)),snapshot.snapshotDigest];
+ const evidence=expectedClasses.map((evidenceClass,i)=>({evidenceClass,evidenceId:'sha256:'+hashes[i],sha256:hashes[i],sourceRef:descriptor.sourceBase+'/'+sourcePaths[i]}));
+ const body={evidenceMode:'repository-corpus',status:'APPROVED',approvalStatus:'APPROVED',approvalSource:'js/c01-corpus-registry.js:approved',manifestRef:descriptor.manifestRef,manifestDigest,ruleId:r.authorityRuleId,ruleVersion:r.authorityRuleVersion,contractDomain:r.contractDomain,predicate:r.predicate,packageIdentityId:descriptor.packageIdentityId,projectIdentityId:descriptor.projectIdentityId,projectSnapshotDigest:snapshot.snapshotDigest,requiredEvidenceClasses:expectedClasses,evidence};
+ return Object.freeze({...body,resolutionDigest:digest(body)});
+}
 module.exports={validateManifest,loadRepositoryCandidate,evaluate,resolveApprovedAuthority,resolveRepositoryEvidenceBinding,isApprovedBridgeRule};
