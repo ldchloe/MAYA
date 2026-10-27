@@ -11,3 +11,7 @@ test('BR-09 wrong version rejected',()=>{const x=load();assert.equal(verifyTagge
 test('BR-12 altered tagged POM rejected',()=>{const x=load();assert.equal(verifyTaggedSourceChain({...x,pom:Buffer.concat([x.pom,Buffer.from(' ')])}).status,'REJECTED');});
 test('BR-19 missing official publication evidence never issues bridge',()=>{const x=load();assert.equal(verifyTaggedSourceChain(x).bridgeRule,null);});
 test('BR-20 offline tagged source replay deterministic',()=>{assert.deepEqual(verifyTaggedSourceChain(load()),verifyTaggedSourceChain(load()));});
+
+test('BR-02/03 P1 or P2 absent: tagged provenance cannot be promoted to complete bridge',()=>{const x=load();assert.equal(verifyTaggedSourceChain(x).bridgeRule,null);assert.notEqual(verifyTaggedSourceChain(x).status,'BRIDGE_EVIDENCE_COMPLETE');});
+test('BR-10/11 caller-declared Y or H1 snapshot cannot promote tagged source to approved bridge',()=>{const x=load();for(const injected of [{projectIdentityId:'project:'+'f'.repeat(64)},{snapshotDigest:'0'.repeat(64)},{approved:true},{bridgeRule:{status:'APPROVED'}}]){const result=verifyTaggedSourceChain({...x,...injected});assert.equal(result.bridgeRule,null);}});
+test('BR-13 altered Maven POM is not accepted as evidence of a published-POM match',()=>{const x=load();assert.equal(verifyTaggedSourceChain({...x,mavenPom:Buffer.from('altered')}).bridgeRule,null);});
