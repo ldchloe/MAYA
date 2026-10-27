@@ -89,3 +89,12 @@ for(const [name,mutate] of [
  assert.equal(policy.evaluate(e,e.payload.assertions[0],true),'NOT_ELIGIBLE');
  prepare(e);assert.notEqual(acceptDocumentarySnapshot(e).acceptanceStatus,'ACCEPTED');
 });
+
+test('F1-01 integrated acceptance retains conflict and selects only repository-verified assertion',()=>{
+ const e=prepare(conflicting()),result=acceptDocumentarySnapshot(e);
+ assert.equal(result.acceptanceStatus,'ACCEPTED');
+ assert.equal(e.payload.conflicts.length,1);
+ assert.equal(e.qualificationProof.conflictIds.length,1);
+ assert.deepEqual(e.resolutionResult.transmittedIds,[e.payload.assertions[0].id]);
+ assert.equal(e.resolutionResult.engineResult.decisions.some(d=>d.selectedAssertionId==='synthetic:assertion:conflicting-project'),false);
+});
