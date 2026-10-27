@@ -21,5 +21,24 @@ const approved=Object.freeze([Object.freeze({
  ]),
  maven:Object.freeze({groupId:'org.springframework',artifactId:'spring-core',version:'6.1.3'}),
  scope:Object.freeze({ecosystem:'maven',groupId:'org.springframework',artifactId:'spring-core',version:'6.1.3',projectIdentityId:'project:389fa659b1d9c46c996fcbef55f8b0c0c3dc7bb9790b9db8e4755c8f82ee79ef'})
+}),Object.freeze({
+ manifestRef:'fixtures/c01/log4j/log4j-h2-authority-manifest.json',
+ manifestDigest:'a5eeb7ca0d06e0643be944e4c718ccbcb595a032eb7938bd1b7d17eb183c4bd0',
+ packageIdentityId:'maven:org.apache.logging.log4j:log4j-core:2.23.1',
+ projectIdentityId:'project:4cf1b8a8c5718164a1abd9de619fa7c15415c9ad94e0ea0dba781dc2b9fa2f48',
+ authorityRuleId:'c01:log4j-core-2.23.1:project-attribution',
+ contractDomain:'C01-I06',
+ approvalDecisionRef:'user-c01-i06-log4j-fast-track-authority-instruction',
+ sourceBase:'fixtures/c01/log4j',
+ snapshot:'apache-log4j-project-identity.snapshot.json',
+ observation:'maven-central/log4j-core-2.23.1.observation.json',
+ pom:'maven-central/log4j-core-2.23.1.pom',
+ sources:Object.freeze([
+  Object.freeze({file:'apache-log4j-readme.adoc',commitment:'officialReadmeGitBlob',evidenceClass:'official-project-readme',assertion:'Apache Log4j is a versatile'}),
+  Object.freeze({file:'apache-log4j-parent-pom.xml',commitment:'officialParentGitBlob',evidenceClass:'official-root-release-pom',assertion:'<revision>2.23.1</revision>'}),
+  Object.freeze({file:'apache-log4j-core-pom.xml',commitment:'officialModuleGitBlob',evidenceClass:'official-module-pom',assertion:'<artifactId>log4j-core</artifactId>'})
+ ]),
+ maven:Object.freeze({groupId:'org.apache.logging.log4j',artifactId:'log4j-core',version:'2.23.1'}),
+ scope:Object.freeze({ecosystem:'maven',groupId:'org.apache.logging.log4j',artifactId:'log4j-core',version:'2.23.1',projectIdentityId:'project:4cf1b8a8c5718164a1abd9de619fa7c15415c9ad94e0ea0dba781dc2b9fa2f48'})
 })]);
 module.exports={approved};
