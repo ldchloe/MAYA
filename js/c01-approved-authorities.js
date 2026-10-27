@@ -3,7 +3,8 @@
  * Approval must be separately pinned in this module after explicit human H2 decision.
  * Never derive an approved trust root from caller input or a manifest's own digest.
  */
-const fs=require('node:fs'),path=require('node:path');
+const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
+const sha=x=>crypto.createHash('sha256').update(x).digest('hex');
 const {digest}=require('./enrichment-canonical.js');
 const MANIFEST_PATH=path.join(__dirname,'../fixtures/c01/junit-h2-authority-candidate.json');
 const APPROVED_MANIFEST_DIGESTS=Object.freeze([]); // H2 not yet approved; never auto-populate
@@ -42,7 +43,31 @@ function resolveApprovedAuthority(claim){
  if(r.approvalProvenance.status!=='APPROVED_H2'||!APPROVED_MANIFEST_DIGESTS.includes(manifest.manifestDigest))return null;
  return Object.freeze({status:'APPROVED',manifestDigest:manifest.manifestDigest,ruleId:r.authorityRuleId,ruleVersion:r.authorityRuleVersion,domain:r.contractDomain,predicate:r.predicate,scope:Object.freeze({...r.scope}),manifestRef:'fixtures/c01/junit-h2-authority-candidate.json'});
 }
+// Read-only, repository-origin evidence binding. No caller-provided evidence, digest,
+// approval flag or path is trusted; the four files are fixed by this module.
+function resolveRepositoryEvidenceBinding(){
+ const manifest=loadRepositoryCandidate();validateManifest(manifest);
+ const r=manifest.rules[0],base=path.join(__dirname,'../fixtures/c01');
+ const read=p=>fs.readFileSync(path.join(base,p));
+ const observation=JSON.parse(read('maven-central/junit-4.13.2.observation.json').toString('utf8'));
+ const reference=JSON.parse(read('maven-central/junit-4.13.2.reference.json').toString('utf8'));
+ const snapshot=JSON.parse(read('junit4-project-identity.snapshot.json').toString('utf8'));
+ const project=require('./project-identity.js');project.validateProjectIdentitySnapshot(snapshot);
+ if(snapshot.snapshotDigest!==r.sourceCommitments.projectSnapshotDigest||snapshot.projects.length!==1||snapshot.projects[0].id!==r.scope.projectIdentityId)throw Error('AUTHORITY_Y_BINDING');
+ if(reference.sha256!==r.sourceCommitments.mavenArchiveSha256||reference.contentHash!==r.sourceCommitments.mavenBodySha256||reference.id!=='observation:'+reference.sha256)throw Error('AUTHORITY_MAVEN_REFERENCE');
+ const pom=read('junit4-r4.13.2-upstream-pom.xml'),readme=read('junit4-r4.13.2-project-readme.md');
+ if(sha(pom)!==r.sourceCommitments.upstreamPomSha256||sha(readme)!==r.sourceCommitments.projectReadmeSha256)throw Error('AUTHORITY_SOURCE_INTEGRITY');
+ if(!observation.acquisition||sha(observation.acquisition.body)!==r.sourceCommitments.mavenBodySha256||observation.acquisition.status!==200||observation.acquisition.providerId!=='maven-central'||observation.acquisition.query.namespace!=='junit'||observation.acquisition.query.name!=='junit'||observation.acquisition.query.version!=='4.13.2')throw Error('AUTHORITY_OBSERVATION_BINDING');
+ const evidence=[
+  {evidenceClass:keys[0],evidenceId:reference.id,sha256:reference.sha256,sourceRef:'fixtures/c01/maven-central/junit-4.13.2.observation.json'},
+  {evidenceClass:keys[1],evidenceId:'sha256:'+sha(pom),sha256:sha(pom),sourceRef:'fixtures/c01/junit4-r4.13.2-upstream-pom.xml'},
+  {evidenceClass:keys[2],evidenceId:'sha256:'+sha(readme),sha256:sha(readme),sourceRef:'fixtures/c01/junit4-r4.13.2-project-readme.md'},
+  {evidenceClass:keys[3],evidenceId:'project-snapshot:'+snapshot.snapshotDigest,sha256:snapshot.snapshotDigest,sourceRef:'fixtures/c01/junit4-project-identity.snapshot.json'}
+ ];
+ const binding={status:'EVIDENCE_BOUND_NOT_APPROVED',manifestDigest:manifest.manifestDigest,ruleId:r.authorityRuleId,ruleVersion:r.authorityRuleVersion,contractDomain:r.contractDomain,predicate:r.predicate,packageIdentityId:'maven:junit:junit:4.13.2',projectIdentityId:r.scope.projectIdentityId,projectSnapshotDigest:snapshot.snapshotDigest,requiredEvidenceClasses:[...keys],evidence,approvalSource:'js/c01-approved-authorities.js:APPROVED_MANIFEST_DIGESTS',approvalStatus:'NOT_APPROVED'};
+ return Object.freeze({...binding,resolutionDigest:digest(binding)});
+}
 // No evidence-bound repository bridge rule has been approved or issued.
 // A caller's rules cannot be promoted by the manifest's mere approval.
 function isApprovedBridgeRule(){return false;}
-module.exports={validateManifest,loadRepositoryCandidate,evaluate,resolveApprovedAuthority,isApprovedBridgeRule};
+module.exports={validateManifest,loadRepositoryCandidate,evaluate,resolveApprovedAuthority,resolveRepositoryEvidenceBinding,isApprovedBridgeRule};
