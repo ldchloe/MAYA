@@ -9,7 +9,7 @@ This is **upstream release-tag POM source**, not an authenticated Maven Central 
 Offline replay: `tests/c01-junit-upstream-archive.test.js` verifies pinned archive SHA-256 and the observed coordinates without network access. Original upstream whitespace is retained, with a scoped Git whitespace attribute; archive bytes are not normalized.
 
 Outstanding:
-- The approved Lot B Maven Central observation archive (`providerId=maven-central`, source URL, HTTP status, observedAt, archived body) has not been acquired. Therefore real V-P in the required Maven acquisition sense is **not PASS**.
+- A real Lot B Maven Central observation has now been acquired using `createMavenCentralProvider` on GitHub Actions and archived using `createObservationArchive`; **V-P = VERIFIED** with offline replay.
 - No independently allocated and verified JUnit ProjectIdentity registry snapshot with pre-existing opaque Y was located.
 - The upstream POM does not itself reference an opaque MAYA ProjectIdentity ID. A source-authorized mapping from its documented project to the independently established Y remains necessary.
 - No independently governed and pinned authority rule registry exists. Caller-supplied rule fixtures are not independent authority.
@@ -26,4 +26,18 @@ This establishes a real independent *project-description source*, **not** an app
 
 ## Maven Central acquisition limitation
 
-The approved Maven Central provider endpoint is `https://repo.maven.apache.org/maven2/junit/junit/4.13.2/junit-4.13.2.pom`. Direct network acquisition from the execution environment failed due to DNS resolution. The Sonatype Central artifact listing independently confirms the published coordinates, but is not a substitute for a Lot B provider acquisition with authenticated response metadata. Do not fabricate a `providerId=maven-central` acquisition record from a web listing.
+The approved Maven Central provider endpoint is `https://repo.maven.apache.org/maven2/junit/junit/4.13.2/junit-4.13.2.pom`. Local DNS acquisition failed, but GitHub Actions acquired HTTP 200 using the **existing Lot B provider**, stored the canonical acquisition with the **existing Lot B archive**, verified its offline load, and committed both archive and reference to this PR.
+
+
+## Verified Lot B Maven Central acquisition (2026-10-27)
+
+- Source URL: `https://repo.maven.apache.org/maven2/junit/junit/4.13.2/junit-4.13.2.pom`
+- Provider: `maven-central` version `2`, scope `Version`, HTTP `200`, transport `ok`.
+- Observed at: `2026-10-27T08:48:04.055Z` (UTC).
+- Archive: `fixtures/c01/maven-central/junit-4.13.2.observation.json` and `junit-4.13.2.reference.json`.
+- Archive ID: `observation:6a977171df7e5908a66ee179fd86039a5e5fd3322758197a2f2d101987e4f740`.
+- Archive SHA-256: `6a977171df7e5908a66ee179fd86039a5e5fd3322758197a2f2d101987e4f740`.
+- Body SHA-256: `569b6977ee4603c965c1c46c3058fa6e969291b0160eb6964dd092cd89eadd94`.
+- Acquisition run: https://github.com/ldchloe/MAYA/actions/runs/40476035379
+- Offline replay: `tests/c01-junit-maven-central-offline.test.js`, read-only archive load, source coordinates, hash, missing and tampered archive checks.
+- This **closes V-P**, not V-Y, Bridge Authority, V-PY or positive integrated acceptance. No POM-to-opaque-Y inference is permitted.
