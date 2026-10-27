@@ -7,6 +7,7 @@ const types=Object.freeze(['OWNERSHIP_CHANGE','ACQUISITION','GOVERNANCE_CHANGE',
 const isObj=x=>x!==null&&typeof x==='object'&&!Array.isArray(x);
 const archiveRoot=path.resolve(__dirname,'../fixtures/g01/junit');
 const allowedTags=new Set(['r4.13.1','r4.13.2']);
+const pinnedHashes=Object.freeze({'r4.13.1':'789aeef92cde549bffb0691fc7f8a917867ac8a364ada4afe1bf15fece79689e','r4.13.2':'570584193e1d9af512e1f16c1d492fdd04e0b4d69a7abcce05c2f084c5f01071'});
 const junitProjectId='project:3b8b92fd783639e12f59ff6256967b246edd5249343217fb6d669a6ce688ff8e';
 function readOfficialRelease(tag){
  if(!allowedTags.has(tag))return null;
@@ -16,7 +17,7 @@ function readOfficialRelease(tag){
   const record=JSON.parse(raw.toString('utf8'));
   const url='https://api.github.com/repos/junit-team/junit4/releases/tags/'+tag;
   const hash=sha256Text(raw.toString('utf8'));
-  if(metadata.requestedUrl!==url||metadata.finalUrl!==url||metadata.httpStatus!==200||!String(metadata.contentType).includes('json')||metadata.sizeBytes!==raw.length||metadata.sha256!==hash||metadata.archiveId!=='archive:'+hash||!Number.isFinite(Date.parse(metadata.acquiredAt)))return null;
+  if(hash!==pinnedHashes[tag]||metadata.requestedUrl!==url||metadata.finalUrl!==url||metadata.httpStatus!==200||!String(metadata.contentType).includes('json')||metadata.sizeBytes!==raw.length||metadata.sha256!==hash||metadata.archiveId!=='archive:'+hash||!Number.isFinite(Date.parse(metadata.acquiredAt)))return null;
   if(record.tag_name!==tag||record.draft!==false||record.prerelease!==false||!/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ$/.test(record.published_at)||record.html_url!=='https://github.com/junit-team/junit4/releases/tag/'+tag)return null;
   return {tag,record,metadata,hash};
  }catch{return null}
