@@ -70,4 +70,17 @@ function resolveSyntheticEventConflictForTest(projectIdentityId,eventType,dates)
  const dc={projectIdentityId,status:'CONFLICTED',conflictIds:[conflict.id],reason:'SYNTHETIC TEST ONLY'};
  return {testOnly:true,projectIdentityId,evidence,assertions,conflicts:[conflict],events:[],timeline:[],decision:{id:deterministicId('decision',dc),...dc}};
 }
-module.exports={resolveTrustEvents,verifyTrustEvents,resolveSyntheticEventConflictForTest,EVENT_TYPES:types};
+function resolveSyntheticChangeForTest(projectIdentityId,eventType,before,after,effectiveAt){
+ resolveGovernance({projectIdentityId,claims:[]});
+ if(!types.includes(eventType)||eventType==='RELEASE'||typeof before!=='string'||!before||typeof after!=='string'||!after||before===after||!/^\\d{4}-\\d\\d-\\d\\d$/.test(effectiveAt))throw Error('INVALID_SYNTHETIC_CHANGE');
+ const core={projectIdentityId,eventType,subject:projectIdentityId,before,after,effectiveAt,method:'SYNTHETIC TEST ONLY'};
+ const evidence={id:deterministicId('evidence',core),...core};
+ const eventCore={eventType,subject:projectIdentityId,before,after,effectiveAt};
+ const eventId=deterministicId('trust-event',eventCore);
+ const assertionCore={eventId,evidenceIds:[evidence.id],before,after,effectiveAt};
+ const assertion={id:deterministicId('assertion',assertionCore),...assertionCore,status:'SYNTHETIC TEST ONLY'};
+ const event={eventId,...eventCore,evidenceIds:[evidence.id],assertionIds:[assertion.id],status:'SYNTHETIC TEST ONLY'};
+ const dc={projectIdentityId,status:'VERIFIED',eventIds:[eventId],reason:'SYNTHETIC TEST ONLY'};
+ return {testOnly:true,projectIdentityId,evidence:[evidence],assertions:[assertion],conflicts:[],events:[event],timeline:[event],decision:{id:deterministicId('decision',dc),...dc}};
+}
+module.exports={resolveTrustEvents,verifyTrustEvents,resolveSyntheticEventConflictForTest,resolveSyntheticChangeForTest,EVENT_TYPES:types};
