@@ -1,0 +1,25 @@
+name: C01 temporary JUnit Maven acquisition
+on:
+  pull_request:
+    paths:
+      - scripts/c01-acquire-junit-maven.js
+      - .github/workflows/c01-junit-acquire.yml
+jobs:
+  acquire:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Acquire real Maven Central observation via Lot B
+        run: node scripts/c01-acquire-junit-maven.js
+      - name: Upload immutable acquisition output
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: c01-junit-maven-observation
+          path: fixtures/c01/maven-central/*.json
+          if-no-files-found: error
