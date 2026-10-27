@@ -27,4 +27,19 @@ function evaluate(m,ruleId,scope,predicate,evidenceClasses,options={}){
  if(r.approvalProvenance.status!=='APPROVED_H2'||!APPROVED_MANIFEST_DIGESTS.includes(m.manifestDigest))return 'NOT_APPROVED';
  return 'APPLICABLE';
 }
-module.exports={validateManifest,loadRepositoryCandidate,evaluate};
+function resolveApprovedAuthority(claim){
+ // Never accept a manifest, approval status, scope, digest or authority rule from caller.
+ // Only the repository's fixed-path candidate and pinned approval root are consulted.
+ if(!claim||typeof claim!=='object'||Array.isArray(claim))return null;
+ if(Object.keys(claim).sort().join(',')!=='externalIdentityId,packageIdentityId,predicate,projectIdentityId')return null;
+ if(claim.predicate!=='attributedToProjectIdentity'||typeof claim.packageIdentityId!=='string'||typeof claim.externalIdentityId!=='string'||typeof claim.projectIdentityId!=='string')return null;
+ // A claimed identity cannot be inferred from a name, alias, URL or package namespace.
+ const manifest=loadRepositoryCandidate();
+ validateManifest(manifest);
+ const r=manifest.rules[0];
+ if(claim.projectIdentityId!==r.scope.projectIdentityId)return null;
+ if(claim.packageIdentityId!=='maven:junit:junit:4.13.2'||claim.externalIdentityId!=='maven:junit:junit:4.13.2')return null;
+ if(r.approvalProvenance.status!=='APPROVED_H2'||!APPROVED_MANIFEST_DIGESTS.includes(manifest.manifestDigest))return null;
+ return Object.freeze({status:'APPROVED',manifestDigest:manifest.manifestDigest,ruleId:r.authorityRuleId,ruleVersion:r.authorityRuleVersion,domain:r.contractDomain,predicate:r.predicate,scope:Object.freeze({...r.scope}),manifestRef:'fixtures/c01/junit-h2-authority-candidate.json'});
+}
+module.exports={validateManifest,loadRepositoryCandidate,evaluate,resolveApprovedAuthority};
