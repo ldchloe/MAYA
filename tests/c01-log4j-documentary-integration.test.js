@@ -75,3 +75,5 @@ test('LOG-22 JUnit and Log4j independently replay with distinct evidence and dec
  assert.notEqual(a.assertion.evidenceIds[0],b.assertion.evidenceIds[0]);
  assert.deepEqual([a.decision.id,b.decision.id].sort(),[b.decision.id,a.decision.id].sort());
 });
+
+module.exports={dossier,real,prepare,claim};
