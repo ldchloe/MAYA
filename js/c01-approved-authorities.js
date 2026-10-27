@@ -7,6 +7,7 @@ const fs=require('node:fs'),path=require('node:path');
 const {digest}=require('./enrichment-canonical.js');
 const MANIFEST_PATH=path.join(__dirname,'../fixtures/c01/junit-h2-authority-candidate.json');
 const APPROVED_MANIFEST_DIGESTS=Object.freeze([]); // H2 not yet approved; never auto-populate
+const EXPECTED_SOURCE_COMMITMENTS=Object.freeze({mavenArchiveSha256:'605703278032b3282a60e2e145b24e1c788aaceb8e60a17a2da145bcab827aef',mavenBodySha256:'569b6977ee4603c965c1c46c3058fa6e969291b0160eb6964dd092cd89eadd94',upstreamPomSha256:'569b6977ee4603c965c1c46c3058fa6e969291b0160eb6964dd092cd89eadd94',projectReadmeSha256:'63feaf908bda828d78adf9989bf404ffd4e4ac4ad76b0d7bed74cf5b4f611723',projectSnapshotDigest:'a61190267f2c520a70ed08ef6183e7d7b1492009c252f3e4dd2677f4f4378fb1'});
 const keys=['lot-b-maven-central-observation','upstream-release-pom','independent-project-readme','approved-project-identity-snapshot'];
 const exact=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
 function validateManifest(m){
@@ -14,7 +15,7 @@ function validateManifest(m){
  const {manifestDigest,...content}=m;
  if(digest(content)!==manifestDigest)throw Error('AUTHORITY_MANIFEST_INTEGRITY');
  const r=m.rules[0];
- if(!r||typeof r.authorityRuleId!=='string'||r.authorityRuleVersion!=='1.0.0'||r.contractDomain!=='C01-I04'||r.predicate!=='attributedToProjectIdentity'||!r.scope||!Array.isArray(r.allowedEvidenceClasses)||!exact(r.allowedEvidenceClasses,keys)||!r.validationRequirements||r.validationRequirements.allClassesRequired!==true||r.validationRequirements.exactOpaqueProjectIdentity!==true||r.validationRequirements.explicitBridgeEvidence!==true||r.validationRequirements.offlineReplay!==true||!r.approvalProvenance||!['PENDING_H2','APPROVED_H2'].includes(r.approvalProvenance.status))throw Error('AUTHORITY_MANIFEST_CONTRACT');
+ if(!r||typeof r.authorityRuleId!=='string'||r.authorityRuleVersion!=='1.0.0'||r.contractDomain!=='C01-I04'||r.predicate!=='attributedToProjectIdentity'||!r.scope||!Array.isArray(r.allowedEvidenceClasses)||!exact(r.allowedEvidenceClasses,keys)||!exact(r.sourceCommitments,EXPECTED_SOURCE_COMMITMENTS)||!r.validationRequirements||r.validationRequirements.allClassesRequired!==true||r.validationRequirements.exactOpaqueProjectIdentity!==true||r.validationRequirements.explicitBridgeEvidence!==true||r.validationRequirements.offlineReplay!==true||!r.approvalProvenance||!['PENDING_H2','APPROVED_H2'].includes(r.approvalProvenance.status))throw Error('AUTHORITY_MANIFEST_CONTRACT');
  if(r.scope.ecosystem!=='maven'||r.scope.groupId!=='junit'||r.scope.artifactId!=='junit'||r.scope.version!=='4.13.2'||!/^project:[a-f0-9]{64}$/.test(r.scope.projectIdentityId||''))throw Error('AUTHORITY_MANIFEST_SCOPE');
  return true;
 }
