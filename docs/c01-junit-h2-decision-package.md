@@ -47,3 +47,7 @@ The manifest now pins all five exact source/snapshot digest commitments in `sour
 **REJECT H2**: do not activate the rule; retain default-deny, V-PY NOT VERIFIED and PR #31 OPEN.
 
 Risks: source authority overreach; trusting a matching name/URL; conflating Maven publication with opaque Y; accidental acceptance of caller digest; mistaken belief that a manifest candidate is itself a bridge. All must remain fail-closed.
+
+## Conditional final review — H2 NOT ACTIVATED
+
+The H2-A10 review identified a legacy path in `js/c01-project-attribution.js` that could accept caller-defined `authorityRules` without consulting the repository manifest. A regression test was added first, followed by a scoped fail-closed check for the exact JUnit H1 pilot. This does **not** establish a complete global no-bypass proof: `js/c01-bridge-authority.js` still has a legacy rule evaluation API, and alternate identity encodings need explicit negative coverage. Consequently H2 is **NOT APPROVED**, the approved-digest list stays empty, and the human approval candidate must not be activated. The next implementation step is to make the approved manifest mandatory in the shared authority evaluator and cover every route to `VXY=PASS` with negative tests, while preserving historical fixture behavior without accepting real unapproved bridges.
