@@ -1,0 +1,28 @@
+name: C01 baseline validation
+on:
+  push:
+    branches: [validation/c01-baseline]
+  workflow_dispatch:
+jobs:
+  baseline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify source HEAD
+        run: |
+          test "$(git rev-parse HEAD^)" = "e6c466c259048fb09b842ce410a983b3be98b568"
+          git diff --name-only HEAD^ HEAD | grep -Fx '.github/workflows/c01-baseline.yml'
+          test "$(git diff --name-only HEAD^ HEAD | wc -l)" -eq 1
+      - name: Syntax identity-purl
+        run: node --check js/identity-purl.js
+      - name: Syntax identity-mvp
+        run: node --check js/identity-mvp.js
+      - name: Maven tests
+        run: node --test tests/identity-maven.test.js
+      - name: Complete suite
+        run: node --test tests/*.test.js
+      - name: Diff whitespace
+        run: git diff --check HEAD^ HEAD
