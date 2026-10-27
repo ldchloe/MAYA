@@ -23,3 +23,36 @@ test('G-13 G-14 G-22 synthetic conflicting dates and after-state remain test-onl
 test('G-16 G-17 G-21 permutation, offline replay and timeline are deterministic',()=>{
  assert.deepEqual(run([]),run([]));assert.deepEqual(run([{eventType:'ACQUISITION'}]),run([{eventType:'ACQUISITION'}]));
 });
+
+const fs=require('node:fs'),path=require('node:path');
+function release(tag){
+ const root=path.resolve(__dirname,'../fixtures/g01/junit');
+ const metadata=JSON.parse(fs.readFileSync(path.join(root,tag+'.metadata.json'),'utf8'));
+ const body=JSON.parse(fs.readFileSync(path.join(root,tag+'.json'),'utf8'));
+ return {eventType:'RELEASE',subject:junit,after:tag,effectiveAt:body.published_at,source:{archiveSha256:metadata.sha256,archiveId:metadata.archiveId,acquiredAt:metadata.acquiredAt}};
+}
+test('G-01 real archived JUnit release events VERIFIED with sourced Assertions',()=>{
+ const r=run([release('r4.13.1'),release('r4.13.2')],junit);
+ assert.equal(r.decision.status,'VERIFIED');assert.equal(r.timeline.length,2);
+ assert.equal(r.evidence.length,2);assert.equal(r.assertions.length,2);
+ assert.ok(r.assertions.every(a=>a.evidenceIds.length>0));assert.ok(verifyTrustEvents(r));
+});
+test('G-04 archive or claimed event alteration rejected',()=>{
+ const c=release('r4.13.2');
+ for(const bad of [{...c,subject:log4j},{...c,after:'r4.13.3'},{...c,effectiveAt:'2020-01-01T00:00:00Z'},{...c,source:{...c.source,archiveSha256:'0'.repeat(64)}}]){
+ assert.equal(run([bad],junit).decision.status,'UNKNOWN');
+ }
+ const r=run([c],junit);assert.equal(verifyTrustEvents({...r,evidence:r.evidence.map(e=>({...e,after:'r4.13.1'}))}),false);
+});
+test('G-15 G-16 G-17 G-21 duplicate evidence and permutation preserve timeline and IDs',()=>{
+ const a=release('r4.13.1'),b=release('r4.13.2');
+ const r=run([b,a,a],junit);
+ assert.deepEqual(r,run([a,b],junit));assert.equal(r.timeline.length,2);
+ assert.ok(r.timeline[0].effectiveAt<=r.timeline[1].effectiveAt);
+ assert.ok(verifyTrustEvents(r));assert.deepEqual(run([a,b],junit),run([a,b],junit));
+});
+test('G-06 to G-12 all event types represented without interpreting unsupported facts',()=>{
+ const {EVENT_TYPES}=require('../js/g01-trust-events.js');
+ for(const type of ['OWNERSHIP_CHANGE','ACQUISITION','GOVERNANCE_CHANGE','MAINTAINER_CHANGE','LICENSE_CHANGE','REPOSITORY_CHANGE','FOUNDATION_CHANGE','SUPPLY_CHAIN_INCIDENT','COMPROMISE'])assert.ok(EVENT_TYPES.includes(type));
+ assert.equal(run([{eventType:'COMPROMISE',subject:junit,after:'r4.13.2',effectiveAt:release('r4.13.2').effectiveAt,source:release('r4.13.2').source}],junit).decision.status,'UNKNOWN');
+});
