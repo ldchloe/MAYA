@@ -24,10 +24,12 @@
   "riskRules": {
     "technical": {
       "licenseConflict": 3,
-      "unknownLicense": null
+      "unknownLicense": null,
+      "licenseResolved": 0
     },
     "governance": {
-      "conflict": 3
+      "conflict": 3,
+      "verifiedGovernance": 0
     },
     "supplyChain": {
       "SUPPLY_CHAIN_INCIDENT": 3,
