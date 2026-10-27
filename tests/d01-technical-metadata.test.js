@@ -2,6 +2,7 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
 const {resolveTechnicalMetadata,verifyTechnicalMetadata}=require('../js/d01-technical-metadata.js');
 const {canonicalJSON,digest}=require('../js/enrichment-canonical.js');
+const {importCycloneDxJson}=require('../js/cyclonedx-json.js');
 const cyclo=JSON.parse(fs.readFileSync(path.join(__dirname,'fixtures/cyclonedx-valid.json'),'utf8'));
 const cd=(licenses,language)=>({id:'document:1',format:'cyclonedx-json',raw:{bomFormat:'CycloneDX',specVersion:'1.5'},components:[{id:'component:1',raw:{name:'demo',purl:'pkg:npm/demo@1',...(language?{language}:{}),licenses}}],licenses:licenses.map((raw,i)=>({id:'license:'+(i+1),componentId:'component:1',raw,sourcePath:'$.components[0].licenses['+i+']'}))});
 const sp=(declared,concluded,language)=>({id:'document:1',format:'spdx-json',raw:{spdxVersion:'SPDX-2.3'},components:[{id:'SPDXRef-Package',raw:{name:'demo',licenseDeclared:declared,licenseConcluded:concluded,...(language?{primaryPackagePurpose:language}:{})}}],licenses:[]});
@@ -19,3 +20,15 @@ test('D-15/16 permutations and offline replay identical',()=>{const a=run(cd([{l
 test('D-17 original document unchanged',()=>{const doc=cd([{license:{id:'MIT'}}]);const before=digest(doc);run(doc);assert.equal(digest(doc),before)});
 test('D-22/23/24 explicit language with evidence; absent or name-derived unknown',()=>{const a=run(cd([], 'JavaScript'));assert.deepEqual(a.languages,['JavaScript']);assert.ok(a.assertions.some(x=>x.predicate==='hasDeclaredLanguage'));assert.deepEqual(run(cd([])).languages,[]);assert.deepEqual(run({...cd([]),components:[{id:'component:1',raw:{name:'java-library'}}]}).languages,[])});
 test('D-16 non-Maven CycloneDX and Maven-agnostic SPDX',()=>{assert.equal(run(cd([{license:{id:'MIT'}}])).decisions.license.status,'RESOLVED');assert.equal(run(sp('Apache-2.0','NOASSERTION')).decisions.license.status,'RESOLVED')});
+
+test('D-01 real versioned CycloneDX fixture through existing canonical importer',()=>{
+ const input=fs.readFileSync(path.join(__dirname,'fixtures/cyclonedx-valid.json'),'utf8');
+ const {document,report}=importCycloneDxJson(input,'cyclonedx-valid.json');
+ assert.ok(document,JSON.stringify(report.errors));
+ const component=document.components.find(x=>x.raw?.['bom-ref']==='a');
+ const before=digest(document),result=run(document,component.id);
+ assert.equal(result.decisions.license.status,'CONFLICTED');
+ assert.deepEqual([...new Set(result.evidence.map(e=>e.value))].sort(),['Apache-2.0','MIT']);
+ assert.equal(digest(document),before);
+ assert.equal(verifyTechnicalMetadata(result),true);
+});
