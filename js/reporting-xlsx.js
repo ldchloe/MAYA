@@ -16,7 +16,7 @@ function cell(value,r,c,style=0){
 }
 function sheet(rows,{widths=[],freeze=0,filter=null,merges=[]}={}){
  const cols=widths.map((w,i)=>'<col min="'+(i+1)+'" max="'+(i+1)+'" width="'+w+'" customWidth="1"/>').join('');
- const data=rows.map((row,i)=>'<row r="'+(i+1)+'">'+row.map((v,j)=>cell(v.value===undefined?v:v.value,i+1,j,v.style??0)).join('')+'</row>').join('');
+ const data=rows.map((row,i)=>'<row r="'+(i+1)+'">'+row.map((v,j)=>cell(v&&typeof v==='object'&&Object.hasOwn(v,'value')?v.value:v,i+1,j,v&&typeof v==='object'&&Object.hasOwn(v,'style')?v.style:0)).join('')+'</row>').join('');
  const merge=merges.length?'<mergeCells count="'+merges.length+'">'+merges.map(ref=>'<mergeCell ref="'+ref+'"/>').join('')+'</mergeCells>':'';
  return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
  '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetViews><sheetView workbookViewId="0">'+
@@ -139,7 +139,7 @@ function inspectWorkbook(buf){
  const sheets=[...w.matchAll(/<sheet name="([^"]+)"/g)].map(x=>x[1]),comex=parseRows(s1),detail=parseRows(s2).slice(4);
  const find=label=>comex.find(r=>r?.[0]===label);
  const exposure={};for(const [k,label] of [['EU','EU'],['EEA','EEA'],['EUROPE_NON_EU','Europe non-EU'],['NON_EU','Non-EU'],['UNKNOWN','UNKNOWN']]){const r=find(label);exposure[k]={count:r?.[1],total:r?.[2],percentage:r?.[3]}}
- const concentration={};for(const key of ['sameOrganization','sameFoundation','sameMaintainer','sameNamespace','sameLegalJurisdiction','unknownGovernance','unknownJurisdiction']){const r=find(key);if(r)concentration[key]={value:r[1]==='UNKNOWN'?null:r[1],count:r[2],total:r[3],percentage:r[4],unknownCount:r[5]}}
+ const concentration={};for(const key of ['sameOrganization','sameFoundation','sameMaintainer','sameNamespace','sameLegalJurisdiction','unknownGovernance','unknownJurisdiction']){const r=find(key);if(r)concentration[key]=key.startsWith('unknown')?{count:r[2],total:r[3],percentage:r[4],unknownCount:r[5]}:{value:r[1]==='UNKNOWN'?null:r[1],count:r[2],total:r[3],percentage:r[4],unknownCount:r[5],population:'all input components'}}
  return {sheets,zipValid:true,hasFilters:s2.includes('<autoFilter'),hasFreeze:s2.includes('<pane'),detailRows:detail.length,componentsTotal:find('Components analyzed')?.[1],overallTrustScore:find('TRUST SCORE /100')?.[1]==='UNKNOWN'?null:find('TRUST SCORE /100')?.[1],overallCoverage:find('TRUST SCORE /100')?.[3]==='UNKNOWN'?null:find('TRUST SCORE /100')?.[3],exposure,concentration,detail:detail.map(r=>({trustScore:r[26]==='UNKNOWN'?null:r[26],evidenceCoverage:r[27]==='UNKNOWN'?null:r[27],risks:r.slice(20,26).map(x=>x==='UNKNOWN'?null:x),unknownCount:r[30],conflictCount:r[29],evidenceRefs:r[32],decisionRefs:r[33]}))};
 }
 module.exports={createWorkbook,inspectWorkbook};
