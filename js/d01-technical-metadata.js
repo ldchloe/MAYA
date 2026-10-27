@@ -16,7 +16,7 @@ function resolveTechnicalMetadata(document,componentId){
  if(!plain(document)||!Array.isArray(document.components))throw Error('INVALID_CANONICAL_DOCUMENT');
  const component=document.components.find(x=>x.id===componentId);
  if(!component||!plain(component.raw))throw Error('UNKNOWN_COMPONENT');
- const documentDigest=digest(document),raw=component.raw,observations=[];
+ const documentDigest=digest(JSON.parse(JSON.stringify(document))),raw=component.raw,observations=[];
  const push=(field,value,semantic,sourcePath)=>{const v=norm(value);if(v!==null)observations.push({field,value:v,semantic,sourcePath})};
  if(document.format==='cyclonedx-json'){
   const licenses=Array.isArray(document.licenses)?document.licenses.filter(x=>x.componentId===componentId):[];
