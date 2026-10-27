@@ -13,3 +13,15 @@ test('H2-05 missing required evidence class is rejected',()=>{const m=seal(candi
 test('H2-06 name-only bridge without explicit bridge evidence rejected',()=>{const m=seal(candidate);assert.equal(A.evaluate(m,rule.authorityRuleId,rule.scope,rule.predicate,rule.allowedEvidenceClasses,{explicitBridgeEvidence:false}),'NOT_APPLICABLE')});
 
 test('H2-07 committed repository candidate is sealed, exact-Y bound, and never approved',()=>{const m=A.loadRepositoryCandidate();assert.equal(A.validateManifest(m),true);assert.equal(m.rules[0].scope.projectIdentityId,'project:3b8b92fd783639e12f59ff6256967b246edd5249343217fb6d669a6ce688ff8e');assert.equal(m.rules[0].approvalProvenance.status,'PENDING_H2');assert.equal(A.evaluate(m,m.rules[0].authorityRuleId,m.rules[0].scope,m.rules[0].predicate,m.rules[0].allowedEvidenceClasses),'NOT_APPROVED')});
+
+const attribution=require('../js/c01-project-attribution.js');
+test('H2-A10 existing attribution cannot mark caller-defined bridge rules applicable without repository approval',()=>{
+ const crypto=require('node:crypto');const sha=s=>crypto.createHash('sha256').update(s).digest('hex');
+ const projectId='project:3b8b92fd783639e12f59ff6256967b246edd5249343217fb6d669a6ce688ff8e';
+ const packageIdentityId='package:junit:junit:4.13.2',externalIdentityId='maven:junit:junit:4.13.2';
+ const content=JSON.stringify({predicate:'attributedToProjectIdentity',packageIdentityId,externalIdentityId,projectIdentityId:projectId});
+ const bridge={id:'bridge:untrusted',kind:'explicit-attribution',packageIdentityId,externalIdentityId,projectIdentityId:projectId,sourceRef:'untrusted:test',versionScope:'4.13.2',content,sourceDigest:sha(content),sourceType:'untrusted',verificationMethod:'self',verificationId:'self'};
+ const rules=[{id:'self',version:'1.0.0',sourceType:bridge.sourceType,verificationMethod:bridge.verificationMethod,verificationId:bridge.verificationId,sourceRef:bridge.sourceRef,sourceDigest:bridge.sourceDigest,predicate:'attributedToProjectIdentity',packageIdentityId,externalIdentityId,projectIdentityId:projectId,versionScope:'4.13.2'}];
+ const result=attribution.evaluate({packageIdentityId,externalIdentityId,projectIdentityId:projectId,archives:[],bridgeEvidence:[bridge],authorityRules:rules,projectSnapshot:JSON.parse(require('node:fs').readFileSync(require('node:path').join(__dirname,'../fixtures/c01/junit4-project-identity.snapshot.json'),'utf8'))});
+ assert.equal(result.validation.bridgeAuthority,'NOT_APPLICABLE');assert.equal(result.validation.VXY,'FAIL');assert.equal(result.eligibility,'NOT_ELIGIBLE');
+});
