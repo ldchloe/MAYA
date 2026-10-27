@@ -44,6 +44,7 @@ function buildComex(a){
  add(/^b06-|^cyclonedx-valid/i.test(a.fileName)?'EXECUTIVE BRIEF  •  DEMO / TEST DATA':'EXECUTIVE BRIEF  •  USER-SUPPLIED SBOM');
  add('SBOM',a.fileName,'Mode',a.analysisMode,'Policy',p.policyVersion);
  add('Source digest',a.sourceDigest);
+ add('Analysis timestamp','NOT_RECORDED (deterministic replay)','MAYA engine','H01-1');
  add();
  add(section('01  •  EXECUTIVE SUMMARY'));
  add('Components analyzed',diag.componentsTotal,'Scored',summary.scoredComponents,'Unknown',summary.unknownComponents);
