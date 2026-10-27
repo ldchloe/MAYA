@@ -11,7 +11,7 @@ test('BR-10 wrong project invalid',()=>assert.equal(verify(complete(),{...expect
 test('BR-11 wrong snapshot invalid',()=>assert.equal(verify(complete(),{...expected,snapshotDigest:'0'.repeat(64)}).status,'BRIDGE_EVIDENCE_INVALID'));
 test('BR-12 altered tagged POM evidence invalid',()=>{const x=structuredClone(complete());x[2].contentDigest='0'.repeat(64);assert.equal(verify(x,expected).status,'BRIDGE_EVIDENCE_INVALID');});
 test('BR-13 altered Maven POM evidence invalid',()=>{const x=structuredClone(complete());x[3].observedValue='mismatch';assert.equal(verify(x,expected).status,'BRIDGE_EVIDENCE_INVALID');});
-test('BR-14 EV-ORDER-01 permutation same digest',()=>assert.deepEqual(verify(complete(),expected),verify(complete().reverse(),expected)));
+test('BR-14 EV-ORDER-01 permutation same digest',()=>assert.deepEqual(verify(complete(),expected),verify([...complete()].reverse(),expected)));
 test('BR-15 unrelated extra evidence excluded from verification digest',()=>{const x=complete();assert.deepEqual(verify(x,expected),verify([...x,{propositionId:'OTHER',id:'extra'}],expected));});
 test('BR-19 incomplete technical provenance never complete',()=>assert.equal(verify(complete().slice(2),expected).status,'BRIDGE_EVIDENCE_INCOMPLETE'));
 test('BR-20 EV-OFFLINE-01 deterministic archive reconstruction',()=>assert.deepEqual(verify(materialize(),expected),verify(materialize(),expected)));
