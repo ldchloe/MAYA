@@ -11,7 +11,7 @@ function verifyTaggedSourceChain(input){
  if(p.pom?.gitBlobSha!=='38be96092f241cb4e1ff0d9046b323b67d34b127'||p.readme?.gitBlobSha!=='739347df507869dae1df7646019866118112083f')return reject();
  if(sha(pom)!==p.pom.archiveSha256||sha(readme)!==p.readme.archiveSha256)return reject();
  // Git blob IDs are content-addressed, independently verified against the official tag.
- const blob=b=>crypto.createHash('sha1').update(Buffer.concat([Buffer.from('blob '+b.length+'\\0'),b])).digest('hex');
+ const blob=b=>crypto.createHash('sha1').update(Buffer.concat([Buffer.from('blob '+b.length),Buffer.from([0]),b])).digest('hex');
  if(blob(pom)!==p.pom.gitBlobSha||blob(readme)!==p.readme.gitBlobSha)return reject();
  const xml=pom.toString('utf8');
  const tag=k=>{const m=xml.match(new RegExp('<'+k+'>([^<]+)</'+k+'>'));return m?.[1]};
