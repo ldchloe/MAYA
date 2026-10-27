@@ -27,7 +27,7 @@ jobs:
           node --check js/reporting-xlsx.js
           node --check js/reporting-cli.js
       - name: Generate validated real-SBOM XLSX demo
-        run: node js/reporting-cli.js tests/fixtures/b06-europeana-corelib.json --output maya-analysis-example.xlsx --mode offline
+        run: node js/reporting-cli.js tests/fixtures/b06-scanoss-java.json --output maya-analysis-example.xlsx --mode offline
       - name: Upload Excel demonstration
         uses: actions/upload-artifact@v4
         with:
