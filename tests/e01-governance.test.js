@@ -3,7 +3,7 @@ const test=require('node:test'),assert=require('node:assert/strict');
 const {resolveGovernance,verifyGovernance}=require('../js/e01-governance.js');
 const registry=require('../js/c01-corpus-registry.js');
 const ids=[...new Set(registry.approved.map(x=>x.projectIdentityId))];
-const project=ids[0];
+const project='project:3b8b92fd783639e12f59ff6256967b246edd5249343217fb6d669a6ce688ff8e';
 const source={archivePath:'fixtures/c01/junit4-r4.13.2-upstream-pom.xml',sourceUrl:'https://github.com/junit-team/junit4/blob/r4.13.2/pom.xml',selector:'<organization>\n        <name>JUnit</name>',observedAt:'2026-10-27T00:00:00Z'};
 const claim=(predicate='attributedToOrganization',object='JUnit',s=source)=>({projectIdentityId:project,predicate,object,source:s});
 const run=(claims=[],id=project)=>resolveGovernance({projectIdentityId:id,claims});
