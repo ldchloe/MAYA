@@ -9,3 +9,11 @@ The dossier and its result are deterministic and read-only. Contradictory bridge
 **Important implementation boundary:** C01-I01's fixture Policy accepts only `mapsToProject`; its resolver adapter is not yet generalized to the real predicate. Consequently, this initial implementation does **not** satisfy T68 (real predicate through C01-I01/I02/I03) and must not be merged as a completed C01-I04. It is suitable for review and follow-up implementation, not production attribution. A further explicit versioned real-domain policy/dispatch integration is required, preserving the fixture contract and historical 1.0.0.
 
 No real Maven POM or bridge archive for JUnit, Spring Framework or Apache Log4j has been identified in the examined branch. The synthetic records used by unit tests are contract fixtures only and must not be presented as evidence for any pilot. All three pilots remain INDETERMINATE pending controlled acquisition and archival of independent attribution Evidence.
+
+## Hardening on PR #31
+
+The bridge archive must now contain a structured `attributedToProjectIdentity` observation explicitly naming the exact PackageIdentity, ExternalIdentity and ProjectIdentity; arbitrary prose with a matching digest is insufficient. Conflicting archived attributions are retained as separate Assertions with an explicit Conflict referencing both. Dossier outputs are recursively frozen, and duplicate evidence IDs are rejected by the corresponding endpoint validation.
+
+This is **content integrity and explicit referent matching**, not independent authentication of the publisher or verification of the underlying factual claim. In particular, a caller could construct a self-consistent synthetic record. Until controlled source provenance and independent verification are implemented, synthetic `VERIFIED` test results must not be interpreted as real-world proof.
+
+The historical C01-I01 fixture dispatch, C01-I02 fixture qualification and C01-I03 acceptance are not yet generalized to this real predicate. Integration T40–T44 and a real JUnit archive are still required. Do not merge PR #31 merely because unit tests pass.
