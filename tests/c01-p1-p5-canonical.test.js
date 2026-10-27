@@ -1,0 +1,18 @@
+'use strict';
+const test=require('node:test'),assert=require('node:assert/strict');
+const {materialize,verify}=require('../js/c01-p1-p5-evidence.js');
+const expected={packageIdentityId:'maven:junit:junit:4.13.2',projectIdentityId:'project:3b8b92fd783639e12f59ff6256967b246edd5249343217fb6d669a6ce688ff8e',snapshotDigest:'a61190267f2c520a70ed08ef6183e7d7b1492009c252f3e4dd2677f4f4378fb1'};
+const complete=()=>materialize();
+test('EV-P1-01 EV-P2-01 EV-P3-01 EV-P4-01 EV-P5-01 real repository archives produce five canonical evidence records',()=>{const x=complete();assert.equal(x.length,5);assert.deepEqual(x.map(y=>y.propositionId),['P1','P2','P3','P4','P5']);assert.equal(verify(x,expected).status,'BRIDGE_EVIDENCE_COMPLETE');});
+for(let i=0;i<5;i++)test('BR-0'+(i+2)+' missing P'+(i+1)+' is INCOMPLETE',()=>{assert.equal(verify(complete().filter(x=>x.propositionId!=='P'+(i+1)),expected).status,'BRIDGE_EVIDENCE_INCOMPLETE');});
+for(const [name,mutate] of [['EV-P1-02 P1 altered',x=>x[0].sourceDigest='0'.repeat(64)],['EV-P2-02 P2 tag altered',x=>x[1].observedValue='r4.13.1'],['EV-P3-02 tag blob altered',x=>x[2].sourceDigest='0'.repeat(64)],['EV-P4-02 Maven POM altered',x=>x[3].sourceDigest='0'.repeat(64)],['EV-P5-02 Y altered',x=>x[4].subjectId='project:wrong'],['EV-P5-03 snapshot altered',x=>x[4].observedValue='bad'],['BR-07 name only',x=>x[0].verificationMethod='name-match'],['BR-08 URL only',x=>x[0].verificationMethod='url-match']])test(name,()=>{const x=structuredClone(complete());mutate(x);assert.equal(verify(x,expected).status,'BRIDGE_EVIDENCE_INVALID');});
+test('BR-09 wrong version invalid',()=>assert.equal(verify(complete(),{...expected,packageIdentityId:'maven:junit:junit:4.13.1'}).status,'BRIDGE_EVIDENCE_INVALID'));
+test('BR-10 wrong project invalid',()=>assert.equal(verify(complete(),{...expected,projectIdentityId:'project:wrong'}).status,'BRIDGE_EVIDENCE_INVALID'));
+test('BR-11 wrong snapshot invalid',()=>assert.equal(verify(complete(),{...expected,snapshotDigest:'0'.repeat(64)}).status,'BRIDGE_EVIDENCE_INVALID'));
+test('BR-12 altered tagged POM evidence invalid',()=>{const x=structuredClone(complete());x[2].contentDigest='0'.repeat(64);assert.equal(verify(x,expected).status,'BRIDGE_EVIDENCE_INVALID');});
+test('BR-13 altered Maven POM evidence invalid',()=>{const x=structuredClone(complete());x[3].observedValue='mismatch';assert.equal(verify(x,expected).status,'BRIDGE_EVIDENCE_INVALID');});
+test('BR-14 EV-ORDER-01 permutation same digest',()=>assert.deepEqual(verify(complete(),expected),verify(complete().reverse(),expected)));
+test('BR-15 unrelated extra evidence excluded from verification digest',()=>{const x=complete();assert.deepEqual(verify(x,expected),verify([...x,{propositionId:'OTHER',id:'extra'}],expected));});
+test('BR-19 incomplete technical provenance never complete',()=>assert.equal(verify(complete().slice(2),expected).status,'BRIDGE_EVIDENCE_INCOMPLETE'));
+test('BR-20 EV-OFFLINE-01 deterministic archive reconstruction',()=>assert.deepEqual(verify(materialize(),expected),verify(materialize(),expected)));
+test('duplicate evidence is invalid',()=>assert.equal(verify([...complete(),complete()[0]],expected).status,'BRIDGE_EVIDENCE_INVALID'));
