@@ -9,7 +9,7 @@ const {dossier:junitDossier}=require('./c01-junit-real-attribution.test.js');
 const base=path.join(__dirname,'../fixtures/c01/log4j');
 const read=p=>fs.readFileSync(path.join(base,p),'utf8');
 const sha=s=>crypto.createHash('sha256').update(s).digest('hex');
-const pkg='maven:org.log4jframework:log4j-core:2.23.1';
+const pkg='maven:org.apache.logging.log4j:log4j-core:2.23.1';
 const project='project:4cf1b8a8c5718164a1abd9de619fa7c15415c9ad94e0ea0dba781dc2b9fa2f48';
 const claim={predicate:'attributedToProjectIdentity',packageIdentityId:pkg,externalIdentityId:pkg,projectIdentityId:project};
 function dossier(){
