@@ -1,0 +1,17 @@
+'use strict';
+const test=require('node:test'),assert=require('node:assert/strict');
+const {resolveGovernance,verifyGovernance,resolveSyntheticConflictForTest}=require('../js/e01-governance.js');
+const registry=require('../js/c01-corpus-registry.js');
+const id=registry.approved.find(x=>x.contractDomain==='C01-I06').projectIdentityId;
+const observedAt='2026-10-27T13:49:41.385Z';
+const foundation={projectIdentityId:id,predicate:'governedByFoundation',object:'Apache Software Foundation',source:{archivePath:'fixtures/e01/apache/apache-logging-guidelines.html',sourceUrl:'https://logging.apache.org/guidelines.html',selector:'Logging Services is a <em>project</em> of the <a href="https://apache.org">Apache Software Foundation</a> (ASF) and composed of several <em>subprojects</em>; Log4cxx, Log4j',observedAt}};
+const maintainer={projectIdentityId:id,predicate:'maintainedBy',object:'Apache Logging Project Management Committee',source:{archivePath:'fixtures/e01/apache/apache-log4j-guidelines.html',sourceUrl:'https://logging.apache.org/log4j/2.3.x/guidelines.html',selector:'Apache Logging Project Management Committee</b></dt>\n          <dd>The group of volunteers who are responsible for managing the Apache',observedAt}};
+const run=claims=>resolveGovernance({projectIdentityId:id,claims});
+test('E-F01 real ASF Foundation documented as Log4j subproject',()=>{const r=run([foundation]);assert.equal(r.decisions.governedByFoundation.status,'VERIFIED');assert.ok(verifyGovernance(r))});
+test('E-M01 real collective Apache Logging PMC responsibility',()=>{const r=run([maintainer]);assert.equal(r.decisions.maintainedBy.status,'VERIFIED');assert.ok(verifyGovernance(r))});
+test('E-F02 E-M02 E-M03 E-O02 no inference from Apache name, contributor or domain',()=>{for(const c of [{...foundation,source:null},{...maintainer,source:{...maintainer.source,selector:'Log4j Developers'}},{...maintainer,object:'GitHub organization member'},{...foundation,object:'apache.org'}])assert.equal(run([c]).assertions.length,0)});
+test('E-U01 unknown stays unknown',()=>assert.equal(run([]).decisions.maintainedBy.status,'UNKNOWN'));
+test('E-T01 time bounds preserved',()=>assert.equal(run([{...foundation,source:{...foundation.source,validFrom:'2003-12-17',validTo:'2024-01-01'}}]).evidence[0].validTo,'2024-01-01'));
+test('E-P01 E-R01 offline permutation replay stable',()=>{const a=run([foundation,maintainer]),b=run([maintainer,foundation]);assert.deepEqual(a,b);assert.deepEqual(run([foundation,maintainer]),a)});
+test('E-C01 controlled SYNTHETIC TEST ONLY conflicting governance observations',()=>{const r=resolveSyntheticConflictForTest(id,'governedByFoundation',['Synthetic Foundation A','Synthetic Foundation B']);assert.equal(r.testOnly,true);assert.equal(r.evidence.length,2);assert.equal(r.assertions.length,2);assert.equal(r.conflicts.length,1);assert.equal(r.decisions.governedByFoundation.status,'CONFLICTED');assert.equal(verifyGovernance(r),false);assert.deepEqual(r,resolveSyntheticConflictForTest(id,'governedByFoundation',['Synthetic Foundation B','Synthetic Foundation A']))});
+test('E-3P three actual projects coexist',()=>{const ids=[...new Set([...registry.approved.map(x=>x.projectIdentityId),'project:3b8b92fd783639e12f59ff6256967b246edd5249343217fb6d669a6ce688ff8e'])];assert.equal(ids.length,3);const r=ids.map(projectIdentityId=>resolveGovernance({projectIdentityId,claims:projectIdentityId===id?[foundation,maintainer]:[]}));assert.equal(new Set(r.map(x=>x.decisions.governedByFoundation.id)).size,3);assert.ok(r.every(verifyGovernance))});
