@@ -1,0 +1,809 @@
+# MAYA — PROJECT STATUS
+
+**Status date:** 27 October 2026  
+**Current phase:** Lot D — Technical Metadata  
+**Repository:** https://github.com/ldchloe/MAYA
+
+---
+
+# 1. Vision
+
+MAYA is a software trust analysis platform built from SBOM data.
+
+Its purpose is to transform software inventory information into an explainable, auditable and reproducible assessment of:
+
+- technical risk;
+- software governance;
+- software supply-chain risk;
+- geopolitical exposure;
+- critical dependencies;
+- overall software trust.
+
+The target architecture is:
+
+SBOM
+↓
+Canonical Model
+↓
+Enrichment
+↓
+Package Identity Resolution
+↓
+Project Resolution
+↓
+Governance Resolution
+↓
+Geographic Facts
+↓
+Trust Events
+↓
+Trust Assessment
+↓
+COMEX / Excel Reporting
+
+The final geopolitical analysis is European-centric, with particular attention to dependencies on organizations, infrastructure and jurisdictions outside Europe.
+
+No geopolitical conclusion may be inferred solely from a namespace, name, domain name, repository host or programming language.
+
+---
+
+# 2. Core architectural principles
+
+## 2.1 Canonical SBOM immutability
+
+The imported CycloneDX/SPDX document is canonical source data.
+
+Enrichment MUST NOT mutate the canonical SBOM.
+
+External knowledge is stored separately.
+
+## 2.2 Evidence-based enrichment
+
+The fundamental MAYA model is:
+
+Evidence
+↓
+Assertion
+↓
+Conflict
+↓
+Decision
+
+### Evidence
+
+An immutable and traceable observation or proof.
+
+Evidence may be:
+
+- declarative;
+- observed;
+- verified;
+- derived.
+
+### Assertion
+
+A verifiable proposition supported by Evidence.
+
+An Assertion without valid Evidence is forbidden.
+
+### Conflict
+
+Represents contradictory, incompatible or competing propositions.
+
+Conflicts are preserved even when a Decision is eventually produced.
+
+### Decision
+
+Represents a reproducible resolution.
+
+A Decision records:
+
+- what was selected;
+- what was rejected;
+- why;
+- which Assertions and Evidence were involved;
+- which Policy and engine produced the result.
+
+---
+
+# 3. Architectural invariants
+
+The following invariants apply across MAYA.
+
+1. The canonical document is never modified.
+2. Every enrichment references an existing component.
+3. Every Assertion has at least one valid Evidence.
+4. Evidence is immutable after creation.
+5. Conflicts are preserved.
+6. Unknown information remains unknown/null.
+7. Decisions are reproducible.
+8. Identifiers are unique.
+9. No association is created from simple name similarity.
+10. No governance, supply-chain or geopolitical score is produced without explicit data.
+11. Historical scoring remains unchanged.
+12. The enrichment foundation supports offline replay.
+
+Additional prohibited inference patterns include:
+
+- country inferred from namespace;
+- nationality inferred from a person's name;
+- jurisdiction inferred from a domain name;
+- geography inferred from a software forge;
+- Project identity inferred from name similarity;
+- official repository inferred solely from URL similarity.
+
+When MAYA cannot establish a proposition with sufficient evidence:
+
+UNKNOWN / INDETERMINATE
+
+is preferred to an unsupported assumption.
+
+---
+
+# 4. Completed foundations
+
+## Canonical Layer
+
+**Status: COMPLETE**
+
+Delivered:
+
+- CycloneDX JSON import;
+- components;
+- services;
+- dependencies;
+- licenses;
+- identifiers;
+- external references;
+- dependency graph;
+- historical scoring compatibility.
+
+---
+
+# 5. Lot A — Foundation Layer
+
+**Status: COMPLETE**
+
+**Closure date:** 19 October 2026
+
+Delivered:
+
+- ComponentEnrichment;
+- Evidence;
+- Assertion;
+- Conflict;
+- Decision;
+- revision/versioning mechanisms;
+- auditability;
+- Trust Boundary.
+
+Lot A established the reusable evidence model used by all subsequent enrichment layers.
+
+---
+
+# 6. Lot B — Identity Resolution
+
+**Status: COMPLETE**
+
+**Closure date:** 23 October 2026
+
+Primary scope:
+
+SBOM Component
+↓
+PackageIdentity
+
+Delivered:
+
+- Maven PackageIdentity;
+- Maven coordinate extraction;
+- PURL validation and normalization;
+- Maven Central resolution;
+- Maven observations;
+- raw observation archiving;
+- SHA-256 integrity controls;
+- Evidence / Assertion / Decision integration;
+- offline replay;
+- Lot A integration;
+- historical non-regression.
+
+The Lot B workflow established the rule:
+
+network acquisition
+↓
+immutable local archive
+↓
+Evidence
+↓
+reproducible Decision
+
+External network access is not required to replay an already archived observation.
+
+---
+
+# 7. Lot C — Project Resolution
+
+## Status
+
+**COMPLETE — MVP C-01**
+
+## Objective
+
+Resolve:
+
+PackageIdentity
+↓
+ProjectIdentity
+
+without relying on name similarity, namespace heuristics or repository guesses.
+
+## C-01 — PackageIdentity → Project
+
+**Status: VALIDATED**
+
+The C-01 implementation introduced and validated:
+
+- opaque ProjectIdentity;
+- independent project identity allocation;
+- explicit Package → Project attribution;
+- independent verification of PackageIdentity;
+- independent verification of ProjectIdentity;
+- explicit bridge Evidence;
+- authority-scoped bridge verification;
+- Policy-driven eligibility;
+- documentary qualification;
+- completeness proof;
+- independent completeness verification;
+- integrated snapshot acceptance;
+- deterministic Decisions;
+- Conflict preservation;
+- fail-closed behavior;
+- offline end-to-end replay.
+
+---
+
+# 8. C-01 validated real-world pilots
+
+Three independent real-world project mappings have been validated.
+
+## JUnit
+
+Package:
+
+`junit:junit:4.13.2`
+
+Resolved project:
+
+`JUnit`
+
+Status:
+
+**VALIDATED**
+
+The JUnit pilot served as the first complete proof of the PackageIdentity → ProjectIdentity pipeline.
+
+It validated the full sequence:
+
+Package observation
+↓
+ProjectIdentity
+↓
+Bridge Evidence
+↓
+Authority
+↓
+Eligibility
+↓
+Qualification
+↓
+Completeness
+↓
+Acceptance
+↓
+Decision
+↓
+Offline Replay
+
+---
+
+## Spring Framework
+
+Package:
+
+`org.springframework:spring-core:6.1.3`
+
+Resolved project:
+
+`Spring Framework`
+
+Status:
+
+**VALIDATED**
+
+The Spring pilot demonstrated that the JUnit mechanism was reusable and not project-specific.
+
+It additionally validated a multi-module project model:
+
+PackageIdentity
+≠
+ProjectIdentity
+
+Multiple packages may legitimately refer to the same ProjectIdentity without merging package identities.
+
+---
+
+## Apache Log4j
+
+Package:
+
+`org.apache.logging.log4j:log4j-core:2.23.1`
+
+Resolved project:
+
+`Apache Log4j`
+
+Status:
+
+**VALIDATED**
+
+The Log4j pilot is the third independent validation of the generic Package → Project resolution pipeline.
+
+The pipeline was validated with:
+
+- real Maven Central observation;
+- independently allocated ProjectIdentity;
+- official Apache project sources;
+- exact bridge authority scope;
+- verified Package → Project bridge;
+- positive Eligibility;
+- complete qualification;
+- valid completeness proof;
+- integrated acceptance;
+- deterministic Decision;
+- negative controls;
+- offline replay.
+
+---
+
+# 9. C-01 genericity validation
+
+The combined JUnit + Spring Framework + Apache Log4j validation demonstrates that MAYA can support multiple independent:
+
+- PackageIdentity objects;
+- ProjectIdentity objects;
+- Evidence sets;
+- authorities;
+- Assertions;
+- Decisions.
+
+The combined validation verifies:
+
+- no identifier collisions;
+- no Evidence cross-contamination;
+- no Decision cross-contamination;
+- deterministic results across ingestion permutations;
+- deterministic offline replay;
+- fail-closed behavior;
+- preservation of competing Assertions and Conflicts.
+
+The generic pipeline therefore does not depend on hard-coded JUnit, Spring or Log4j semantics.
+
+---
+
+# 10. Lot C closure decision
+
+## Active MVP scope
+
+The active Lot C / C-01 scope is:
+
+PackageIdentity
+↓
+ProjectIdentity
+
+This scope is now complete.
+
+Historical roadmap items such as:
+
+- Project → Repository;
+- monorepos;
+- forks;
+- mirrors;
+
+are not required for closure of the current MVP C-01 scope.
+
+They remain possible backlog items and may be reopened later if required by downstream analysis.
+
+## Verdict
+
+**LOT C MVP — COMPLETE**
+
+**C-01 PACKAGEIDENTITY → PROJECT — VALIDATED**
+
+The project can proceed to Lot D without reopening Lot C architecture.
+
+---
+
+# 11. Current validated architecture
+
+MAYA currently has the following validated pipeline:
+
+SBOM
+↓
+Canonical Component
+↓
+ComponentEnrichment
+↓
+PackageIdentity
+↓
+ProjectIdentity
+↓
+Evidence
+↓
+Assertion
+↓
+Conflict
+↓
+Qualification
+↓
+Completeness Proof
+↓
+Eligibility
+↓
+Decision
+↓
+Offline Replay
+
+This pipeline constitutes the technical and probative foundation for subsequent governance and geopolitical layers.
+
+---
+
+# 12. Lot D — Technical Metadata
+
+## Status
+
+**NEXT / READY TO START**
+
+## Objective
+
+Enrich components and projects with technical metadata while reusing the existing evidence model.
+
+Initial scope:
+
+### Licenses
+
+- declared licenses;
+- concluded licenses;
+- CycloneDX licenses;
+- SPDX licenses.
+
+### SPDX expressions
+
+Examples:
+
+- `Apache-2.0`;
+- `MIT OR Apache-2.0`;
+- `MIT AND Apache-2.0`;
+- expressions using SPDX exceptions where supported.
+
+### License conflicts
+
+Preserve contradictory license information from multiple sources.
+
+A difference between a declared and concluded license MUST NOT automatically be interpreted as a Conflict because the two fields have different semantics.
+
+### Languages
+
+Only explicit language information may be accepted.
+
+No programming language may be inferred from:
+
+- project name;
+- Maven namespace;
+- repository host;
+- package name;
+- assumed file extensions.
+
+If unavailable:
+
+`language = null / UNKNOWN`
+
+## Preferred implementation strategy
+
+Lot D should maximize reuse of:
+
+Evidence
+↓
+Assertion
+↓
+Conflict
+↓
+Decision
+
+and of the canonical SBOM license representation.
+
+External data acquisition SHOULD NOT be required for the Lot D MVP when the relevant metadata is already available in the SBOM.
+
+Target delivery:
+
+one implementation branch
+↓
+one PR
+↓
+full CI
+↓
+merge
+↓
+Lot D closure
+
+---
+
+# 13. Lot E — Governance Layer
+
+**Status: NOT STARTED**
+
+Planned scope:
+
+- Organization;
+- Foundation;
+- Maintainer;
+- governance relationships;
+- ownership/stewardship.
+
+Expected first relationship:
+
+ProjectIdentity
+↓
+Organization
+
+All governance relationships must be documented and evidence-backed.
+
+---
+
+# 14. Lot F — Geographic Facts
+
+**Status: NOT STARTED**
+
+Planned scope:
+
+- CountryRelationship;
+- jurisdiction;
+- hosting;
+- documented location;
+- legal attachment.
+
+Critical rule:
+
+Geography and jurisdiction MUST NOT be inferred from names, namespaces, domains or software forges.
+
+---
+
+# 15. Lot G — Trust Events
+
+**Status: NOT STARTED**
+
+Planned events include:
+
+- acquisition;
+- ownership change;
+- governance change;
+- maintainer change;
+- license change;
+- repository change;
+- foundation change;
+- supply-chain incident;
+- compromise.
+
+Trust Events are historical facts, not risk scores.
+
+They must themselves be evidence-backed and timestamped.
+
+---
+
+# 16. Lot H — Trust Analysis
+
+**Status: NOT STARTED**
+
+Target capabilities:
+
+- TrustAssessment;
+- governance assessment;
+- supply-chain analysis;
+- governance concentration;
+- geopolitical exposure;
+- critical dependency analysis;
+- explainable trust score /100.
+
+This is the stage where MAYA will convert verified facts and relationships into an assessment.
+
+A score MUST NOT be used to manufacture missing facts.
+
+The expected direction is:
+
+Verified Facts
+↓
+Evidence
+↓
+Assertions
+↓
+Decisions
+↓
+Documented Interpretation
+↓
+Risk Dimensions
+↓
+Trust Score
+
+---
+
+# 17. Geopolitical target model
+
+The geopolitical perspective is primarily European and French-client oriented.
+
+Future analysis should consider evidence-backed information such as:
+
+- legal jurisdiction of organizations;
+- country relationships;
+- locations of relevant infrastructure;
+- documented maintainer locations where available;
+- ownership relationships;
+- foundation relationships;
+- state relationships;
+- institutional relationships;
+- financial/control relationships;
+- acquisitions;
+- governance changes;
+- supply-chain incidents.
+
+Particular attention should be paid to structural dependencies on extra-European organizations, jurisdictions and infrastructure.
+
+Unknown data must remain explicitly unknown.
+
+---
+
+# 18. Reporting target
+
+The final product must support Excel reporting with two principal views.
+
+## COMEX sheet
+
+Executive-oriented view containing:
+
+- critical dependencies;
+- major geopolitical exposures;
+- governance concentration;
+- significant supply-chain risks;
+- notable changes/events;
+- highest-risk components;
+- confidence/coverage indicators.
+
+## Detailed sheet
+
+Component-level analysis containing:
+
+- component identity;
+- package;
+- project;
+- repository where validated;
+- organization;
+- foundation;
+- maintainers;
+- language;
+- licenses;
+- jurisdictions;
+- geographic relationships;
+- governance facts;
+- supply-chain events;
+- Evidence;
+- Conflicts;
+- Decisions;
+- risk dimensions;
+- final trust score.
+
+Wavestone visual styling should be applied to the final reporting workbook.
+
+---
+
+# 19. Current project status
+
+| Layer | Status |
+|---|---|
+| Canonical Layer | ✅ Complete |
+| Lot A — Foundation | ✅ Complete |
+| Lot B — Identity Resolution | ✅ Complete |
+| Lot C / C-01 — Project Resolution | ✅ Complete |
+| Lot D — Technical Metadata | 🟡 Next |
+| Lot E — Governance | ⬜ Not started |
+| Lot F — Geographic Facts | ⬜ Not started |
+| Lot G — Trust Events | ⬜ Not started |
+| Lot H — Trust Analysis | ⬜ Not started |
+| COMEX / Excel reporting | ⬜ Future |
+
+---
+
+# 20. Current priority
+
+## Priority #1
+
+**Lot D — Technical Metadata**
+
+Implement:
+
+1. licenses;
+2. SPDX expressions;
+3. license conflicts;
+4. explicit languages;
+5. Unknown handling.
+
+## Priority #2
+
+Validate Lot D against real existing SBOM fixtures.
+
+## Priority #3
+
+Merge Lot D into `main` with:
+
+- zero regression;
+- deterministic Decisions;
+- canonical SBOM unchanged;
+- offline replay;
+- full CI green.
+
+## Priority #4
+
+Start Lot E with:
+
+ProjectIdentity
+↓
+Organization
+
+---
+
+# 21. Development methodology
+
+Every material change follows:
+
+Design / contract
+↓
+Tests first
+↓
+Feature branch
+↓
+Implementation
+↓
+Targeted tests
+↓
+Historical regression tests
+↓
+Offline replay where applicable
+↓
+Full CI
+↓
+Pull Request
+↓
+Merge to main
+↓
+HEAD verification
+
+A feature is not considered delivered until its required gates are green and the change has been merged to `main`.
+
+---
+
+# 22. Status summary
+
+MAYA has progressed from SBOM parsing to a validated evidence-driven software identity pipeline.
+
+The system can now reproducibly resolve:
+
+SBOM Component
+↓
+PackageIdentity
+↓
+ProjectIdentity
+
+using archived official evidence without name-based inference and with deterministic offline replay.
+
+The next objective is to enrich these resolved software identities with structured technical metadata before proceeding to governance, geographic and geopolitical reasoning.
+
+**Current milestone: LOT C COMPLETE**
+
+**Next milestone: LOT D — TECHNICAL METADATA**
