@@ -46,3 +46,11 @@ test('R-18 R-19 canonical and legacy scoring unaffected',()=>{
  const a=run(),b=run();assert.deepEqual(a.canonical,b.canonical);
  assert.equal(a.portfolio.resultDigest,b.portfolio.resultDigest);
 });
+
+test('R-PERF medium real SBOM analysis and workbook generation timings', {timeout:60000},()=>{
+ const raw=fs.readFileSync(path.join(__dirname,'fixtures/b06-spring-feroz-sbom.json'),'utf8');
+ const start=process.hrtime.bigint(),a=analyzeSbom(raw,{fileName:'b06-spring-feroz-sbom.json',mode:'offline'});
+ const analyzed=process.hrtime.bigint(),bytes=createWorkbook(a),generated=process.hrtime.bigint();
+ assert.ok(a.components.length>12);assert.equal(inspectWorkbook(bytes).detailRows,a.components.length);
+ console.log('REPORTING_PERFORMANCE',JSON.stringify({components:a.components.length,analysisMs:Number(analyzed-start)/1e6,xlsxMs:Number(generated-analyzed)/1e6,bytes:bytes.length}));
+});
