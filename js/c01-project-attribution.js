@@ -3,6 +3,7 @@ const crypto=require('node:crypto');
 const canonical=require('./enrichment-canonical.js');
 const projects=require('./project-identity.js');
 const authority=require('./c01-bridge-authority.js');
+const approvedAuthorities=require('./c01-approved-authorities.js');
 
 const POLICY_ID='maya.c01.package-project-evidence',POLICY_VERSION='1.0.0';
 const sha=text=>crypto.createHash('sha256').update(Buffer.from(text,'utf8')).digest('hex');
@@ -60,8 +61,10 @@ function evaluate(d){
  const alternatives=bridges.filter(b=>isOtherCandidate(b,d));
  const incompatible=alternatives.length>0;
  const bridgeAuthority=matching.length>0&&matching.every(b=>authority.evaluate(b,{predicate:'attributedToProjectIdentity',packageIdentityId:d.packageIdentityId,externalIdentityId:d.externalIdentityId,projectIdentityId:d.projectIdentityId},d.authorityRules||[])==='APPLICABLE')?'APPLICABLE':'NOT_APPLICABLE';
- const vxy=unique(d.bridgeEvidence)&&bridges.length>0&&matching.length===bridges.length&&bridgeAuthority==='APPLICABLE'?'PASS':'FAIL';
- const validation={VX:vx,VY:vy,VXY:vxy,bridgeAuthority};
+ const junitH2Scope=d.projectIdentityId==='project:3b8b92fd783639e12f59ff6256967b246edd5249343217fb6d669a6ce688ff8e'&&d.externalIdentityId==='maven:junit:junit:4.13.2';
+ const repositoryH2Approved=!junitH2Scope||approvedAuthorities.evaluate(approvedAuthorities.loadRepositoryCandidate(),'c01:junit-4.13.2:project-attribution',{ecosystem:'maven',groupId:'junit',artifactId:'junit',version:'4.13.2',projectIdentityId:d.projectIdentityId},'attributedToProjectIdentity',['lot-b-maven-central-observation','upstream-release-pom','independent-project-readme','approved-project-identity-snapshot'])==='APPLICABLE';
+ const vxy=unique(d.bridgeEvidence)&&bridges.length>0&&matching.length===bridges.length&&bridgeAuthority==='APPLICABLE'&&repositoryH2Approved?'PASS':'FAIL';
+ const validation={VX:vx,VY:vy,VXY:vxy,bridgeAuthority:junitH2Scope&&!repositoryH2Approved?'NOT_APPLICABLE':bridgeAuthority};
  const eligible=vx==='PASS'&&vy==='PASS'&&vxy==='PASS'&&!incompatible&&d.exclusive!==false;
  const basis={policyId:POLICY_ID,policyVersion:POLICY_VERSION,packageIdentityId:d.packageIdentityId,
   externalIdentityId:d.externalIdentityId,projectIdentityId:d.projectIdentityId,
