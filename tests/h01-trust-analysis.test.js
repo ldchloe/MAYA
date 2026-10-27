@@ -12,3 +12,37 @@ test('H-05 H-12 H-13 H-14 conflicts, releases and incidents are distinct',()=>{c
 test('H-16 criticality and H-17 concentration explicit policy',()=>{const r=assess({criticality:'CRITICAL',criticalityEvidenceId:'e1',concentration:fact('VERIFIED',{percentage:60,denominator:5,numerator:3,decisionId:'d1'})});assert.ok(r.dimensions[5].riskScore>0);assert.ok(r.dimensions[3].riskScore>0)});
 test('H-18 H-19 H-20 offline determinism, policy version',()=>{assert.deepEqual(assess(),assess());const p=structuredClone(policy);p.version='H01-test-v2';assert.notEqual(assess({},p).resultDigest,assess().resultDigest)});
 test('H-23 H-25 portfolio aggregation, no fabricated critical dependencies',()=>{const r=assessSbom([base,{...base,subjectId:'project:other'}]);assert.equal(r.componentAssessments.length,2);assert.equal(r.overallTrustScore,null);assert.deepEqual(r.criticalDependencies,[]);assert.ok(r.executiveSummary)});
+
+test('H-23 H-24 H-25 three real project identities from verified E/F/G offline decisions',()=>{
+ const fs=require('node:fs'),path=require('node:path');
+ const {assessVerifiedProject}=require('../js/h01-trust-analysis.js');
+ const {resolveGovernance}=require('../js/e01-governance.js');
+ const {resolveGeographicFacts}=require('../js/f01-geographic-facts.js');
+ const {resolveTrustEvents}=require('../js/g01-trust-events.js');
+ const registry=require('../js/c01-corpus-registry.js');
+ const ids=[registry.approved[0].projectIdentityId,registry.approved[1].projectIdentityId,'project:3b8b92fd783639e12f59ff6256967b246edd5249343217fb6d669a6ce688ff8e'];
+ const meta=JSON.parse(fs.readFileSync(path.resolve(__dirname,'../fixtures/f01/asf/corporation.metadata.json'),'utf8'));
+ const claim={subject:'Apache Software Foundation',relationship:'LEGAL_JURISDICTION',countryCode:'US',countryObserved:'United States',jurisdictionSubdivision:'Delaware',source:{archivePath:'fixtures/f01/asf/corporation.html',sourceUrl:meta.finalUrl,selector:'The ASF is a Delaware membership corporation',acquiredAt:meta.acquiredAt,archiveSha256:meta.sha256}};
+ const assessments=ids.map(subjectId=>{
+  const geographic=resolveGeographicFacts({projectIdentityId:subjectId,claims:subjectId===ids[1]?[claim]:[]});
+  const governance=resolveGovernance({projectIdentityId:subjectId,claims:[]});
+  const releaseClaims=subjectId===ids[2]?['r4.13.1','r4.13.2'].map(tag=>{
+   const root=path.resolve(__dirname,'../fixtures/g01/junit');
+   const m=JSON.parse(fs.readFileSync(path.join(root,tag+'.metadata.json'),'utf8'));
+   const raw=JSON.parse(fs.readFileSync(path.join(root,tag+'.json'),'utf8'));
+   return {eventType:'RELEASE',subject:subjectId,after:tag,effectiveAt:raw.published_at,source:{archiveSha256:m.sha256,archiveId:m.archiveId,acquiredAt:m.acquiredAt}};
+  }):[];
+  const events=resolveTrustEvents({projectIdentityId:subjectId,claims:releaseClaims});
+  const a=assessVerifiedProject({subjectId,governance,geographic,events});
+  assert.deepEqual(a,assessVerifiedProject({subjectId,governance,geographic,events}));
+  return a;
+ });
+ assert.equal(assessments.length,3);
+ assert.equal(assessments[1].dimensions.find(x=>x.type==='GEOPOLITICAL_RISK').riskScore,policy.riskRules.geopolitical.NON_EU);
+ assert.equal(assessments[2].dimensions.find(x=>x.type==='SUPPLY_CHAIN_RISK').riskScore,0);
+ assert.equal(assessments[0].trustScore,null);
+});
+test('H-10 H-11 forged verified Lot F input fails closed',()=>{
+ const {assessVerifiedProject}=require('../js/h01-trust-analysis.js');
+ assert.throws(()=>assessVerifiedProject({subjectId:'project:test',geographic:{projectIdentityId:'project:test',decisions:{LEGAL_JURISDICTION:{status:'VERIFIED',countryCodes:['US']}}}}));
+});
