@@ -2,6 +2,7 @@
 const crypto=require('node:crypto');
 const canonical=require('./enrichment-canonical.js');
 const projects=require('./project-identity.js');
+const authority=require('./c01-bridge-authority.js');
 
 const POLICY_ID='maya.c01.package-project-evidence',POLICY_VERSION='1.0.0';
 const sha=text=>crypto.createHash('sha256').update(Buffer.from(text,'utf8')).digest('hex');
@@ -58,13 +59,14 @@ function evaluate(d){
  const matching=bridges.filter(b=>validBridge(b,d));
  const alternatives=bridges.filter(b=>isOtherCandidate(b,d));
  const incompatible=alternatives.length>0;
- const vxy=unique(d.bridgeEvidence)&&bridges.length>0&&matching.length===bridges.length?'PASS':'FAIL';
- const validation={VX:vx,VY:vy,VXY:vxy};
+ const bridgeAuthority=matching.length>0&&matching.every(b=>authority.evaluate(b,{predicate:'attributedToProjectIdentity',packageIdentityId:d.packageIdentityId,externalIdentityId:d.externalIdentityId,projectIdentityId:d.projectIdentityId},d.authorityRules||[])==='APPLICABLE')?'APPLICABLE':'NOT_APPLICABLE';
+ const vxy=unique(d.bridgeEvidence)&&bridges.length>0&&matching.length===bridges.length&&bridgeAuthority==='APPLICABLE'?'PASS':'FAIL';
+ const validation={VX:vx,VY:vy,VXY:vxy,bridgeAuthority};
  const eligible=vx==='PASS'&&vy==='PASS'&&vxy==='PASS'&&!incompatible&&d.exclusive!==false;
  const basis={policyId:POLICY_ID,policyVersion:POLICY_VERSION,packageIdentityId:d.packageIdentityId,
   externalIdentityId:d.externalIdentityId,projectIdentityId:d.projectIdentityId,
   projectSnapshotDigest:d.projectSnapshot?.snapshotDigest||null,
-  archives,bridgeEvidence:bridges,validation,exclusive:d.exclusive===true};
+  archives,bridgeEvidence:bridges,authorityRules:d.authorityRules||[],validation,exclusive:d.exclusive===true};
  const dossierDigest=digest(basis);
  const assertion=makeAssertion(d,d.projectIdentityId,matching.map(b=>b.id));
  const assertions=[assertion,...alternatives.map(b=>makeAssertion(d,b.projectIdentityId,[b.id]))].sort((a,b)=>a.id.localeCompare(b.id));
