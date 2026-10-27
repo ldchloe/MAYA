@@ -16,9 +16,9 @@ test('R-03 R-04 R-07 R-08 reporting consumes H01 unchanged',()=>{
  const a=run(),x=inspectWorkbook(createWorkbook(a));
  assert.equal(x.overallTrustScore,a.executiveSummary.overallTrustScore);
  assert.equal(x.overallCoverage,a.executiveSummary.overallCoverage);
- assert.equal(x.detail[0].trustScore,a.assessments[0].trustScore);
- assert.equal(x.detail[0].evidenceCoverage,a.assessments[0].evidenceCoverage);
- assert.deepEqual(x.detail[0].risks,a.assessments[0].dimensions.map(d=>d.riskScore));
+ assert.deepEqual(x.detail.map(d=>d.trustScore).sort(),a.assessments.map(d=>d.trustScore).sort());
+ assert.deepEqual(x.detail.map(d=>d.evidenceCoverage).sort(),a.assessments.map(d=>d.evidenceCoverage).sort());
+ assert.deepEqual(x.detail.map(d=>d.risks.join(',')).sort(),a.assessments.map(a=>a.dimensions.map(d=>d.riskScore).join(',')).sort());
 });
 test('R-05 R-06 R-13 R-14 unknown/conflict and traceability represented',()=>{
  const a=run(),x=inspectWorkbook(createWorkbook(a));
