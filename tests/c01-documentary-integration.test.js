@@ -1,0 +1,11 @@
+'use strict';
+const test=require('node:test'),assert=require('node:assert/strict');
+const {fixture,refresh,clone}=require('./c01-documentary-fixtures.js');
+const {qualify,RULES_ID,RULES_VERSION}=require('../js/c01-documentary-qualification.js');
+const {createProof}=require('../js/c01-completeness-proof.js');
+const {verify}=require('../js/c01-completeness-verifier.js');
+const boundary=require('../js/c01-resolution-boundary.js');
+const canonical=require('../js/enrichment-canonical.js');
+test('T28 historical snapshot path does not call documentary qualification',()=>{const {fixture:historical,doc}=require('./enrichment-helpers.js');const store=require('../js/enrichment-store.js');assert.equal(store.validateSnapshot(historical(),doc),true);assert.equal(historical().schemaVersion,'1.0.0');});
+test('T29 offline qualification replays exactly without network',()=>{const e=fixture({values:['alpha','beta'],allowed:[]});const q=qualify(e);e.payload.conflicts=clone(q.conflicts);refresh(e);const first=createProof(e,qualify(e)),second=createProof(clone(e),qualify(clone(e)));assert.equal(canonical.canonicalJSON(first),canonical.canonicalJSON(second));assert.equal(verify(e,e.payload,{id:RULES_ID,version:RULES_VERSION},first),true);});
+test('T30 qualification includes excluded assertions, resolver only receives eligible',()=>{const e=fixture({values:['alpha','beta'],allowed:['a1']});const q=qualify(e);e.payload.conflicts=clone(q.conflicts);refresh(e);const p=createProof(e,qualify(e));assert.equal(verify(e,e.payload,{id:RULES_ID,version:RULES_VERSION},p),true);const r=boundary.run(e);assert.deepEqual(p.examinedAssertionIds,['a1','a2']);assert.deepEqual(r.eligibleIds,['a1']);assert.deepEqual(r.transmittedIds,['a1']);assert.deepEqual(r.nonEligibleIds,['a2']);assert.equal(e.payload.conflicts.length,1);assert.equal(r.engineResult.decisions.length,1);});
