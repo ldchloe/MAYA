@@ -1,0 +1,21 @@
+'use strict';
+const test=require('node:test'),assert=require('node:assert/strict');
+const {prepared,clone,refresh}=require('./c01-snapshot-acceptance-fixtures.js');
+const {acceptDocumentarySnapshot,verifyAcceptanceResult}=require('../js/c01-snapshot-acceptance.js');
+function status(e){return acceptDocumentarySnapshot(e).acceptanceStatus;}
+test('T31 accepted complete snapshot',()=>{const e=prepared({values:['alpha','gamma']});const r=acceptDocumentarySnapshot(e);assert.equal(r.acceptanceStatus,'ACCEPTED');assert.equal(verifyAcceptanceResult(e,r),true);});
+test('T32 missing conflict rejected',()=>{const e=prepared({values:['alpha','beta']});e.payload.conflicts=[];refresh(e);assert.equal(status(e),'REJECTED');});
+test('T33 invalid completeness proof rejected',()=>{const e=prepared();e.qualificationProof.examinedAssertionIds=[];assert.equal(status(e),'REJECTED');});
+test('T34 ineligible assertion preserved',()=>{const e=prepared({values:['alpha','gamma'],allowed:['a1']});assert.equal(status(e),'ACCEPTED');assert.deepEqual(e.payload.assertions.map(a=>a.id),['a1','a2']);assert.deepEqual(e.resolutionResult.transmittedIds,['a1']);});
+test('T35 noneligible assertion transmitted rejected',()=>{const e=prepared({values:['alpha','gamma'],allowed:['a1']});e.resolutionResult.transmittedIds.push('a2');assert.equal(status(e),'REJECTED');});
+test('T36 missing eligible decision rejected',()=>{const e=prepared();e.resolutionResult.engineResult.decisions=[];assert.equal(status(e),'REJECTED');});
+test('T37 unexpected decision rejected',()=>{const e=prepared();e.resolutionResult.engineResult.decisions.push(clone(e.resolutionResult.engineResult.decisions[0]));assert.equal(status(e),'REJECTED');});
+test('T38 payload digest invalid',()=>{const e=prepared();e.payloadDigest='bad';assert.equal(status(e),'REJECTED');});
+test('T39 context digest invalid',()=>{const e=prepared();e.validationContextDigest='bad';assert.equal(status(e),'REJECTED');});
+test('T40 unknown domain rejected',()=>{const e=prepared();e.contractDomain='other';assert.equal(status(e),'REJECTED');});
+test('T41 unsupported contract version rejected',()=>{const e=prepared();e.contractVersion='9.0.0';assert.equal(status(e),'REJECTED');});
+test('T42 indeterminate examination can be accepted',()=>{const e=prepared({values:['pending']});assert.equal(e.qualificationProof.examinations[0].result,'INDETERMINATE');assert.equal(status(e),'ACCEPTED');});
+test('T43 explicitly unavailable mandatory completeness verification indeterminate',()=>{const e=prepared();delete e.qualificationProof;e.qualificationVerificationStatus='UNAVAILABLE';assert.equal(status(e),'INDETERMINATE');});
+test('T44 superseded allowlisted assertion never transmitted',()=>{const e=prepared({values:['alpha','gamma'],allowed:['a1','a2']});e.payload.assertions[1].supersedesAssertionIds=['a1'];refresh(e);e.qualificationProof=require('../js/c01-completeness-proof.js').createProof(e,require('../js/c01-documentary-qualification.js').qualify(e));e.resolutionResult=require('../js/c01-resolution-boundary.js').run(e);assert.equal(status(e),'ACCEPTED');assert.deepEqual(e.resolutionResult.transmittedIds,['a2']);});
+test('T45 noneligible conflict retained',()=>{const e=prepared({values:['alpha','beta'],allowed:['a1']});assert.equal(status(e),'ACCEPTED');assert.equal(e.payload.conflicts.length,1);assert.deepEqual(e.resolutionResult.transmittedIds,['a1']);});
+test('T49 direct lower-level result cannot masquerade as acceptance',()=>{const e=prepared(),raw=e.resolutionResult;assert.equal(verifyAcceptanceResult(e,raw),false);assert.equal(verifyAcceptanceResult(e,e.qualificationProof),false);});
