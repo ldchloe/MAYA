@@ -9,7 +9,7 @@ const archiveScopes=Object.freeze({
  'fixtures/c01/junit4-r4.13.2-upstream-pom.xml':{projectId:'project:3b8b92fd783639e12f59ff6256967b246edd5249343217fb6d669a6ce688ff8e'},
  'fixtures/c01/spring/spring-framework-v6.1.3-readme.md':{domain:'C01-I05'},
  'fixtures/c01/log4j/apache-log4j-parent-pom.xml':{domain:'C01-I06'},
- 'fixtures/e01/apache/apache-logging-guidelines.html':{domain:'C01-I06',sha256:'55d5377bdf82ec38d4bd8357c97095a6a059b86c2e771598c848f94a872102f3',url:'https://logging.apache.org/guidelines.html',observedAt:'2026-10-27T13:49:41.385Z'},
+ 'fixtures/e01/apache/apache-logging-guidelines.html':{domain:'C01-I06',sha256:'55d5377bdf82ec38d4bd8357c97095a6a059b86c2e771598c848f94a872102f3',subjectToken:'Log4j',url:'https://logging.apache.org/guidelines.html',observedAt:'2026-10-27T13:49:41.385Z'},
  'fixtures/e01/apache/apache-log4j-guidelines.html':{domain:'C01-I06',sha256:'9a51e1fca74ce85cc287cf2f87c405b028831746165b406e40ae5bca79e32fad',url:'https://logging.apache.org/log4j/2.3.x/guidelines.html',observedAt:'2026-10-27T13:49:41.505Z'},
  'fixtures/e01/apache/apache-logging-charter.html':{domain:'C01-I06',sha256:'b2bbf5c22c56729e3d92693ad1b302004cbb8f1c3e99d6c43c2e64dce6974df4',url:'https://logging.apache.org/charter.html',observedAt:'2026-10-27T13:49:41.627Z'}
 });
@@ -27,7 +27,7 @@ function evidenceFor(c,id){
  // An explicit contextual statement is required; names, domain URLs and contribution alone are not governance.
  if(c.predicate==='attributedToOrganization'&&!/(<organization>\s*<name>|governed by|maintained by|stewardship of)/i.test(s.selector))return null;
  const statement=s.selector.replace(/<[^>]*>/g,' ').replace(/\s+/g,' ');
- if(c.predicate==='governedByFoundation'&&!/(governed by.*foundation|foundation governs|project.*of the .*foundation.*subprojects.*log4j)/i.test(statement))return null;
+ if(c.predicate==='governedByFoundation'&&(!/(governed by.*foundation|foundation governs|project.*of the .*foundation.*subprojects)/i.test(statement)||(scope.subjectToken&&!statement.includes(scope.subjectToken))))return null;
  if(c.predicate==='maintainedBy'&&!/(<maintainer>|maintained by|maintainers:|responsible for managing the)/i.test(s.selector))return null;
  if(!statement.includes(c.object))return null;
  const core={projectIdentityId:id,predicate:c.predicate,object:c.object,archivePath:s.archivePath,archiveId:'archive:'+sha256Text(raw),archiveSha256:sha256Text(raw),sourceUrl:s.sourceUrl,selector:s.selector,observedAt:s.observedAt,validFrom:s.validFrom??null,validTo:s.validTo??null,method:'official-archived-document'};
