@@ -1,0 +1,20 @@
+'use strict';
+const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
+const {canonicalJSON}=require('../js/enrichment-canonical.js');
+const {createMavenCentralProvider}=require('../js/identity-maven-provider.js');
+const {createObservationArchive}=require('../js/identity-archive.js');
+const sha=x=>crypto.createHash('sha256').update(x).digest('hex');
+(async()=>{
+ const base=path.join(__dirname,'../fixtures/c01/log4j/maven-central');
+ const pom=fs.readFileSync(path.join(base,'log4j-core-2.23.1.pom'));
+ const identity={ecosystem:'maven',namespace:'org.apache.logging.log4j',name:'log4j-core',version:'2.23.1'};
+ const provider=createMavenCentralProvider({fetchImpl:fetch,now:()=>new Date().toISOString()});
+ const observation=await provider.acquire(identity,{scope:'Version'});
+ if(observation.status!==200||observation.transport!=='ok'||sha(observation.body)!==sha(pom))throw Error('LOG4J_MAVEN_REAL_OBSERVATION_MISMATCH');
+ const map=new Map(),backend={put:async(k,v)=>{if(map.has(k))throw Error('duplicate');map.set(k,v)},get:async k=>map.get(k)||null};
+ const archive=createObservationArchive(backend),reference=await archive.store(observation),replay=await archive.load(reference);
+ if(canonicalJSON(replay)!==canonicalJSON(observation))throw Error('OFFLINE_REPLAY_MISMATCH');
+ const result={acquisition:observation,reference,bodySha256:sha(pom),contentType:'application/xml',acquisitionMethod:'Lot B createMavenCentralProvider',archivedAt:new Date().toISOString()};
+ fs.writeFileSync(path.join(base,'log4j-core-2.23.1.observation.json'),JSON.stringify(result,null,2)+'\n');
+ console.log('LOG4J_LOT_B_OBSERVATION',reference.id,sha(pom));
+})().catch(e=>{console.error(e);process.exitCode=1});
