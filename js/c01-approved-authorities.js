@@ -103,7 +103,7 @@ function resolveApprovedCorpus(claim,descriptor){
  const sourcePaths=[descriptor.observation,...descriptor.sources.map(x=>x.file),descriptor.snapshot];
  const hashes=[c.mavenBodySha256,...sources.map(x=>sha(x.bytes)),snapshot.snapshotDigest];
  const evidence=expectedClasses.map((evidenceClass,i)=>({evidenceClass,evidenceId:'sha256:'+hashes[i],sha256:hashes[i],sourceRef:descriptor.sourceBase+'/'+sourcePaths[i]}));
- const body={status:'APPROVED',approvalStatus:'APPROVED',approvalSource:'js/c01-corpus-registry.js:approved',manifestRef:descriptor.manifestRef,manifestDigest,ruleId:r.authorityRuleId,ruleVersion:r.authorityRuleVersion,contractDomain:r.contractDomain,predicate:r.predicate,packageIdentityId:descriptor.packageIdentityId,projectIdentityId:descriptor.projectIdentityId,projectSnapshotDigest:snapshot.snapshotDigest,requiredEvidenceClasses:expectedClasses,evidence};
+ const body={evidenceMode:'repository-corpus',status:'APPROVED',approvalStatus:'APPROVED',approvalSource:'js/c01-corpus-registry.js:approved',manifestRef:descriptor.manifestRef,manifestDigest,ruleId:r.authorityRuleId,ruleVersion:r.authorityRuleVersion,contractDomain:r.contractDomain,predicate:r.predicate,packageIdentityId:descriptor.packageIdentityId,projectIdentityId:descriptor.projectIdentityId,projectSnapshotDigest:snapshot.snapshotDigest,requiredEvidenceClasses:expectedClasses,evidence};
  return Object.freeze({...body,resolutionDigest:digest(body)});
 }
 module.exports={validateManifest,loadRepositoryCandidate,evaluate,resolveApprovedAuthority,resolveRepositoryEvidenceBinding,isApprovedBridgeRule};
