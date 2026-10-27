@@ -41,7 +41,7 @@ function acceptance(e){
  }
  if(validEnvelope&&boundaryResult){
   for(const a of e.payload.assertions||[]){
-   if(a.predicate==='attributedToProjectIdentity'&&eligibility.evaluate(e,a,true)!==eligibility.ELIGIBLE)add('ELIGIBILITY_INVALID');
+   if(e.validationContext.attributionDossier&&a.predicate==='attributedToProjectIdentity'&&eligibility.evaluate(e,a,true)!==eligibility.ELIGIBLE)add('ELIGIBILITY_INVALID');
   }
   try{
    const q=qualify(e);
