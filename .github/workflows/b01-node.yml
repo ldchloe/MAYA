@@ -21,5 +21,39 @@ jobs:
         run: node --test tests/identity-maven.test.js
       - name: Complete suite
         run: node --test tests/*.test.js
+      - name: Productization syntax
+        run: |
+          node --check js/reporting-product.js
+          node --check js/reporting-xlsx.js
+          node --check js/reporting-cli.js
+      - name: Generate validated real-SBOM XLSX demo
+        run: node js/reporting-cli.js tests/fixtures/b06-scanoss-java.json --output maya-analysis-example.xlsx --mode offline
+      - name: Independent OOXML structural validation
+        run: |
+          python3 - <<'PY'
+          import zipfile, xml.etree.ElementTree as ET
+          p='maya-analysis-example.xlsx'
+          with zipfile.ZipFile(p) as z:
+              assert z.testzip() is None, 'CRC failure'
+              names=set(z.namelist())
+              required={'[Content_Types].xml','xl/workbook.xml','xl/styles.xml','xl/worksheets/sheet1.xml','xl/worksheets/sheet2.xml'}
+              assert required<=names
+              root=ET.fromstring(z.read('xl/workbook.xml'))
+              ns={'x':'http://schemas.openxmlformats.org/spreadsheetml/2006/main'}
+              sheets=[x.attrib['name'] for x in root.findall('.//x:sheet',ns)]
+              assert sheets==['COMEX','DETAIL'], sheets
+              for n in ('sheet1.xml','sheet2.xml'):
+                  ET.fromstring(z.read('xl/worksheets/'+n))
+              detail=ET.fromstring(z.read('xl/worksheets/sheet2.xml'))
+              assert detail.find('.//x:autoFilter',ns) is not None
+              assert detail.find('.//x:pane',ns) is not None
+          print('INDEPENDENT_OOXML_VALIDATION PASS',sheets)
+          PY
+      - name: Upload Excel demonstration
+        uses: actions/upload-artifact@v4
+        with:
+          name: maya-analysis-example
+          path: maya-analysis-example.xlsx
+          retention-days: 14
       - name: Diff whitespace
         run: git diff --check HEAD^ HEAD
