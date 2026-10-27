@@ -22,7 +22,7 @@ This document is a **candidate for human approval**, not an approval. V-P and V-
 - Exact Maven coordinate: `junit:junit:4.13.2` (`ecosystem=maven`, `groupId=junit`, `artifactId=junit`, `version=4.13.2`)
 - Exact opaque target Y: `project:3b8b92fd783639e12f59ff6256967b246edd5249343217fb6d669a6ce688ff8e`
 - Target Y snapshot digest: `a61190267f2c520a70ed08ef6183e7d7b1492009c252f3e4dd2677f4f4378fb1`
-- Manifest SHA-256 canonical commitment (`manifestDigest`): `2b06c5e1f433dc279c840513aa2522777b017c433003f736c494e11fe7ed8064`
+- Manifest SHA-256 canonical commitment (`manifestDigest`): `a0af0913dd7aedbe02100d93d92ffecdd6edd70e2ad1b2b3f552d56ee12bc3fb`
 - Approval provenance: `status=PENDING_H2`, `decisionRef=null`. No approval has been given or inferred.
 
 ### Required archived evidence classes (ALL mandatory)
@@ -31,6 +31,8 @@ This document is a **candidate for human approval**, not an approval. V-P and V-
 2. `upstream-release-pom`: `fixtures/c01/junit4-r4.13.2-upstream-pom.xml`, body SHA-256 `569b6977ee4603c965c1c46c3058fa6e969291b0160eb6964dd092cd89eadd94`; official release-tag upstream POM.
 3. `independent-project-readme`: `fixtures/c01/junit4-r4.13.2-project-readme.md`, SHA-256 `63feaf908bda828d78adf9989bf404ffd4e4ac4ad76b0d7bed74cf5b4f611723`.
 4. `approved-project-identity-snapshot`: `fixtures/c01/junit4-project-identity.snapshot.json`, `snapshotDigest=a61190267f2c520a70ed08ef6183e7d7b1492009c252f3e4dd2677f4f4378fb1`.
+
+The manifest now pins all five exact source/snapshot digest commitments in `sourceCommitments` (Lot B archive, Maven body, upstream POM, README, and H1 snapshot). A change to any commitment without resealing fails integrity validation.
 
 ### Validation method and limits
 
