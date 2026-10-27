@@ -18,7 +18,7 @@ function evidenceFor(c,id){
  if(!isObj(c)||c.projectIdentityId!==id||!predicates.includes(c.predicate)||typeof c.object!=='string'||!c.object.trim()||!isObj(c.source))return null;
  const s=c.source;
  const scope=archiveScopes[s.archivePath];
- if(!scope||(scope.projectId&&scope.projectId!==id)||(scope.domain&&!registry.approved.some(x=>x.projectIdentityId===id&&x.contractDomain===scope.domain))||typeof s.sourceUrl!=='string'||!/^https:\\/\\//.test(s.sourceUrl)||typeof s.selector!=='string'||s.selector.length<12||typeof s.observedAt!=='string'||!/^\\d{4}-\\d\\d-\\d\\dT/.test(s.observedAt))return null;
+ if(!scope||(scope.projectId&&scope.projectId!==id)||(scope.domain&&!registry.approved.some(x=>x.projectIdentityId===id&&x.contractDomain===scope.domain))||typeof s.sourceUrl!=='string'||!s.sourceUrl.startsWith('https://')||typeof s.selector!=='string'||s.selector.length<12||typeof s.observedAt!=='string'||!Number.isFinite(Date.parse(s.observedAt)))return null;
  if(scope.url&&(s.sourceUrl!==scope.url||s.observedAt!==scope.observedAt))return null;
  if((s.validFrom!=null&&typeof s.validFrom!=='string')||(s.validTo!=null&&typeof s.validTo!=='string'))return null;
  let raw;try{raw=fs.readFileSync(path.resolve(__dirname,'..',s.archivePath),'utf8')}catch{return null}
