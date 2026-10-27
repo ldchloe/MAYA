@@ -37,4 +37,4 @@ The standalone `resolveTechnicalMetadata(document, componentId)` API accepts can
 
 This MVP intentionally does not perform legal license compatibility analysis, verify identifiers against an external SPDX license list, or fetch language data from GitHub. Those are not prerequisites for declarative SBOM metadata extraction.
 
-**Closure is conditional on final green CI and merge of PR #35.** Next active phase after merge: Lot E — Governance Layer, first increment ProjectIdentity → Organization with independently archived official ownership/stewardship evidence.
+**LOT D TECHNICAL METADATA VALIDATED.** PR #35 merged at `4ff23ca09a499225c697510015a88cb362dd2d7e` after GitHub Actions run `40511994746` passed 527/527 Node and 58/58 Maven, 0 failed and 0 skipped. Next active phase: Lot E — Governance Layer, first increment ProjectIdentity → Organization with independently archived official ownership/stewardship evidence.
