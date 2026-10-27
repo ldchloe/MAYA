@@ -16,6 +16,6 @@
 
 The expression `governedByFoundation` is distinct from `attributedToOrganization`, and `maintainedBy` requires an explicit maintainer statement. Different predicates never automatically imply one another.
 
-**Closure status: PENDING FINAL CI AND MERGE.** Official Apache Foundation and collective Maintainer positive tests are present. Controlled contradictions are explicitly `SYNTHETIC TEST ONLY`, segregated from the production resolver and rejected by the production verifier. All three real C-01 ProjectIdentity values are exercised; missing governance is UNKNOWN. Closure requires final CI green and merge PR #36.
+**Closure status: LOT E GOVERNANCE VALIDATED — MERGED TO MAIN.** Official Apache Foundation and collective Maintainer positive tests are present. Controlled contradictions are explicitly `SYNTHETIC TEST ONLY`, segregated from the production resolver and rejected by the production verifier. All three real C-01 ProjectIdentity values are exercised; missing governance is UNKNOWN. PR #36 merged at `1f33aa3b10bfdcc52d0ec54ad9cc0f20af7f09cd` after CI run `40516842687` passed 551/551 Node, 58/58 Maven, 0 failed, 0 skipped, syntax and diff whitespace checks.
 
 Next after validated closure: Lot F Geographic Facts, first increment Organization → Legal Jurisdiction only with explicit official/legal evidence.
