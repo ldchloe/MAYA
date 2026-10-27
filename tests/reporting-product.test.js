@@ -13,7 +13,7 @@ test('R-01 R-02 R-12 R-17 real pinned CycloneDX → A-H assessments → two-shee
  assert.ok(book.subarray(0,2).equals(Buffer.from('PK')));
 });
 test('R-03 R-04 R-07 R-08 reporting consumes H01 unchanged',()=>{
- const a=run(),x=inspectWorkbook(createWorkbook(a));
+ const a=run(),x=inspectWorkbook(createWorkbook(a));console.log('DEBUG_XLSX',JSON.stringify({comex:x.debugComex,detail:x.debugDetail}));
  assert.equal(x.overallTrustScore,a.executiveSummary.overallTrustScore);
  assert.equal(x.overallCoverage,a.executiveSummary.overallCoverage);
  assert.deepEqual(x.detail.map(d=>d.trustScore).sort(),a.assessments.map(d=>d.trustScore).sort());
