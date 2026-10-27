@@ -2,6 +2,8 @@
 const canonical=require('./enrichment-canonical.js');
 const DOMAIN='maya.lot-c.documentary',VERSION='1.0.0',KIND='documentary-snapshot',POLICY_ID='maya.c01.eligibility-fixture',POLICY_VERSION='1.0.0';
 function fail(code){const e=new Error(code);e.code=code;throw e;}
+function payloadDigest(payload){const p=JSON.parse(canonical.canonicalJSON(payload));for(const key of ['assertions','evidence','evidenceRelations','conflicts','componentEnrichments','verifications'])if(Array.isArray(p[key]))p[key].sort((a,b)=>a.id.localeCompare(b.id));return canonical.digest(p);}
+function contextDigest(context){const c=JSON.parse(canonical.canonicalJSON(context));if(Array.isArray(c.eligibleAssertionIds))c.eligibleAssertionIds.sort();return canonical.digest(c);}
 function dispatch(e){
  if(!e||!e.contractDomain)fail('MISSING_CONTRACT_DOMAIN');
  if(e.contractDomain!==DOMAIN)fail('UNKNOWN_CONTRACT_DOMAIN');
@@ -16,7 +18,7 @@ function dispatch(e){
  if(c.policyVersion!==POLICY_VERSION)fail('UNSUPPORTED_POLICY_VERSION');
  if(!Array.isArray(c.eligibleAssertionIds)||c.eligibleAssertionIds.some(x=>typeof x!=='string'||!x)||new Set(c.eligibleAssertionIds).size!==c.eligibleAssertionIds.length)fail('CONTRACT_ERROR');
  if(!e.payload||typeof e.payload!=='object')fail('CONTRACT_ERROR');
- if(e.payloadDigest!==canonical.digest(e.payload)||e.validationContextDigest!==canonical.digest(c))fail('INTEGRITY_ERROR');
+ if(e.payloadDigest!==payloadDigest(e.payload)||e.validationContextDigest!==contextDigest(c))fail('INTEGRITY_ERROR');
  return Object.freeze({contractDomain:DOMAIN,contractVersion:VERSION,policyId:POLICY_ID,policyVersion:POLICY_VERSION});
 }
-module.exports={DOMAIN,VERSION,KIND,POLICY_ID,POLICY_VERSION,dispatch,fail};
+module.exports={DOMAIN,VERSION,KIND,POLICY_ID,POLICY_VERSION,payloadDigest,contextDigest,dispatch,fail};
