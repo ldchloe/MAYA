@@ -5,3 +5,4 @@ fixtures/c01/log4j/apache-log4j-readme.adoc whitespace=-blank-at-eol
 fixtures/c01/log4j/apache-log4j-parent-pom.xml whitespace=-blank-at-eol
 fixtures/c01/log4j/apache-log4j-core-pom.xml whitespace=-blank-at-eol
 fixtures/c01/log4j/maven-central/log4j-core-2.23.1.pom whitespace=-blank-at-eol
+fixtures/e01/apache/*.html whitespace=-blank-at-eol
