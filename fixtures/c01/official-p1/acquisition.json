@@ -1,0 +1,15 @@
+{
+  "acquiredAt": "2026-10-27T09:47:54.553141+00:00",
+  "archiveFormat": "c01-official-http-archive-v1",
+  "archiveId": "sha256:3ee70e885ef7b4371841131dcad80fc83b341ca33736db3aa051ff06dc56ac52",
+  "bodyBytes": 8005,
+  "bodyPath": "fixtures/c01/official-p1/dependency-info.html",
+  "bodySha256": "3ee70e885ef7b4371841131dcad80fc83b341ca33736db3aa051ff06dc56ac52",
+  "contentType": "text/html; charset=utf-8",
+  "finalUrl": "https://junit.org/junit4/dependency-info.html",
+  "headersPath": "fixtures/c01/official-p1/headers.txt",
+  "httpStatus": 200,
+  "method": "GET",
+  "provider": "github-actions-curl",
+  "sourceUrl": "https://junit.org/junit4/dependency-info.html"
+}
