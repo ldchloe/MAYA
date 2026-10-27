@@ -1,0 +1,70 @@
+{
+  "version": "H01-EUROPE-1",
+  "regions": {
+    "EU": [
+      "AT",
+      "BE",
+      "BG",
+      "HR",
+      "CY",
+      "CZ",
+      "DK",
+      "EE",
+      "FI",
+      "FR",
+      "DE",
+      "GR",
+      "HU",
+      "IE",
+      "IT",
+      "LV",
+      "LT",
+      "LU",
+      "MT",
+      "NL",
+      "PL",
+      "PT",
+      "RO",
+      "SK",
+      "SI",
+      "ES",
+      "SE"
+    ],
+    "EEA": [
+      "IS",
+      "LI",
+      "NO"
+    ],
+    "EUROPE_NON_EU": [
+      "AL",
+      "AD",
+      "BA",
+      "BY",
+      "CH",
+      "GB",
+      "MD",
+      "MC",
+      "ME",
+      "MK",
+      "RS",
+      "SM",
+      "UA",
+      "VA"
+    ],
+    "NON_EU": [
+      "US",
+      "CA",
+      "MX",
+      "BR",
+      "AU",
+      "NZ",
+      "JP",
+      "CN",
+      "IN",
+      "KR",
+      "SG",
+      "ZA"
+    ]
+  },
+  "note": "Descriptive regional membership only; NON_EU supported-country allowlist, not a risk or exhaustive geopolitical database."
+}

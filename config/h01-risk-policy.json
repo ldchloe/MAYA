@@ -1,0 +1,77 @@
+{
+  "version": "H01-RISK-1",
+  "engineVersion": "H01-1",
+  "dimensions": [
+    "TECHNICAL_RISK",
+    "GOVERNANCE_RISK",
+    "SUPPLY_CHAIN_RISK",
+    "CONCENTRATION_RISK",
+    "GEOPOLITICAL_RISK",
+    "CRITICALITY_RISK"
+  ],
+  "weights": {
+    "TECHNICAL_RISK": 20,
+    "GOVERNANCE_RISK": 20,
+    "SUPPLY_CHAIN_RISK": 20,
+    "CONCENTRATION_RISK": 15,
+    "GEOPOLITICAL_RISK": 15,
+    "CRITICALITY_RISK": 10
+  },
+  "confidenceThresholds": {
+    "high": 80,
+    "medium": 50
+  },
+  "riskRules": {
+    "technical": {
+      "licenseConflict": 3,
+      "unknownLicense": null,
+      "licenseResolved": 0
+    },
+    "governance": {
+      "conflict": 3,
+      "verifiedGovernance": 0
+    },
+    "supplyChain": {
+      "SUPPLY_CHAIN_INCIDENT": 3,
+      "COMPROMISE": 5,
+      "RELEASE": 0
+    },
+    "concentration": {
+      "thresholds": [
+        {
+          "min": 80,
+          "risk": 4
+        },
+        {
+          "min": 60,
+          "risk": 3
+        },
+        {
+          "min": 40,
+          "risk": 2
+        },
+        {
+          "min": 20,
+          "risk": 1
+        }
+      ],
+      "otherwise": 0
+    },
+    "criticality": {
+      "LOW": 0,
+      "MEDIUM": 1,
+      "HIGH": 3,
+      "CRITICAL": 5
+    },
+    "geopolitical": {
+      "EU": 0,
+      "EEA": 0,
+      "EUROPE_NON_EU": 1,
+      "NON_EU": 2
+    }
+  },
+  "unknownScore": null,
+  "conflictedRiskScore": null,
+  "scoreFormula": "100 - sum(weight * knownRisk/5), null if no known dimensions; unknown dimensions contribute no penalty and lower coverage",
+  "coverageFormula": "sum(weights of VERIFIED dimensions)/sum(weights of applicable dimensions) * 100; CONFLICTED and UNKNOWN count as uncovered; NOT_APPLICABLE excluded"
+}
