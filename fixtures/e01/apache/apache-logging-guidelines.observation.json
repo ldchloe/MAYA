@@ -1,0 +1,11 @@
+{
+  "url": "https://logging.apache.org/guidelines.html",
+  "finalUrl": "https://logging.apache.org/guidelines.html",
+  "status": 200,
+  "observedAt": "2026-10-27T13:49:41.385Z",
+  "contentType": "text/html",
+  "sha256": "55d5377bdf82ec38d4bd8357c97095a6a059b86c2e771598c848f94a872102f3",
+  "archiveId": "archive:55d5377bdf82ec38d4bd8357c97095a6a059b86c2e771598c848f94a872102f3",
+  "provider": "apache-official-http",
+  "rawPath": "fixtures/e01/apache/apache-logging-guidelines.html"
+}

@@ -1,0 +1,11 @@
+{
+  "url": "https://logging.apache.org/charter.html",
+  "finalUrl": "https://logging.apache.org/charter.html",
+  "status": 200,
+  "observedAt": "2026-10-27T13:49:41.627Z",
+  "contentType": "text/html",
+  "sha256": "b2bbf5c22c56729e3d92693ad1b302004cbb8f1c3e99d6c43c2e64dce6974df4",
+  "archiveId": "archive:b2bbf5c22c56729e3d92693ad1b302004cbb8f1c3e99d6c43c2e64dce6974df4",
+  "provider": "apache-official-http",
+  "rawPath": "fixtures/e01/apache/apache-logging-charter.html"
+}
