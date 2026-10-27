@@ -1,0 +1,10 @@
+'use strict';
+const test=require('node:test');
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
+const crypto=require('node:crypto');
+const archive=path.join(__dirname,'../fixtures/c01/junit4-r4.13.2-official-release-api.json');
+const verify=()=>{const bytes=fs.readFileSync(archive);const release=JSON.parse(bytes.toString('utf8'));assert.equal(release.tag_name,'r4.13.2');assert.equal(release.name,'JUnit 4.13.2');assert.equal(release.html_url,'https://github.com/junit-team/junit4/releases/tag/r4.13.2');assert.equal(release.draft,false);assert.equal(release.prerelease,false);return crypto.createHash('sha256').update(bytes).digest('hex');};
+test('P2 official GitHub release API archived and replayed offline',()=>{const first=verify();assert.match(first,/^[a-f0-9]{64}$/);assert.equal(first,verify());});
+test('P2 official release archive is not sufficient by itself to issue ApprovedBridgeRule',()=>{verify();const {verifyTaggedSourceChain}=require('../js/c01-official-bridge-sources.js');assert.equal(typeof verifyTaggedSourceChain,'function');});

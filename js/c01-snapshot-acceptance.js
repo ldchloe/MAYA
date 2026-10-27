@@ -4,6 +4,7 @@ const {dispatch,payloadDigest,contextDigest}=require('./c01-contract-dispatch.js
 const {qualify,RULES_ID,RULES_VERSION}=require('./c01-documentary-qualification.js');
 const {verify}=require('./c01-completeness-verifier.js');
 const boundary=require('./c01-resolution-boundary.js');
+const eligibility=require('./c01-eligibility-policy.js');
 const STATUS=Object.freeze({ACCEPTED:'ACCEPTED',REJECTED:'REJECTED',INDETERMINATE:'INDETERMINATE'});
 const CODES=Object.freeze(['DOMAIN_INVALID','ENVELOPE_INVALID','PAYLOAD_INTEGRITY_INVALID','CONTEXT_INTEGRITY_INVALID','CORPUS_INVALID','QUALIFICATION_INVALID','COMPLETENESS_INVALID','COMPLETENESS_INDETERMINATE','ELIGIBILITY_INVALID','RESOLUTION_MISMATCH','UNEXPECTED_DECISION','MISSING_DECISION','NON_ELIGIBLE_ASSERTION_TRANSMITTED','SUPERSESSION_INVALID']);
 const has=(xs,x)=>Array.isArray(xs)&&xs.includes(x);
@@ -39,6 +40,9 @@ function acceptance(e){
   try{boundaryResult=boundary.run(e);}catch(err){add(errorCode(err));}
  }
  if(validEnvelope&&boundaryResult){
+  for(const a of e.payload.assertions||[]){
+   if(a.predicate==='attributedToProjectIdentity'&&(a.id.startsWith('assertion:')||a.evidenceIds.some(id=>e.payload.evidence.some(v=>v.id===id&&v.sourceType!=='fixture')))&&eligibility.evaluate(e,a,true)!==eligibility.ELIGIBLE)add('ELIGIBILITY_INVALID');
+  }
   try{
    const q=qualify(e);
    qualificationResultDigest=safeDigest(q);

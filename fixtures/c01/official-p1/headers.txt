@@ -1,0 +1,26 @@
+HTTP/2 200 
+date: Tue, 27 Oct 2026 09:47:54 GMT
+content-type: text/html; charset=utf-8
+vary: Accept-Encoding
+server: BunnyCDN-DE1-1081
+cdn-pullzone: 5193839
+cdn-requestcountrycode: US
+vary: Accept-Encoding
+cache-control: public, must-revalidate, max-age=0
+etag: "dmekrgnflrli66d"
+last-modified: Mon, 26 Oct 2026 07:00:49 GMT
+content-security-policy: frame-ancestors 'self' *.javadoc.io javadoc.io
+permissions-policy: geolocation=(), camera=(), microphone=()
+referrer-policy: strict-origin-when-cross-origin
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+x-content-type-options: nosniff
+cdn-proxyver: 1.71
+cdn-requestpullcode: 200
+cdn-requestpullsuccess: True
+cdn-edgestorageid: 1072, 1078
+cdn-cachedat: 10/26/2026 07:43:29
+cdn-status: 200
+cdn-requesttime: 0
+cdn-requestid: f04b34ab3361c5e6ab92f1297d4d8d40
+cdn-cache: HIT
+

@@ -1,0 +1,16 @@
+'use strict';
+const test=require('node:test'),assert=require('node:assert/strict');
+const crypto=require('node:crypto');
+const authority=require('../js/c01-bridge-authority.js');
+const sha=x=>crypto.createHash('sha256').update(x).digest('hex');
+const claim={predicate:'attributedToProjectIdentity',packageIdentityId:'maven:junit:junit',externalIdentityId:'external:junit',projectIdentityId:'project:'+'a'.repeat(32)};
+const content=JSON.stringify(claim);
+const evidence={content,sourceDigest:sha(content),sourceType:'distribution-attestation',verificationMethod:'independent-document-review-v1',verificationId:'verification:1',sourceRef:'archive:bridge',versionScope:'4.13.2'};
+const rule={id:'rule:1',version:'1.0.0',sourceType:evidence.sourceType,verificationMethod:evidence.verificationMethod,verificationId:evidence.verificationId,sourceRef:evidence.sourceRef,sourceDigest:evidence.sourceDigest,predicate:claim.predicate,packageIdentityId:claim.packageIdentityId,externalIdentityId:claim.externalIdentityId,projectIdentityId:claim.projectIdentityId,versionScope:evidence.versionScope};
+const authorityRecord={ruleIds:['rule:1'],issuerId:'independent:review-board',issuedAt:'2026-01-01T00:00:00Z',sourceRef:'archive:authority-register'};
+const authorityArchive=JSON.stringify(authorityRecord);
+const authorityProvenance={sourceContent:authorityArchive,sourceDigest:sha(authorityArchive),sourceRef:'archive:authority-register',issuerId:'independent:review-board',approvedRuleIds:['rule:1']};
+test('T55 missing independent rule provenance cannot authorize a bridge',()=>assert.equal(authority.evaluate(evidence,claim,[rule],{requireProvenance:true}),'NOT_APPLICABLE'));
+test('T56 self-asserted authority provenance cannot authorize a bridge',()=>assert.equal(authority.evaluate(evidence,claim,[rule],{requireProvenance:true,provenance:{...authorityProvenance,issuerId:'external:junit'}}),'NOT_APPLICABLE'));
+test('T56 caller-pinned provenance digest alone cannot authorize fixture rule',()=>assert.equal(authority.evaluate(evidence,claim,[rule],{requireProvenance:true,provenance:authorityProvenance,trustedAuthorityDigest:sha(authorityArchive)}),'NOT_APPLICABLE'));
+test('T56 independently pinned archive with wrong digest is rejected',()=>assert.equal(authority.evaluate(evidence,claim,[rule],{requireProvenance:true,provenance:authorityProvenance,trustedAuthorityDigest:sha('unrelated')}),'NOT_APPLICABLE'));
