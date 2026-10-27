@@ -2,8 +2,8 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
 const {analyzeSbom}=require('../js/reporting-product.js');
 const {createWorkbook,inspectWorkbook}=require('../js/reporting-xlsx.js');
-const real=fs.readFileSync(path.join(__dirname,'fixtures/b06-europeana-corelib.json'),'utf8');
-const run=()=>analyzeSbom(real,{fileName:'b06-europeana-corelib.json',mode:'offline'});
+const real=fs.readFileSync(path.join(__dirname,'fixtures/b06-scanoss-java.json'),'utf8');
+const run=()=>analyzeSbom(real,{fileName:'b06-scanoss-java.json',mode:'offline'});
 test('R-01 R-02 R-12 R-17 real pinned CycloneDX → A-H assessments → two-sheet XLSX',()=>{
  const a=run(),book=createWorkbook(a),inspect=inspectWorkbook(book);
  assert.equal(a.analysisMode,'OFFLINE');assert.ok(a.components.length>0);
