@@ -15,9 +15,9 @@ const rule={id:'authority:fixture-1',version:'1.0.0',sourceType:'distribution-at
 const dossier=(changes={})=>({...claim,projectSnapshot:snapshot(),archives:[archive],bridgeEvidence:[bridge],authorityRules:[rule],...changes});
 test('T45 absent authority is NOT_APPLICABLE',()=>{const r=evaluate(dossier({authorityRules:[]}));assert.equal(r.validation.bridgeAuthority,'NOT_APPLICABLE');assert.equal(r.validation.VXY,'FAIL');assert.equal(r.eligibility,'NOT_ELIGIBLE');});
 test('T46 intact hash alone is not authority',()=>assert.equal(authority.evaluate(bridge,claim,[]),'NOT_APPLICABLE'));
-test('T47 explicit scoped authority rule is APPLICABLE',()=>assert.equal(authority.evaluate(bridge,claim,[rule]),'APPLICABLE'));
+test('T47 explicit scoped caller rule alone is NOT_APPLICABLE',()=>assert.equal(authority.evaluate(bridge,claim,[rule]),'NOT_APPLICABLE'));
 test('T48 wrong claim is NOT_APPLICABLE',()=>assert.equal(authority.evaluate(bridge,claim,[{...rule,predicate:'otherClaim'}]),'NOT_APPLICABLE'));
 test('T49 wrong scope is NOT_APPLICABLE',()=>assert.equal(authority.evaluate(bridge,claim,[{...rule,projectIdentityId:'project:other'}]),'NOT_APPLICABLE'));
-test('T50 V-PY requires authority and both endpoints',()=>{const r=evaluate(dossier());assert.deepEqual([r.validation.VX,r.validation.VY,r.validation.VXY,r.validation.bridgeAuthority],['PASS','PASS','PASS','APPLICABLE']);});
+test('T50 V-PY requires authority and both endpoints',()=>{const r=evaluate(dossier());assert.deepEqual([r.validation.VX,r.validation.VY,r.validation.VXY,r.validation.bridgeAuthority],['PASS','PASS','FAIL','NOT_APPLICABLE']);});
 test('T51 authority failure forbids positive eligibility',()=>assert.equal(evaluate(dossier({authorityRules:[{...rule,sourceDigest:sha('other')}]})).eligibility,'NOT_ELIGIBLE'));
 test('T54 conflicting proposals remain unselected even with one authorized bridge',()=>{const other={...bridge,id:'evidence:other',projectIdentityId:'project:'+'c'.repeat(32)};other.content=JSON.stringify({...claim,projectIdentityId:other.projectIdentityId});other.sourceDigest=sha(other.content);const r=evaluate(dossier({bridgeEvidence:[bridge,other]}));assert.equal(r.status,'CONFLICTED');assert.equal(r.decision.selectedAssertionId,null);assert.equal(r.assertions.length,2);});
