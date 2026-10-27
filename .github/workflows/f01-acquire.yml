@@ -1,0 +1,42 @@
+name: F01 temporary official acquisition
+on:
+  push:
+    paths:
+      - '.github/workflows/f01-acquire.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  acquire:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/f01-geographic-facts
+          persist-credentials: true
+      - name: Archive official ASF corporate history
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p fixtures/f01/asf
+          python3 - <<'PY'
+          import urllib.request,hashlib,json,datetime,pathlib
+          url='https://www.apache.org/foundation/governance/corporation.html'
+          req=urllib.request.Request(url,headers={'User-Agent':'MAYA-F01-evidence-acquisition/1.0'})
+          with urllib.request.urlopen(req,timeout=40) as response:
+              raw=response.read()
+              meta={'requestedUrl':url,'finalUrl':response.url,'httpStatus':response.status,'contentType':response.headers.get('Content-Type'),'acquiredAt':datetime.datetime.now(datetime.timezone.utc).isoformat().replace('+00:00','Z'),'sizeBytes':len(raw),'sha256':hashlib.sha256(raw).hexdigest()}
+          if meta['httpStatus']!=200 or b'Delaware membership corporation' not in raw or b'subject to DE laws' not in raw: raise RuntimeError('OFFICIAL_SOURCE_NOT_EXPLICIT')
+          meta['archiveId']='archive:'+meta['sha256']
+          p=pathlib.Path('fixtures/f01/asf')
+          (p/'corporation.html').write_bytes(raw)
+          (p/'corporation.metadata.json').write_text(json.dumps(meta,indent=2)+'\n')
+          print(meta)
+          PY
+      - name: Commit archive
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add fixtures/f01/asf
+          git commit -m 'evidence(f01): archive official ASF Delaware incorporation source'
+          git push origin HEAD:feature/f01-geographic-facts
