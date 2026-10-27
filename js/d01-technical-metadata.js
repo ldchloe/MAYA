@@ -41,7 +41,7 @@ function resolveTechnicalMetadata(document,componentId){
  const declared=select('declared'),concluded=select('concluded');
  const status=conflicts.some(c=>c.reason==='CONTRADICTORY_OBSERVATIONS')?'CONFLICTED':conflicts.some(c=>c.reason==='INVALID_EXPRESSION')?'UNKNOWN':declared||concluded?'RESOLVED':'UNKNOWN';
  const core={componentId,documentDigest,status,declared:status==='CONFLICTED'?null:declared,concluded:status==='CONFLICTED'?null:concluded,conflictIds:conflicts.map(c=>c.id)};
- const licenseDecision={id:deterministicId('decision',core),...core};
+ const licenseDecision={id:deterministicId('decision',Object.fromEntries(Object.entries(core).filter(([key])=>key!=='documentDigest'))),...core};
  const languages=[...new Set(evidence.filter(e=>e.semantic==='language').map(e=>e.value))].sort();
  return {componentId,documentDigest,licenses:{declared,concluded},languages,evidence,assertions,conflicts,decisions:{license:licenseDecision},resultDigest:digest({evidence,assertions,conflicts,licenseDecision,languages})};
 }
@@ -50,7 +50,7 @@ function verifyTechnicalMetadata(result){
  const ids=new Set(result.evidence.map(e=>e.id));
  return result.evidence.every(e=>{const {id,sourceDigest,...core}=e;return id===deterministicId('evidence',core)&&sourceDigest===digest(core)&&e.documentDigest===result.documentDigest&&e.componentId===result.componentId})
  &&result.assertions.every(a=>{const {id,status,...core}=a;return status==='verified'&&id===deterministicId('assertion',core)&&Array.isArray(a.evidenceIds)&&a.evidenceIds.length>0&&a.evidenceIds.every(e=>ids.has(e))})
- &&result.decisions.license.id===deterministicId('decision',Object.fromEntries(Object.entries(result.decisions.license).filter(([k])=>k!=='id')))
+ &&result.decisions.license.id===deterministicId('decision',Object.fromEntries(Object.entries(result.decisions.license).filter(([k])=>k!=='id'&&k!=='documentDigest')))
  &&result.resultDigest===digest({evidence:result.evidence,assertions:result.assertions,conflicts:result.conflicts,licenseDecision:result.decisions.license,languages:result.languages});
 }
 module.exports={resolveTechnicalMetadata,verifyTechnicalMetadata,validExpression};
