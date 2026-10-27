@@ -24,3 +24,68 @@ test('INT-Q02 missing real assertion cannot preserve positive decision',()=>{con
 test('INT-Q03 missing bridge Evidence rejects documentary completeness',()=>{const e=prepare(real());e.payload.evidence=[];refresh(e);assert.notEqual(acceptDocumentarySnapshot(e).acceptanceStatus,'ACCEPTED');});
 test('INT-C03 omitted examination of admitted assertion is invalid',()=>{const e=prepare(real());e.qualificationProof={...e.qualificationProof,examinedAssertionIds:[]};assert.equal(acceptDocumentarySnapshot(e).acceptanceStatus,'REJECTED');});
 test('INT-A03 altered completeness proof is not accepted',()=>{const e=prepare(real());e.qualificationProof={...e.qualificationProof,resultDigest:'0'.repeat(64)};assert.equal(acceptDocumentarySnapshot(e).acceptanceStatus,'REJECTED');});
+
+function conflicting(){
+ const e=real(),a=e.payload.assertions[0],v=e.payload.evidence[0],r=e.payload.evidenceRelations[0];
+ const other={...a,id:'synthetic:assertion:conflicting-project',value:'project:synthetic-test-only',evidenceIds:['synthetic:evidence:conflicting-project'],status:'candidate'};
+ const ev={...v,id:other.evidenceIds[0],sourceType:'fixture',sourceRef:'synthetic-test-fixture-only',sourceDigest:null,observedValue:other.value};
+ const rel={...r,id:'synthetic:relation:conflicting-project',assertionId:other.id,evidenceId:ev.id};
+ e.payload.assertions.push(other);e.payload.evidence.push(ev);e.payload.evidenceRelations.push(rel);refresh(e);return e;
+}
+test('F1-01 F1-06 conflicting synthetic candidate retained, qualified, noneligible',()=>{
+ const e=prepare(conflicting()),q=qualify(e);
+ assert.equal(e.payload.assertions.length,2);assert.equal(e.payload.evidence.length,2);
+ assert.equal(q.examinedAssertionIds.length,2);assert.equal(q.conflicts.length,1);
+ assert.equal(e.payload.conflicts.length,1);
+ assert.equal(policy.evaluate(e,e.payload.assertions[1],true),'NOT_ELIGIBLE');
+ assert.equal(verify(e,e.payload,{id:RULES_ID,version:RULES_VERSION},e.qualificationProof),true);
+ assert.deepEqual(e.resolutionResult.eligibleIds,[e.payload.assertions[0].id]);
+});
+test('F1-02 F1-03 F1-08 conflicting permutations and offline replay identical',()=>{
+ const a=prepare(conflicting()),b=conflicting();
+ b.payload.assertions.reverse();b.payload.evidence.reverse();b.payload.evidenceRelations.reverse();refresh(b);prepare(b);
+ assert.deepEqual(a.qualificationProof,b.qualificationProof);
+ assert.deepEqual(a.resolutionResult,b.resolutionResult);
+ assert.deepEqual(acceptDocumentarySnapshot(a),acceptDocumentarySnapshot(b));
+});
+test('F1-04 omitted documentary conflict fails completeness',()=>{
+ const e=prepare(conflicting());e.payload.conflicts=[];refresh(e);
+ assert.notEqual(acceptDocumentarySnapshot(e).acceptanceStatus,'ACCEPTED');
+});
+test('F1-05 caller selection of synthetic candidate rejected',()=>{
+ const e=prepare(conflicting());
+ const forged={...e.resolutionResult,engineResult:{...e.resolutionResult.engineResult,decisions:[{id:'synthetic:decision',selectedAssertionId:'synthetic:assertion:conflicting-project'}]}};
+ e.resolutionResult=forged;
+ assert.equal(acceptDocumentarySnapshot(e).acceptanceStatus,'REJECTED');
+});
+test('F1-07 unrelated predicate does not infer documentary conflict',()=>{
+ const e=conflicting(),a=e.payload.assertions[1],v=e.payload.evidence[1],r=e.payload.evidenceRelations[1];
+ a.predicate='unrelatedSyntheticRelationship';v.attribute=a.predicate;r.predicate=a.predicate;refresh(e);
+ assert.equal(qualify(e).conflicts.length,0);
+});
+test('F2 legacy mapsToProject remains legacy only',()=>{
+ const e=fixture();assert.equal(policy.evaluate(e,e.payload.assertions[0],true),'ELIGIBLE');
+ assert.equal(e.payload.assertions.some(a=>a.predicate==='attributedToProjectIdentity'),false);
+});
+test('F2 real assertion without any dossier cannot be eligible or accepted',()=>{
+ const e=real();delete e.validationContext.attributionDossier;refresh(e);
+ assert.equal(policy.evaluate(e,e.payload.assertions[0],true),'NOT_ELIGIBLE');
+ prepare(e);assert.notEqual(acceptDocumentarySnapshot(e).acceptanceStatus,'ACCEPTED');
+ assert.equal(e.resolutionResult.engineResult.decisions.some(d=>d.selectedAssertionId===e.payload.assertions[0].id),false);
+});
+for(const [name,mutate] of [
+ ['F2-01',d=>{d.archives=[];d.bridgeEvidence=[]}],
+ ['F2-02',d=>{d.approvedAuthorityResolution=null;d.bridgeEvidence=[]}],
+ ['F2-03',d=>{d.bridgeEvidence=[]}],
+ ['F2-04',d=>{d.bridgeEvidence[0].bridgeEvidenceDigest='0'.repeat(64)}],
+ ['F2-05',d=>{d.approvedBridgeRule={status:'APPROVED',ruleDigest:'0'.repeat(64)};d.bridgeEvidence=[]}],
+ ['F2-06',d=>{d.projectSnapshot=null}],
+ ['F2-07',d=>{d.manifestDigest=null;d.bridgeEvidence=[]}],
+ ['F2-08',d=>{d.bridgeEvidence=[];d.verificationContext={}}],
+ ['F2-09',d=>{d.authorityRules=[{status:'APPROVED'}];d.bridgeEvidence=[]}],
+ ['F2-10',d=>{d.bridgeEvidence=[];d.name='JUnit';d.url='https://junit.org'}]
+])test(name+' partial or forged context fails closed',()=>{
+ const e=real();mutate(e.validationContext.attributionDossier);refresh(e);
+ assert.equal(policy.evaluate(e,e.payload.assertions[0],true),'NOT_ELIGIBLE');
+ prepare(e);assert.notEqual(acceptDocumentarySnapshot(e).acceptanceStatus,'ACCEPTED');
+});
