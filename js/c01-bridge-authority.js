@@ -26,6 +26,8 @@ function evaluate(evidence,claim,rules=[],options={}){
  // Contractual APPLICABLE requires repository-resolved approval; there is no legacy fallback.
  if(!applicable)return 'NOT_APPLICABLE';
  const approved=repositoryAuthority.resolveApprovedAuthority(claim);
- return approved&&approved.status==='APPROVED'?'APPLICABLE':'NOT_APPLICABLE';
+ // Approval alone does not authorize caller-authored bridge rules: only a
+ // repository-resolved, evidence-bound rule can ever yield APPLICABLE.
+ return approved&&approved.status==='APPROVED'&&repositoryAuthority.isApprovedBridgeRule(rules,evidence,claim)?'APPLICABLE':'NOT_APPLICABLE';
 }
 module.exports={POLICY_ID,POLICY_VERSION,evaluate};
