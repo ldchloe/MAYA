@@ -10,7 +10,7 @@ const isObj=x=>x!==null&&typeof x==='object'&&!Array.isArray(x);
 function evidenceFor(c,id){
  if(!isObj(c)||c.projectIdentityId!==id||!predicates.includes(c.predicate)||typeof c.object!=='string'||!c.object.trim()||!isObj(c.source))return null;
  const s=c.source;
- if(!allowedArchives.has(s.archivePath)||typeof s.sourceUrl!=='string'||!/^https:\/\//.test(s.sourceUrl)||typeof s.selector!=='string'||s.selector.length<12||typeof s.observedAt!=='string'||!/^\d{4}-\d\d-\d\dT/.test(s.observedAt))return null;
+ if(!allowedArchives.has(s.archivePath)|| (s.archivePath.includes('junit4-')&&id!=='project:3b8b92fd783639e12f59ff6256967b246edd5249343217fb6d669a6ce688ff8e')||(s.archivePath.includes('/spring/')&&!registry.approved.some(x=>x.projectIdentityId===id&&x.contractDomain==='C01-I05'))||(s.archivePath.includes('/log4j/')&&!registry.approved.some(x=>x.projectIdentityId===id&&x.contractDomain==='C01-I06'))||typeof s.sourceUrl!=='string'||!/^https:\/\//.test(s.sourceUrl)||typeof s.selector!=='string'||s.selector.length<12||typeof s.observedAt!=='string'||!/^\d{4}-\d\d-\d\dT/.test(s.observedAt))return null;
  if((s.validFrom!==undefined&&typeof s.validFrom!=='string')||(s.validTo!==undefined&&typeof s.validTo!=='string'))return null;
  let raw;try{raw=fs.readFileSync(path.resolve(__dirname,'..',s.archivePath),'utf8')}catch{return null}
  if(!raw.includes(s.selector))return null;
