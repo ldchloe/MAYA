@@ -807,3 +807,26 @@ The next objective is to enrich these resolved software identities with structur
 **Current milestone: LOT C COMPLETE**
 
 **Next milestone: LOT D — TECHNICAL METADATA**
+
+
+---
+
+# Addendum — Lot E Governance Closure — 27 October 2026
+
+**LOT E GOVERNANCE VALIDATED — MERGED TO MAIN.**
+
+| Layer | Status |
+| --- | --- |
+| Canonical Layer | COMPLETE |
+| Lot A — Foundation | COMPLETE |
+| Lot B — Maven Identity Resolution | COMPLETE |
+| Lot C / C-01 — PackageIdentity → ProjectIdentity | COMPLETE (JUnit, Spring Framework, Apache Log4j) |
+| Lot D — Technical Metadata | COMPLETE (PR #35) |
+| Lot E — Evidence-based Governance | COMPLETE (PR #36, merge `1f33aa3b10bfdcc52d0ec54ad9cc0f20af7f09cd`) |
+| Lot F — Geographic Facts | **NEXT** |
+
+Lot E validates three independent C-01 ProjectIdentity values in one offline deterministic governance resolver, with distinct Organization, Foundation and collective Maintainer relations. The JUnit tagged official POM provides a scoped Organization attribution, not legal ownership. Apache's archived official Logging Services guidelines explicitly establish ASF foundation governance over the Log4j subproject; the official Log4j project guidelines explicitly identify the Apache Logging Project Management Committee as the responsible collective group. Missing Spring governance and other unsupported relations remain **UNKNOWN**, not inferred. A controlled contradiction is explicitly **SYNTHETIC TEST ONLY** and cannot be accepted by the production verifier.
+
+Official Apache HTTP archives include original bytes, final URL, HTTP 200, acquisition timestamp, content type, SHA-256 and archive ID. The temporary acquisition workflow was removed after archiving. No geopolitical scoring or country/jurisdiction inference is performed. Full PR #36 CI run `40516842687`: **551/551 Node**, **58/58 Maven**, 0 failed, 0 skipped, syntax and `git diff --check` passed. Detailed evidence and semantics: `docs/e01-governance.md`.
+
+**NEXT: LOT F — GEOGRAPHIC FACTS.** First increment: Organization → Legal Jurisdiction, based exclusively on explicit official/legal evidence, preserving UNKNOWN and temporal scope. One branch and one PR, reuse Evidence/Assertion/Conflict/Decision. No Lot F implementation started in PR #36.
