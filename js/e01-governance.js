@@ -26,7 +26,7 @@ function evidenceFor(c,id){
  if(!raw.includes(s.selector))return null;
  // An explicit contextual statement is required; names, domain URLs and contribution alone are not governance.
  if(c.predicate==='attributedToOrganization'&&!/(<organization>\s*<name>|governed by|maintained by|stewardship of)/i.test(s.selector))return null;
- const statement=s.selector.replace(/<[^>]*>/g,' ').replace(/\\s+/g,' ');
+ const statement=s.selector.replace(/<[^>]*>/g,' ').replace(/\s+/g,' ');
  if(c.predicate==='governedByFoundation'&&!/(governed by.*foundation|foundation governs|project.*of the .*foundation.*subprojects.*log4j)/i.test(statement))return null;
  if(c.predicate==='maintainedBy'&&!/(<maintainer>|maintained by|maintainers:|responsible for managing the)/i.test(s.selector))return null;
  if(!s.selector.includes(c.object))return null;
