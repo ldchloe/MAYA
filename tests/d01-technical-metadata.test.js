@@ -26,9 +26,9 @@ test('D-01 real versioned CycloneDX fixture through existing canonical importer'
  const {document,report}=importCycloneDxJson(input,'cyclonedx-valid.json');
  assert.ok(document,JSON.stringify(report.errors));
  const component=document.components.find(x=>x.raw?.['bom-ref']==='a');
- const before=digest(document),result=run(document,component.id);
+ const before=JSON.stringify(document),result=run(document,component.id);
  assert.equal(result.decisions.license.status,'CONFLICTED');
  assert.deepEqual([...new Set(result.evidence.map(e=>e.value))].sort(),['Apache-2.0','MIT']);
- assert.equal(digest(document),before);
+ assert.equal(JSON.stringify(document),before);
  assert.equal(verifyTechnicalMetadata(result),true);
 });
