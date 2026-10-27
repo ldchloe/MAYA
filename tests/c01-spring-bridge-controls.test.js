@@ -28,7 +28,7 @@ test('SPR-07 altered evidence or swapped source digest rejects V-PY',()=>{
 test('SPR-MULTI-01 controlled two packages link to same Y without merging package identities',()=>{
  const source=require('../fixtures/c01/spring/spring-framework-project-identity.snapshot.json');
  const original=source.projects[0];
- let registry=allocateProjectIdentity(createProjectIdentityRegistry(),original);
+ let registry=allocateProjectIdentity(createProjectIdentityRegistry(),{...original,projectId:original.id});
  for(const [i,p] of [pkg,'maven:org.springframework:spring-beans:6.1.3'].entries()){
   registry=linkPackageIdentity(registry,{relationId:'relation:'+(i+1).toString(16).padStart(64,'0'),packageIdentityId:p,projectId:project,evidenceRefs:['evidence:controlled-multimodule-fixture-'+i],createdAt:original.createdAt,attributionContext:{scope:'controlled-multimodule-test-only',documentaryBridgeStatus:i===0?'verified':'not-established'},versionScope:'6.1.3'});
  }
