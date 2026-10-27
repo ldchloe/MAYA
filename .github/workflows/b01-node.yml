@@ -21,5 +21,18 @@ jobs:
         run: node --test tests/identity-maven.test.js
       - name: Complete suite
         run: node --test tests/*.test.js
+      - name: Productization syntax
+        run: |
+          node --check js/reporting-product.js
+          node --check js/reporting-xlsx.js
+          node --check js/reporting-cli.js
+      - name: Generate validated real-SBOM XLSX demo
+        run: node js/reporting-cli.js tests/fixtures/b06-europeana-corelib.json --output maya-analysis-example.xlsx --mode offline
+      - name: Upload Excel demonstration
+        uses: actions/upload-artifact@v4
+        with:
+          name: maya-analysis-example
+          path: maya-analysis-example.xlsx
+          retention-days: 14
       - name: Diff whitespace
         run: git diff --check HEAD^ HEAD
