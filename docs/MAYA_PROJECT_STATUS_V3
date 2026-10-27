@@ -602,3 +602,17 @@ La validation C-01 exige les archives officielles, une identité projet allouée
 **Scope MVP :** le ticket C-01 couvre PackageIdentity → ProjectIdentity. Repository officiel, forks et miroirs ne sont pas inclus dans ce ticket actif ; aucune nouvelle ADR n'est nécessaire. Après clôture effective, le prochain lot prioritaire est Lot D — Technical Metadata, première tranche licences + SPDX.
 
 **C-01 PACKAGEIDENTITY → PROJECT : VALIDÉ ET CLÔTURÉ.** Les trois pilotes réels sont fusionnés, avec CI finale 509/509 Node et 58/58 Maven, zéro échec, zéro skipped. Le ticket actif Lot C est clos ; prochaine priorité Lot D — licences + SPDX.
+
+
+---
+
+# Addendum Lot D — 27 octobre 2026
+
+**LOT D TECHNICAL METADATA VALIDATED — MERGED.**
+
+- Lot C / C-01 PackageIdentity → ProjectIdentity : ✅ (JUnit, Spring Framework, Apache Log4j).
+- Lot D — Technical Metadata : ✅ (PR #35, merge `4ff23ca09a499225c697510015a88cb362dd2d7e`).
+- Tests finaux PR #35 : **527/527 Node**, **58/58 Maven**, zéro échec, zéro skipped, contrôles syntaxe et whitespace verts.
+- Licences déclarées CycloneDX et SPDX, licences conclues SPDX, expressions SPDX AND/OR/WITH et parenthèses dans le périmètre grammatical requis, Evidence/Assertions sourcées, Conflicts factuels conservés, Decisions déterministes, langage explicitement déclaré uniquement, UNKNOWN préservé et rejeu hors réseau. Pas de vérification externe des identifiants SPDX ni de matrice de compatibilité juridique.
+- Dossier de clôture : `docs/d01-technical-metadata.md`.
+- **NEXT : LOT E — GOVERNANCE LAYER.** Premier incrément proposé : ProjectIdentity → Organization, avec Evidence officielles d'ownership ou stewardship. Aucun code Lot E commencé.
