@@ -16,3 +16,14 @@ Outstanding:
 - Positive eligibility, full integrated acceptance and real JUnit offline replay remain open. JUNIT PACKAGE→PROJECT = INDETERMINATE.
 
 Do not merge PR #31 based solely on this archived source or the green synthetic tests.
+
+
+## Independent project description acquired
+
+A second upstream release-tag document has been archived from `junit-team/junit4` at `r4.13.2`: `fixtures/c01/junit4-r4.13.2-project-readme.md`, source https://github.com/junit-team/junit4/blob/r4.13.2/README.md . It explicitly describes JUnit 4 as a software testing framework, independently of Maven coordinates. Test `tests/c01-junit-project-source.test.js` verifies its archived content offline.
+
+This establishes a real independent *project-description source*, **not** an approved opaque ProjectIdentity allocation or snapshot. No ProjectIdentity has been allocated on the strength of a Maven name or POM. The V-Y gate remains open pending an explicitly authorized independent registry allocation and its pinned provenance.
+
+## Maven Central acquisition limitation
+
+The approved Maven Central provider endpoint is `https://repo.maven.apache.org/maven2/junit/junit/4.13.2/junit-4.13.2.pom`. Direct network acquisition from the execution environment failed due to DNS resolution. The Sonatype Central artifact listing independently confirms the published coordinates, but is not a substitute for a Lot B provider acquisition with authenticated response metadata. Do not fabricate a `providerId=maven-central` acquisition record from a web listing.
