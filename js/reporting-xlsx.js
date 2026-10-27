@@ -3,6 +3,7 @@
 // Reporting is a pure projection of H01 outputs; no score formula or risk thresholds here.
 const zlib=require('node:zlib');
 const {digest}=require('./enrichment-canonical.js');
+const riskPolicy=require('../config/h01-risk-policy.json');
 const C={purple:'35205D',magenta:'BC287E',light:'F4F0F8',white:'FFFFFF',ink:'242236',grey:'697080',border:'DFD9E7',unknown:'E7E7EB',red:'F9D7DF',green:'DCEFE7'};
 const xml=x=>String(x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&apos;').replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g,'');
 const text=x=>x===null||x===undefined||x===''?'UNKNOWN':Array.isArray(x)?x.join('; ')||'UNKNOWN':String(x);
@@ -46,7 +47,7 @@ function buildComex(a){
  add();
  add(section('01  •  EXECUTIVE SUMMARY'));
  add('Components analyzed',diag.componentsTotal,'Scored',summary.scoredComponents,'Unknown',summary.unknownComponents);
- add('TRUST SCORE /100',num(summary.overallTrustScore),'EVIDENCE COVERAGE %',num(summary.overallCoverage),'CONFIDENCE',summary.overallCoverage===null?'UNKNOWN':summary.overallCoverage>=80?'HIGH':summary.overallCoverage>=50?'MEDIUM':'LOW');
+ add('TRUST SCORE /100',num(summary.overallTrustScore),'EVIDENCE COVERAGE %',num(summary.overallCoverage),'CONFIDENCE',summary.overallCoverage===null?'UNKNOWN':summary.overallCoverage>=riskPolicy.confidenceThresholds.high?'HIGH':summary.overallCoverage>=riskPolicy.confidenceThresholds.medium?'MEDIUM':'LOW');
  add('INTERPRETATION','UNKNOWN is not zero risk. Read score alongside coverage.');
  add();
  add(section('02  •  TOP RISK DRIVERS'));
