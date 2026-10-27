@@ -1,0 +1,27 @@
+name: C01 Spring baseline temporary
+on:
+  push:
+    branches: [validation/c01-spring-baseline]
+jobs:
+  baseline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Exact baseline provenance
+        run: |
+          test "$(git rev-parse HEAD^)" = "9591c65451fd92dd10d6158e843f5a3ec8ec7b69"
+          test "$(git diff --name-only HEAD^ HEAD)" = ".github/workflows/c01-spring-baseline-temp.yml"
+          git diff --check HEAD^ HEAD
+      - name: Syntax checks
+        run: |
+          node --check js/identity-purl.js
+          node --check js/identity-mvp.js
+      - name: Maven Lot B tests
+        run: node --test tests/identity-maven.test.js
+      - name: Full Node suite including C01 and JUnit offline tests
+        run: node --test tests/*.test.js
