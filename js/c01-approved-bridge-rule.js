@@ -11,7 +11,7 @@ function issue(claim){
   resolution=authority.resolveApprovedAuthority(claim);
   if(!resolution||resolution.status!=='APPROVED')return reject();
   const expected={packageIdentityId:claim.packageIdentityId,projectIdentityId:claim.projectIdentityId,snapshotDigest:resolution.projectSnapshotDigest};
-  if(resolution.requiredEvidenceClasses.length===7){
+  if(resolution.evidenceMode==='repository-corpus'){
    corpus=propositions.materializeApproved(resolution);
    verification=propositions.verifyApproved(corpus,expected,resolution);
   }else{
