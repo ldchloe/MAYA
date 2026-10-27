@@ -1,5 +1,6 @@
 'use strict';
 const fs=require('node:fs'),path=require('node:path');
+const {canonicalJSON}=require('../js/enrichment-canonical.js');
 const {createMavenCentralProvider}=require('../js/identity-maven-provider.js');
 const {createObservationArchive,createMemoryBackend}=require('../js/identity-archive.js');
 (async()=>{
@@ -11,7 +12,7 @@ const {createObservationArchive,createMemoryBackend}=require('../js/identity-arc
  const archive=createObservationArchive(backend);
  const reference=await archive.store(observation);
  const replay=await archive.load(reference);
- if(JSON.stringify(replay)!==JSON.stringify(observation))throw Error('OFFLINE_REPLAY_MISMATCH');
+ if(canonicalJSON(replay)!==canonicalJSON(observation))throw Error('OFFLINE_REPLAY_MISMATCH');
  const dir=path.join(__dirname,'../fixtures/c01/maven-central');fs.mkdirSync(dir,{recursive:true});
  fs.writeFileSync(path.join(dir,'junit-4.13.2.observation.json'),map.get(reference.id)+'\n');
  fs.writeFileSync(path.join(dir,'junit-4.13.2.reference.json'),JSON.stringify(reference,null,2)+'\n');
