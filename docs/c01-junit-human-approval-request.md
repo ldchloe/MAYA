@@ -1,10 +1,12 @@
+> HISTORICAL APPROVAL REQUEST: H1 was subsequently APPROVED by the user and executed. H2 remains PENDING, not approved. See `fixtures/c01/junit4-project-identity.snapshot.json` and `fixtures/c01/junit-h2-authority-candidate.json`. This document's H1 pending wording is historical, not the current gate state.
+
 # C01-I04 — independent approval decision required (JUnit pilot)
 
 Status: **HUMAN APPROVAL REQUIRED**. This is an approval request, **not** an approved allocation, an approved authority, or a verified Package→Project bridge.
 
 ## Verified and archived, no further acquisition needed
 
-- Real Maven Central Lot B observation: `fixtures/c01/maven-central/junit-4.13.2.observation.json` and `junit-4.13.2.reference.json`. Provider `maven-central` v2, HTTP 200, version `4.13.2`, observation timestamp `2026-10-27T08:48:04.055Z`. Archive SHA-256 `6a977171df7e5908a66ee179fd86039a5e5fd3322758197a2f2d101987e4f740`; body SHA-256 `569b6977ee4603c965c1c46c3058fa6e969291b0160eb6964dd092cd89eadd94`. Offline test: `tests/c01-junit-maven-central-offline.test.js`.
+- Real Maven Central Lot B observation: `fixtures/c01/maven-central/junit-4.13.2.observation.json` and `junit-4.13.2.reference.json`. Provider `maven-central` v2, HTTP 200, version `4.13.2`, observation timestamp `2026-10-27T08:48:04.055Z`. Archive SHA-256 `605703278032b3282a60e2e145b24e1c788aaceb8e60a17a2da145bcab827aef`; body SHA-256 `569b6977ee4603c965c1c46c3058fa6e969291b0160eb6964dd092cd89eadd94`. Offline test: `tests/c01-junit-maven-central-offline.test.js`.
 - Project-description source: `fixtures/c01/junit4-r4.13.2-project-readme.md`, official upstream tagged JUnit 4 README, offline test `tests/c01-junit-project-source.test.js`. Describes the JUnit project, **does not** allocate a MAYA ProjectIdentity.
 - Tagged upstream POM: `fixtures/c01/junit4-r4.13.2-upstream-pom.xml`, SHA-256 `569b6977ee4603c965c1c46c3058fa6e969291b0160eb6964dd092cd89eadd94`. Its matching bytes and Maven coordinates do **not** independently prove a link to an opaque ProjectIdentity.
 
