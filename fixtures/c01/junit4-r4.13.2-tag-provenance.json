@@ -1,0 +1,23 @@
+{
+  "officialRepository": "junit-team/junit4",
+  "tag": "r4.13.2",
+  "releaseUrl": "https://github.com/junit-team/junit4/releases/tag/r4.13.2",
+  "releasePublishedAt": "2021-02-13T16:56:53Z",
+  "claim": "upstream-tagged-pom-declares-maven-coordinates",
+  "packageCoordinate": "junit:junit:4.13.2",
+  "pom": {
+    "officialSource": "https://github.com/junit-team/junit4/blob/r4.13.2/pom.xml",
+    "gitBlobSha": "38be96092f241cb4e1ff0d9046b323b67d34b127",
+    "archivePath": "fixtures/c01/junit4-r4.13.2-upstream-pom.xml",
+    "archiveSha256": "569b6977ee4603c965c1c46c3058fa6e969291b0160eb6964dd092cd89eadd94"
+  },
+  "readme": {
+    "officialSource": "https://github.com/junit-team/junit4/blob/r4.13.2/README.md",
+    "gitBlobSha": "739347df507869dae1df7646019866118112083f",
+    "archivePath": "fixtures/c01/junit4-r4.13.2-project-readme.md",
+    "archiveSha256": "63feaf908bda828d78adf9989bf404ffd4e4ac4ad76b0d7bed74cf5b4f611723"
+  },
+  "verificationMethod": "official-github-tagged-file-exact-byte-comparison-and-git-blob-identity",
+  "bridgeAuthorityStatus": "NOT_ISSUED",
+  "limitations": "Tag provenance and explicit POM coordinates support evaluating the P-to-independent-Y relationship, but do not themselves emit an approved bridge rule or certify V-PY."
+}
