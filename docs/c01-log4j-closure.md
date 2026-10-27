@@ -43,4 +43,4 @@ C01-01 through C01-15 are tested through JUnit, Spring and Log4j real archived c
 
 The latest project status scopes the active Lot C ticket to **PackageIdentity → Project**. Repository, forks and mirrors are outside that active MVP ticket. Therefore the next phase after a green three-pilot merge is **Lot D — Technical Metadata**, starting with licenses and SPDX, reusing Evidence / Assertion / Conflict and preserving UNKNOWN for unsupported claims.
 
-The closure declaration becomes effective only after the final complete CI passes and the Log4j PR is merged into main.
+**C-01 PACKAGEIDENTITY TO PROJECT VALIDATED.** Final PR #34 CI passed: 509/509 Node and 58/58 Maven, zero failed and zero skipped. PR #34 was merged to main at commit `37c79fe30f94775f09fe14819065d7e2df3abdad`. The closure criteria C01-01 through C01-15 are satisfied by the three archived pilots. The next active MVP phase is Lot D — Technical Metadata, licenses + SPDX. No new ADR or historical repository/fork/mirror ticket is opened.
