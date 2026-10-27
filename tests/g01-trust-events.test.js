@@ -56,3 +56,20 @@ test('G-06 to G-12 all event types represented without interpreting unsupported 
  for(const type of ['OWNERSHIP_CHANGE','ACQUISITION','GOVERNANCE_CHANGE','MAINTAINER_CHANGE','LICENSE_CHANGE','REPOSITORY_CHANGE','FOUNDATION_CHANGE','SUPPLY_CHAIN_INCIDENT','COMPROMISE'])assert.ok(EVENT_TYPES.includes(type));
  assert.equal(run([{eventType:'COMPROMISE',subject:junit,after:'r4.13.2',effectiveAt:release('r4.13.2').effectiveAt,source:release('r4.13.2').source}],junit).decision.status,'UNKNOWN');
 });
+
+test('G-06 G-07 G-08 G-09 controlled transitions retain before and after',()=>{
+ const {resolveSyntheticChangeForTest}=require('../js/g01-trust-events.js');
+ for(const type of ['LICENSE_CHANGE','MAINTAINER_CHANGE','FOUNDATION_CHANGE','REPOSITORY_CHANGE','GOVERNANCE_CHANGE','OWNERSHIP_CHANGE','ACQUISITION']){
+  const r=resolveSyntheticChangeForTest(log4j,type,'old','new','2020-01-01');
+  assert.equal(r.events[0].before,'old');assert.equal(r.events[0].after,'new');
+  assert.equal(r.decision.status,'VERIFIED');assert.equal(r.testOnly,true);
+  assert.equal(verifyTrustEvents(r),false);
+ }
+});
+test('G-10 G-12 synthetic incident and explicit compromise require evidence',()=>{
+ const {resolveSyntheticChangeForTest}=require('../js/g01-trust-events.js');
+ for(const type of ['SUPPLY_CHAIN_INCIDENT','COMPROMISE']){
+ const r=resolveSyntheticChangeForTest(log4j,type,'unaffected','documented-event','2021-12-01');
+ assert.equal(r.evidence.length,1);assert.equal(r.testOnly,true);assert.equal(verifyTrustEvents(r),false);
+ }
+});
