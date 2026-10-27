@@ -585,3 +585,18 @@ pour chaque relation Package → Project.
 Le Lot B est clôturé.
 
 Le chantier principal de MAYA devient désormais le Lot C : PackageIdentity → Project.
+
+
+---
+
+# Addendum C-01 — 27 octobre 2026
+
+Les pilotes documentaires réels de PackageIdentity → ProjectIdentity sont :
+
+- JUnit `junit:junit:4.13.2` → JUnit : validé et fusionné.
+- Spring Framework `org.springframework:spring-core:6.1.3` → Spring Framework : validé et fusionné.
+- Apache Log4j `org.apache.logging.log4j:log4j-core:2.23.1` → Apache Log4j : pipeline et tests intégrés dans la PR C01-I06 ; clôture effective après fusion et CI verte.
+
+La validation C-01 exige les archives officielles, une identité projet allouée indépendamment, une approbation de portée exacte, des Evidence de bridge explicites, l'éligibilité fail-closed, la qualification, la completeness, l'acceptance, les Decisions déterministes et le rejeu intégral hors réseau. Voir `docs/c01-log4j-closure.md`.
+
+**Scope MVP :** le ticket C-01 couvre PackageIdentity → ProjectIdentity. Repository officiel, forks et miroirs ne sont pas inclus dans ce ticket actif ; aucune nouvelle ADR n'est nécessaire. Après clôture effective, le prochain lot prioritaire est Lot D — Technical Metadata, première tranche licences + SPDX.
