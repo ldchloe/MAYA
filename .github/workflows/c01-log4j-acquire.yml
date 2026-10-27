@@ -1,0 +1,46 @@
+name: C01 Log4j archive acquisition
+on:
+  push:
+    branches: [feature/c01-log4j-pilot]
+    paths: ['.github/workflows/c01-log4j-acquire.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  acquire:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/c01-log4j-pilot
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Acquire immutable official sources and Maven Central POM
+        run: |
+          node <<'NODE'
+          const fs=require('node:fs'),crypto=require('node:crypto'),https=require('node:https');
+          const base='fixtures/c01/log4j',sha=x=>crypto.createHash('sha256').update(x).digest('hex');
+          const sources=[
+           ['apache-log4j-readme.adoc','https://raw.githubusercontent.com/apache/logging-log4j2/rel/2.23.1/README.adoc'],
+           ['apache-log4j-parent-pom.xml','https://raw.githubusercontent.com/apache/logging-log4j2/rel/2.23.1/pom.xml'],
+           ['apache-log4j-core-pom.xml','https://raw.githubusercontent.com/apache/logging-log4j2/rel/2.23.1/log4j-core/pom.xml'],
+           ['maven-central/log4j-core-2.23.1.pom','https://repo.maven.apache.org/maven2/org/apache/logging/log4j/log4j-core/2.23.1/log4j-core-2.23.1.pom']
+          ];
+          fs.mkdirSync(base+'/maven-central',{recursive:true});
+          function get(url){return new Promise((resolve,reject)=>https.get(url,{headers:{'User-Agent':'MAYA-C01-I06-evidence-acquisition'}},res=>{const chunks=[];res.on('data',x=>chunks.push(x));res.on('end',()=>{if(res.statusCode!==200)return reject(Error(url+' HTTP '+res.statusCode));resolve({bytes:Buffer.concat(chunks),status:res.statusCode,headers:res.headers})})}).on('error',reject))}
+          (async()=>{
+           const records=await Promise.all(sources.map(async([file,url])=>{const {bytes,status,headers}=await get(url);const dest=base+'/'+file;if(fs.existsSync(dest)&&sha(fs.readFileSync(dest))!==sha(bytes))throw Error('ARCHIVE_IMMUTABILITY '+file);fs.writeFileSync(dest,bytes);return {file,url,provider:url.includes('repo.maven.apache.org')?'maven-central':'apache-github-official-tag',status,acquiredAt:new Date().toISOString(),sha256:sha(bytes),archiveId:'sha256:'+sha(bytes),headers:{etag:headers.etag||null,lastModified:headers['last-modified']||null,contentType:headers['content-type']||null}}}));
+           fs.writeFileSync(base+'/acquisition-manifest.json',JSON.stringify({version:'1.0.0',records},null,2)+'\n');
+           console.log(records.map(x=>x.file+' '+x.sha256).join('\n'));
+          })().catch(e=>{console.error(e);process.exitCode=1});
+          NODE
+      - name: Commit archives
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add fixtures/c01/log4j
+          if ! git diff --cached --quiet; then
+            git commit -m 'evidence(c01): archive official Apache Log4j 2.23.1 sources and Maven Central POM'
+            git push origin HEAD:feature/c01-log4j-pilot
+          fi
