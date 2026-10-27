@@ -1,0 +1,28 @@
+{
+  "acquisition": {
+    "providerId": "maven-central",
+    "providerVersion": "2",
+    "scope": "Version",
+    "url": "https://repo.maven.apache.org/maven2/org/springframework/spring-core/6.1.3/spring-core-6.1.3.pom",
+    "query": {
+      "namespace": "org.springframework",
+      "name": "spring-core",
+      "version": "6.1.3"
+    },
+    "observedAt": "2026-10-27T12:43:42.041Z",
+    "status": 200,
+    "transport": "ok",
+    "error": null,
+    "body": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<project xmlns=\"http://maven.apache.org/POM/4.0.0\" xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n  <!-- This module was also published with a richer model, Gradle metadata,  -->\n  <!-- which should be used instead. Do not delete the following line which  -->\n  <!-- is to indicate to Gradle or any Gradle module metadata file consumer  -->\n  <!-- that they should prefer consuming it instead. -->\n  <!-- do_not_remove: published-with-gradle-metadata -->\n  <modelVersion>4.0.0</modelVersion>\n  <groupId>org.springframework</groupId>\n  <artifactId>spring-core</artifactId>\n  <version>6.1.3</version>\n  <name>Spring Core</name>\n  <description>Spring Core</description>\n  <url>https://github.com/spring-projects/spring-framework</url>\n  <organization>\n    <name>Spring IO</name>\n    <url>https://spring.io/projects/spring-framework</url>\n  </organization>\n  <licenses>\n    <license>\n      <name>Apache License, Version 2.0</name>\n      <url>https://www.apache.org/licenses/LICENSE-2.0</url>\n      <distribution>repo</distribution>\n    </license>\n  </licenses>\n  <developers>\n    <developer>\n      <id>jhoeller</id>\n      <name>Juergen Hoeller</name>\n      <email>jhoeller@pivotal.io</email>\n    </developer>\n  </developers>\n  <scm>\n    <connection>scm:git:git://github.com/spring-projects/spring-framework</connection>\n    <developerConnection>scm:git:git://github.com/spring-projects/spring-framework</developerConnection>\n    <url>https://github.com/spring-projects/spring-framework</url>\n  </scm>\n  <issueManagement>\n    <system>GitHub</system>\n    <url>https://github.com/spring-projects/spring-framework/issues</url>\n  </issueManagement>\n  <dependencies>\n    <dependency>\n      <groupId>org.springframework</groupId>\n      <artifactId>spring-jcl</artifactId>\n      <version>6.1.3</version>\n      <scope>compile</scope>\n    </dependency>\n  </dependencies>\n</project>\n"
+  },
+  "reference": {
+    "id": "observation:82379bb41013e1bfe25c27390cd27061aa4923cf6d4a8b53d30bfded6ceaded9",
+    "sha256": "82379bb41013e1bfe25c27390cd27061aa4923cf6d4a8b53d30bfded6ceaded9",
+    "contentHash": "e218e29adafcc0512596aa2e4458e8394521d6131491fce63ac7ecc3ed1bbdab",
+    "archiveFormatVersion": "2"
+  },
+  "bodySha256": "e218e29adafcc0512596aa2e4458e8394521d6131491fce63ac7ecc3ed1bbdab",
+  "contentType": "application/xml",
+  "acquisitionMethod": "Lot B createMavenCentralProvider",
+  "archivedAt": "2026-10-27T12:43:42.197Z"
+}
