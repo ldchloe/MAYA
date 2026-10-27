@@ -4,6 +4,10 @@ const {digest,deterministicId}=require('./enrichment-canonical.js');
 const defaultPolicy=require('../config/h01-risk-policy.json');
 const geographicPolicy=require('../config/h01-geopolitical-policy.json');
 const TYPES=Object.freeze([...defaultPolicy.dimensions]);
+const {verifyTechnicalMetadata}=require('./d01-technical-metadata.js');
+const {verifyGovernance}=require('./e01-governance.js');
+const {verifyGeographicFacts}=require('./f01-geographic-facts.js');
+const {verifyTrustEvents}=require('./g01-trust-events.js');
 const isObj=x=>x!==null&&typeof x==='object'&&!Array.isArray(x);
 const round=x=>Math.round((x+Number.EPSILON)*100)/100;
 const sortUnique=x=>[...new Set(x.filter(v=>typeof v==='string'&&v))].sort();
@@ -64,6 +68,35 @@ function evaluateFact(type,x,policy){
  }else reasons.push(status==='CONFLICTED'?'CONFLICTING_FACTS':status==='NOT_APPLICABLE'?'NOT_APPLICABLE':'MISSING_VERIFIED_FACTS');
  return {type,status,riskScore,coverage:status==='VERIFIED'?100:status==='NOT_APPLICABLE'?null:0,factsUsed,decisionIds:refs,evidenceIds,policyRules:rules,reasonCodes:sortUnique(reasons)};
 }
+function fromVerifiedLots({subjectId,technical,governance,geographic,events,criticality}={}){
+ if(typeof subjectId!=='string'||!subjectId)throw Error('INVALID_H01_SUBJECT');
+ const out={subjectId,technical:{status:'UNKNOWN'},governance:{status:'UNKNOWN'},geographic:{status:'UNKNOWN'},events:{status:'UNKNOWN'},criticality:'UNKNOWN'};
+ if(technical){
+  if(!verifyTechnicalMetadata(technical))throw Error('UNVERIFIED_TECHNICAL_INPUT');
+  const d=technical.decisions.license;
+  out.technical={status:d.status==='CONFLICTED'?'CONFLICTED':d.status==='RESOLVED'?'VERIFIED':'UNKNOWN',licenseStatus:d.status,decisionId:d.id,evidenceIds:technical.evidence.map(e=>e.id)};
+ }
+ if(governance){
+  if(!verifyGovernance(governance)||governance.projectIdentityId!==subjectId)throw Error('UNVERIFIED_GOVERNANCE_INPUT');
+  const decisions=Object.values(governance.decisions),known=decisions.filter(d=>d.status==='VERIFIED'),conflict=decisions.some(d=>d.status==='CONFLICTED');
+  out.governance={status:conflict?'CONFLICTED':known.length?'VERIFIED':'UNKNOWN',verifiedGovernance:known.length>0,governanceConflict:conflict,decisionIds:decisions.map(d=>d.id),evidenceIds:governance.evidence.map(e=>e.id)};
+ }
+ if(geographic){
+  if(!verifyGeographicFacts(geographic)||geographic.projectIdentityId!==subjectId)throw Error('UNVERIFIED_GEOGRAPHIC_INPUT');
+  const d=geographic.decisions.LEGAL_JURISDICTION;
+  out.geographic={status:d.status,relationship:'LEGAL_JURISDICTION',countryCode:d.status==='VERIFIED'?d.countryCodes[0]:null,jurisdictionSubdivision:d.jurisdictionSubdivision,decisionId:d.id,evidenceIds:d.evidenceIds};
+ }
+ if(events){
+  if(!verifyTrustEvents(events)||events.projectIdentityId!==subjectId)throw Error('UNVERIFIED_EVENT_INPUT');
+  out.events={status:events.decision.status,events:events.events,decisionId:events.decision.id,evidenceIds:events.evidence.map(e=>e.id)};
+ }
+ if(criticality!=null){
+  if(!isObj(criticality)||!['LOW','MEDIUM','HIGH','CRITICAL'].includes(criticality.level)||!criticality.evidenceId)throw Error('UNVERIFIED_CRITICALITY_INPUT');
+  out.criticality={status:'VERIFIED',level:criticality.level,evidenceId:criticality.evidenceId};
+ }
+ return out;
+}
+function assessVerifiedProject(lots,policy=defaultPolicy){return assessTrust(fromVerifiedLots(lots),policy)}
 function assessTrust(input,policy=defaultPolicy){
  validatePolicy(policy);
  if(!isObj(input)||typeof input.subjectId!=='string'||!input.subjectId)throw Error('INVALID_H01_SUBJECT');
@@ -127,4 +160,4 @@ function assessSbom(inputs,policy=defaultPolicy){
  const core={overallTrustScore,overallCoverage,componentAssessments,dimensions,topRiskDrivers,governanceConcentration:concentration,geopoliticalExposure,criticalDependencies,recentTrustEvents,unknownDataWarnings,executiveSummary,policyVersion:policy.version};
  return {...core,resultDigest:digest(core)};
 }
-module.exports={assessTrust,assessSbom,regionForCountry,TYPES};
+module.exports={assessTrust,assessSbom,assessVerifiedProject,fromVerifiedLots,regionForCountry,TYPES};
