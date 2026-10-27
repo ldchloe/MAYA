@@ -8,7 +8,7 @@
 
 - **JUnit 4**: archived official tagged upstream POM explicitly contains `<organization><name>JUnit</name></organization>`. This supports a narrowly scoped **attributedToOrganization(JUnit, JUnit)** *as a project POM metadata attribution*, **not** legal ownership. The POM's contributors are not automatically maintainers.
 - **Spring Framework**: official tagged README establishes the project and its code-of-conduct governance but does not explicitly identify a legal owner, Foundation or individual maintainer. Its Organization/Foundation/Maintainer relations remain **UNKNOWN** pending archived, proposition-specific governance sources.
-- **Apache Log4j**: tagged parent POM identifies Apache contributor/PMC metadata and ASF licensing but the license header alone is **not** evidence of legal ownership or a Foundation-governance relationship. These relations remain **UNKNOWN** pending explicit governance documentation. Apache's official Logging guidelines at https://logging.apache.org/guidelines.html describe ASF and Logging PMC governance, but their raw bytes have not yet been archived in this branch and thus are not admitted to the offline evidence registry.
+- **Apache Log4j**: official Apache Logging Services guidelines (archived HTTP 200 with SHA-256) explicitly identify Logging Services as an ASF project with Log4j among its subprojects. This supports **governedByFoundation(Apache Log4j, Apache Software Foundation)**, not a claim of legal ownership. Official Log4j project guidelines explicitly identify the **Apache Logging Project Management Committee** as the volunteer group responsible for managing Apache Logging projects including Log4j. This supports collective **maintainedBy** with a documented governance role, not individual maintainer inference. Historical Log4j 2.3.x guidelines have no automatically assumed current validity interval. The charter provides corroborating ASF board governance context.
 
 ## Contract
 
@@ -16,6 +16,6 @@
 
 The expression `governedByFoundation` is distinct from `attributedToOrganization`, and `maintainedBy` requires an explicit maintainer statement. Different predicates never automatically imply one another.
 
-**Closure status: IN PROGRESS.** The three-project offline corpus is deterministic, but the full official source set, positive Foundation/Maintainer tests, substantive conflict tests, full CI and final closure must be verified before declaring Lot E validated. Do not claim Lot E closed based on this document alone.
+**Closure status: PENDING FINAL CI AND MERGE.** Official Apache Foundation and collective Maintainer positive tests are present. Controlled contradictions are explicitly `SYNTHETIC TEST ONLY`, segregated from the production resolver and rejected by the production verifier. All three real C-01 ProjectIdentity values are exercised; missing governance is UNKNOWN. Closure requires final CI green and merge PR #36.
 
 Next after validated closure: Lot F Geographic Facts, first increment Organization → Legal Jurisdiction only with explicit official/legal evidence.
