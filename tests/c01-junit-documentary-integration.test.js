@@ -19,3 +19,8 @@ module.exports={real,prepare};
 
 test('INT-A02 INT-A07 missing or forged V-PY authority cannot be ACCEPTED',()=>{for(const mutate of [e=>e.validationContext.attributionDossier.bridgeEvidence=[],e=>e.validationContext.attributionDossier.bridgeEvidence[0].bridgeEvidenceDigest='0'.repeat(64)]){const e=real();mutate(e);refresh(e);prepare(e);assert.notEqual(acceptDocumentarySnapshot(e).acceptanceStatus,'ACCEPTED');}});
 test('INT-A08 missing required documentary conflict rejected',()=>{const e=prepare(real());e.payload.conflicts=[{id:'forged-conflict',subjectId:e.payload.assertions[0].subjectId,predicate:e.payload.assertions[0].predicate,assertionIds:[e.payload.assertions[0].id],conflictType:'contradictory-evidence',status:'conflicted'}];refresh(e);assert.notEqual(acceptDocumentarySnapshot(e).acceptanceStatus,'ACCEPTED');});
+
+test('INT-Q02 missing real assertion cannot preserve positive decision',()=>{const e=prepare(real());e.payload.assertions=[];refresh(e);assert.notEqual(acceptDocumentarySnapshot(e).acceptanceStatus,'ACCEPTED');});
+test('INT-Q03 missing bridge Evidence rejects documentary completeness',()=>{const e=prepare(real());e.payload.evidence=[];refresh(e);assert.notEqual(acceptDocumentarySnapshot(e).acceptanceStatus,'ACCEPTED');});
+test('INT-C03 omitted examination of admitted assertion is invalid',()=>{const e=prepare(real());e.qualificationProof={...e.qualificationProof,examinedAssertionIds:[]};assert.equal(acceptDocumentarySnapshot(e).acceptanceStatus,'REJECTED');});
+test('INT-A03 altered completeness proof is not accepted',()=>{const e=prepare(real());e.qualificationProof={...e.qualificationProof,resultDigest:'0'.repeat(64)};assert.equal(acceptDocumentarySnapshot(e).acceptanceStatus,'REJECTED');});
