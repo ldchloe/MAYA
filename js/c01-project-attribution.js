@@ -22,17 +22,22 @@ function validArchive(a,d){
   nonempty(a.sourceRef)&&nonempty(a.versionScope)&&typeof a.content==='string'&&
   isDigest(a.sha256)&&sha(a.content)===a.sha256;
 }
-function observedBridge(b){\n try{const x=JSON.parse(b.content);return x&&typeof x==='object'&&!Array.isArray(x)&&x.predicate==='attributedToProjectIdentity'&&nonempty(x.packageIdentityId)&&nonempty(x.externalIdentityId)&&nonempty(x.projectIdentityId)?x:null;}catch{return null;}\n}\nfunction validBridge(b,d){
+function observedBridge(b){
+ try{const x=JSON.parse(b.content);return x&&typeof x==='object'&&!Array.isArray(x)&&x.predicate==='attributedToProjectIdentity'&&nonempty(x.packageIdentityId)&&nonempty(x.externalIdentityId)&&nonempty(x.projectIdentityId)?x:null;}catch{return null;}
+}
+function validBridge(b,d){
  return b.kind==='explicit-attribution'&&b.packageIdentityId===d.packageIdentityId&&
   b.externalIdentityId===d.externalIdentityId&&b.projectIdentityId===d.projectIdentityId&&
   nonempty(b.sourceRef)&&nonempty(b.versionScope)&&typeof b.content==='string'&&
-  isDigest(b.sourceDigest)&&sha(b.content)===b.sourceDigest&&\n  observedBridge(b)?.packageIdentityId===d.packageIdentityId&&observedBridge(b)?.externalIdentityId===d.externalIdentityId&&observedBridge(b)?.projectIdentityId===d.projectIdentityId;
+  isDigest(b.sourceDigest)&&sha(b.content)===b.sourceDigest&&
+  observedBridge(b)?.packageIdentityId===d.packageIdentityId&&observedBridge(b)?.externalIdentityId===d.externalIdentityId&&observedBridge(b)?.projectIdentityId===d.projectIdentityId;
 }
 function isOtherCandidate(b,d){
  return b.kind==='explicit-attribution'&&b.packageIdentityId===d.packageIdentityId&&
   b.externalIdentityId===d.externalIdentityId&&b.projectIdentityId!==d.projectIdentityId&&
   nonempty(b.projectIdentityId)&&nonempty(b.sourceRef)&&nonempty(b.versionScope)&&
-  typeof b.content==='string'&&isDigest(b.sourceDigest)&&sha(b.content)===b.sourceDigest&&\n  observedBridge(b)?.packageIdentityId===d.packageIdentityId&&observedBridge(b)?.externalIdentityId===d.externalIdentityId&&observedBridge(b)?.projectIdentityId===b.projectIdentityId;
+  typeof b.content==='string'&&isDigest(b.sourceDigest)&&sha(b.content)===b.sourceDigest&&
+  observedBridge(b)?.packageIdentityId===d.packageIdentityId&&observedBridge(b)?.externalIdentityId===d.externalIdentityId&&observedBridge(b)?.projectIdentityId===b.projectIdentityId;
 }
 function makeAssertion(d,projectId,bridgeIds){
  const basis={packageIdentityId:d.packageIdentityId,externalIdentityId:d.externalIdentityId,projectIdentityId:projectId,bridgeIds:[...bridgeIds].sort()};
