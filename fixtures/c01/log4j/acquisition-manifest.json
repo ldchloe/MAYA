@@ -1,0 +1,61 @@
+{
+  "version": "1.0.0",
+  "records": [
+    {
+      "file": "apache-log4j-readme.adoc",
+      "url": "https://raw.githubusercontent.com/apache/logging-log4j2/rel/2.23.1/README.adoc",
+      "provider": "apache-github-official-tag",
+      "status": 200,
+      "acquiredAt": "2026-10-27T13:07:15.980Z",
+      "sha256": "cf6ba510571fff70a2579ba38795ab66354812db4228c3604cfb7e164f89f6fd",
+      "archiveId": "sha256:cf6ba510571fff70a2579ba38795ab66354812db4228c3604cfb7e164f89f6fd",
+      "headers": {
+        "etag": "\"b2838f7636f883c7768b8b38bb842adca1eef090c1b52cff888988134b34c882\"",
+        "lastModified": null,
+        "contentType": "text/plain; charset=utf-8"
+      }
+    },
+    {
+      "file": "apache-log4j-parent-pom.xml",
+      "url": "https://raw.githubusercontent.com/apache/logging-log4j2/rel/2.23.1/pom.xml",
+      "provider": "apache-github-official-tag",
+      "status": 200,
+      "acquiredAt": "2026-10-27T13:07:16.000Z",
+      "sha256": "ff5cceb935c95662980febe740b82c610021c9bb2db3f1fd1976ad7438dc108e",
+      "archiveId": "sha256:ff5cceb935c95662980febe740b82c610021c9bb2db3f1fd1976ad7438dc108e",
+      "headers": {
+        "etag": "\"a2d13b79e0cc76abea5a1b70fc8ad18474764db5d77e99f0005b140ec97dfe2d\"",
+        "lastModified": null,
+        "contentType": "text/plain; charset=utf-8"
+      }
+    },
+    {
+      "file": "apache-log4j-core-pom.xml",
+      "url": "https://raw.githubusercontent.com/apache/logging-log4j2/rel/2.23.1/log4j-core/pom.xml",
+      "provider": "apache-github-official-tag",
+      "status": 200,
+      "acquiredAt": "2026-10-27T13:07:15.981Z",
+      "sha256": "cb853eb528a22f7b414c8e944da9a1cec171c9f4b751feb827da952b5438fa2b",
+      "archiveId": "sha256:cb853eb528a22f7b414c8e944da9a1cec171c9f4b751feb827da952b5438fa2b",
+      "headers": {
+        "etag": "\"290b17ac97fa89aa01f704f7538c323e34ef499107f94706b8cb688e79ecc9a8\"",
+        "lastModified": null,
+        "contentType": "text/plain; charset=utf-8"
+      }
+    },
+    {
+      "file": "maven-central/log4j-core-2.23.1.pom",
+      "url": "https://repo.maven.apache.org/maven2/org/apache/logging/log4j/log4j-core/2.23.1/log4j-core-2.23.1.pom",
+      "provider": "maven-central",
+      "status": 200,
+      "acquiredAt": "2026-10-27T13:07:15.909Z",
+      "sha256": "c89ba0c23757511b9252b27a731d01e863b28ddfce503e7dee94ae2318c82ddc",
+      "archiveId": "sha256:c89ba0c23757511b9252b27a731d01e863b28ddfce503e7dee94ae2318c82ddc",
+      "headers": {
+        "etag": "\"a98ff1396bb2f2c6eb09f1ff9c66c21d\"",
+        "lastModified": "Wed, 06 Mar 2024 12:32:46 GMT",
+        "contentType": "text/xml"
+      }
+    }
+  ]
+}
