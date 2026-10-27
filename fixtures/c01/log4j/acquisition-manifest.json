@@ -6,7 +6,7 @@
       "url": "https://raw.githubusercontent.com/apache/logging-log4j2/rel/2.23.1/README.adoc",
       "provider": "apache-github-official-tag",
       "status": 200,
-      "acquiredAt": "2026-10-27T13:07:15.980Z",
+      "acquiredAt": "2026-10-27T13:09:54.926Z",
       "sha256": "cf6ba510571fff70a2579ba38795ab66354812db4228c3604cfb7e164f89f6fd",
       "archiveId": "sha256:cf6ba510571fff70a2579ba38795ab66354812db4228c3604cfb7e164f89f6fd",
       "headers": {
@@ -20,7 +20,7 @@
       "url": "https://raw.githubusercontent.com/apache/logging-log4j2/rel/2.23.1/pom.xml",
       "provider": "apache-github-official-tag",
       "status": 200,
-      "acquiredAt": "2026-10-27T13:07:16.000Z",
+      "acquiredAt": "2026-10-27T13:09:54.979Z",
       "sha256": "ff5cceb935c95662980febe740b82c610021c9bb2db3f1fd1976ad7438dc108e",
       "archiveId": "sha256:ff5cceb935c95662980febe740b82c610021c9bb2db3f1fd1976ad7438dc108e",
       "headers": {
@@ -34,7 +34,7 @@
       "url": "https://raw.githubusercontent.com/apache/logging-log4j2/rel/2.23.1/log4j-core/pom.xml",
       "provider": "apache-github-official-tag",
       "status": 200,
-      "acquiredAt": "2026-10-27T13:07:15.981Z",
+      "acquiredAt": "2026-10-27T13:09:55.212Z",
       "sha256": "cb853eb528a22f7b414c8e944da9a1cec171c9f4b751feb827da952b5438fa2b",
       "archiveId": "sha256:cb853eb528a22f7b414c8e944da9a1cec171c9f4b751feb827da952b5438fa2b",
       "headers": {
@@ -48,7 +48,7 @@
       "url": "https://repo.maven.apache.org/maven2/org/apache/logging/log4j/log4j-core/2.23.1/log4j-core-2.23.1.pom",
       "provider": "maven-central",
       "status": 200,
-      "acquiredAt": "2026-10-27T13:07:15.909Z",
+      "acquiredAt": "2026-10-27T13:09:54.909Z",
       "sha256": "c89ba0c23757511b9252b27a731d01e863b28ddfce503e7dee94ae2318c82ddc",
       "archiveId": "sha256:c89ba0c23757511b9252b27a731d01e863b28ddfce503e7dee94ae2318c82ddc",
       "headers": {
