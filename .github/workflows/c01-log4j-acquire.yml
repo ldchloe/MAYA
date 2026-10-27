@@ -35,6 +35,8 @@ jobs:
            console.log(records.map(x=>x.file+' '+x.sha256).join('\n'));
           })().catch(e=>{console.error(e);process.exitCode=1});
           NODE
+      - name: Archive real Lot B Maven observation and verify offline replay
+        run: node scripts/c01-acquire-log4j-maven.js
       - name: Commit archives
         run: |
           git config user.name 'github-actions[bot]'
