@@ -1,0 +1,29 @@
+name: C01 I02 development validation
+on:
+  push:
+    branches: [feature/c01-documentary-qualification]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: C01 I02 tests
+        run: node --test tests/c01-documentary-qualification.test.js tests/c01-completeness-proof.test.js tests/c01-documentary-integration.test.js
+      - name: C01 I01 tests
+        run: node --test tests/c01-resolution-eligibility.test.js tests/c01-resolution-historical.test.js tests/c01-resolution-offline.test.js
+      - name: Maven
+        run: node --test tests/identity-maven.test.js
+      - name: Full suite
+        run: node --test tests/*.test.js
+      - name: Syntax checks
+        run: |
+          node --check js/identity-purl.js
+          node --check js/identity-mvp.js
+          for f in js/c01-*.js; do node --check "$f"; done
+      - name: Whitespace
+        run: git diff --check HEAD^ HEAD
