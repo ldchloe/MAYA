@@ -35,8 +35,8 @@ The approved Maven Central provider endpoint is `https://repo.maven.apache.org/m
 - Provider: `maven-central` version `2`, scope `Version`, HTTP `200`, transport `ok`.
 - Observed at: `2026-10-27T08:48:04.055Z` (UTC).
 - Archive: `fixtures/c01/maven-central/junit-4.13.2.observation.json` and `junit-4.13.2.reference.json`.
-- Archive ID: `observation:6a977171df7e5908a66ee179fd86039a5e5fd3322758197a2f2d101987e4f740`.
-- Archive SHA-256: `6a977171df7e5908a66ee179fd86039a5e5fd3322758197a2f2d101987e4f740`.
+- Archive ID: `observation:605703278032b3282a60e2e145b24e1c788aaceb8e60a17a2da145bcab827aef`.
+- Archive SHA-256: `605703278032b3282a60e2e145b24e1c788aaceb8e60a17a2da145bcab827aef`.
 - Body SHA-256: `569b6977ee4603c965c1c46c3058fa6e969291b0160eb6964dd092cd89eadd94`.
 - Acquisition run: https://github.com/ldchloe/MAYA/actions/runs/40476035379
 - Offline replay: `tests/c01-junit-maven-central-offline.test.js`, read-only archive load, source coordinates, hash, missing and tampered archive checks.
