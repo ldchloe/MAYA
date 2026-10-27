@@ -6,7 +6,7 @@ const boundary=require('../js/c01-resolution-boundary.js');
 function prepared(options={}){
  const e=fixture(options),q=qualify(e);e.payload.conflicts=clone(q.conflicts);refresh(e);
  e.qualificationProof=createProof(e,qualify(e));
- e.resolutionResult=boundary.run(e);
+ e.resolutionResult=clone(boundary.run(e));
  return e;
 }
 module.exports={prepared,clone,refresh,RULES_ID,RULES_VERSION};
