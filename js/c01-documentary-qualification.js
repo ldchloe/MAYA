@@ -29,16 +29,17 @@ function qualify(envelope){
   const classId='c01-class:'+canonical.digest({subjectType,subjectId,predicate,versionScope,assertionIds});
   comparisonClasses.push({id:classId,subjectType,subjectId,predicate,versionScope,assertionIds});
   const values=new Set(members.map(a=>canonical.canonicalJSON(a.value)));
-  const incompatible=values.has(canonical.canonicalJSON('alpha'))&&values.has(canonical.canonicalJSON('beta'))&&predicate==='mapsToProject';
+  const realIncompatible=predicate==='attributedToProjectIdentity'&&values.size>1;
+  const incompatible=realIncompatible||(values.has(canonical.canonicalJSON('alpha'))&&values.has(canonical.canonicalJSON('beta'))&&predicate==='mapsToProject');
   const indeterminate=!incompatible&&values.has(canonical.canonicalJSON('pending'));
   const result=incompatible?'CONFLICT':indeterminate?'INDETERMINATE':'NO_CONFLICT';
-  const ruleId=incompatible?FIXTURE_CONFLICT:indeterminate?FIXTURE_INDETERMINATE:FIXTURE_NO_CONFLICT;
+  const ruleId=realIncompatible?'explicit-project-attribution-incompatible':incompatible?FIXTURE_CONFLICT:indeterminate?FIXTURE_INDETERMINATE:FIXTURE_NO_CONFLICT;
   let conflictIds=[];
   if(incompatible){
    const conflict={id:'c01-conflict:'+canonical.digest({classId,assertionIds,ruleId,rulesId:RULES_ID,rulesVersion:RULES_VERSION}),subjectId,predicate,assertionIds,conflictType:'contradictory-values',status:'conflicted',detectedAt:'1970-01-01T00:00:00.000Z'};
    conflicts.push(conflict);conflictIds=[conflict.id];
   }
-  examinations.push({id:'c01-examination:'+canonical.digest({classId,assertionIds,ruleId}),classId,assertionIds,ruleId,result,conflictIds,reason:incompatible?'Explicit alpha/beta fixture incompatibility':indeterminate?'Explicit pending fixture requires further qualification':'No explicit incompatibility rule applies'});
+  examinations.push({id:'c01-examination:'+canonical.digest({classId,assertionIds,ruleId}),classId,assertionIds,ruleId,result,conflictIds,reason:incompatible?(realIncompatible?'Explicit incompatible project attribution values':'Explicit alpha/beta fixture incompatibility'):indeterminate?'Explicit pending fixture requires further qualification':'No explicit incompatibility rule applies'});
  }
  return {contractDomain:envelope.contractDomain,contractVersion:envelope.contractVersion,corpusDigest:payloadDigest(p),qualificationRulesId:RULES_ID,qualificationRulesVersion:RULES_VERSION,examinedAssertionIds:ids(p.assertions),comparisonClasses,examinations,conflicts};
 }
