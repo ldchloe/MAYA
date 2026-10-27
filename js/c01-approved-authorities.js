@@ -34,7 +34,8 @@ function resolveApprovedAuthority(claim){
  if(!claim||typeof claim!=='object'||Array.isArray(claim))return null;
  if(Object.keys(claim).sort().join(',')!=='externalIdentityId,packageIdentityId,predicate,projectIdentityId')return null;
  if(claim.predicate!=='attributedToProjectIdentity'||typeof claim.packageIdentityId!=='string'||typeof claim.externalIdentityId!=='string'||typeof claim.projectIdentityId!=='string')return null;
- if(claim.packageIdentityId===SPRING_PACKAGE)return springRepositoryBinding(claim);
+ const approvedCorpus=APPROVED_CORPORA.find(x=>x.packageIdentityId===claim.packageIdentityId);
+ if(approvedCorpus)return resolveApprovedCorpus(claim,approvedCorpus);
  // A claimed identity cannot be inferred from a name, alias, URL or package namespace.
  const manifest=loadRepositoryCandidate();
  validateManifest(manifest);
@@ -75,46 +76,34 @@ function resolveRepositoryEvidenceBinding(){
 // A caller's rules cannot be promoted by the manifest's mere approval.
 function isApprovedBridgeRule(){return false;}
 
-const SPRING_MANIFEST_PATH=path.join(__dirname,'../fixtures/c01/spring/spring-h2-authority-manifest.json');
-const SPRING_APPROVED_DIGEST='57bcf8ba76d9c79bc0bb681df2774b28d8777889e881bba71c8c7e2672b83c33';
-const SPRING_PACKAGE='maven:org.springframework:spring-core:6.1.3';
-function springRepositoryBinding(claim){
- if(claim.packageIdentityId!==SPRING_PACKAGE||claim.externalIdentityId!==SPRING_PACKAGE)return null;
- const manifest=JSON.parse(fs.readFileSync(SPRING_MANIFEST_PATH,'utf8'));
- if(manifest.manifestDigest!==SPRING_APPROVED_DIGEST||digest(Object.fromEntries(Object.entries(manifest).filter(([k])=>k!=='manifestDigest')))!==manifest.manifestDigest)throw Error('SPRING_H2_MANIFEST_INTEGRITY');
- if(manifest.manifestVersion!=='1.0.0'||manifest.rules.length!==1)throw Error('SPRING_H2_MANIFEST_CONTRACT');
- const r=manifest.rules[0];
- if(r.approvalProvenance.status!=='APPROVED_H2'||r.approvalProvenance.decisionRef!=='user-explicit-h2-approval-c01-i05-spring-core-6.1.3'||r.authorityRuleId!=='c01:spring-core-6.1.3:project-attribution'||r.authorityRuleVersion!=='1.0.0'||r.contractDomain!=='C01-I05'||r.predicate!=='attributedToProjectIdentity')throw Error('SPRING_H2_RULE_CONTRACT');
- if(!exact(r.scope,{artifactId:'spring-core',ecosystem:'maven',groupId:'org.springframework',projectIdentityId:'project:389fa659b1d9c46c996fcbef55f8b0c0c3dc7bb9790b9db8e4755c8f82ee79ef',version:'6.1.3'})&&!exact(r.scope,{ecosystem:'maven',groupId:'org.springframework',artifactId:'spring-core',version:'6.1.3',projectIdentityId:'project:389fa659b1d9c46c996fcbef55f8b0c0c3dc7bb9790b9db8e4755c8f82ee79ef'}))throw Error('SPRING_H2_SCOPE');
- if(claim.projectIdentityId!==r.scope.projectIdentityId)return null;
- if(!Array.isArray(r.allowedEvidenceClasses)||r.allowedEvidenceClasses.length!==7||r.validationRequirements.allClassesRequired!==true||r.validationRequirements.explicitBridgeEvidence!==true||r.validationRequirements.offlineReplay!==true||r.validationRequirements.exactOpaqueProjectIdentity!==true)throw Error('SPRING_H2_EVIDENCE_REQUIREMENTS');
- const base=path.join(__dirname,'../fixtures/c01/spring');
+
+const APPROVED_CORPORA=require('./c01-corpus-registry.js').approved;
+const gitBlob=b=>crypto.createHash('sha1').update(Buffer.concat([Buffer.from('blob '+b.length),Buffer.from([0]),b])).digest('hex');
+function resolveApprovedCorpus(claim,descriptor){
+ const base=path.join(__dirname,'..');
  const read=p=>fs.readFileSync(path.join(base,p));
- const snapshot=JSON.parse(read('spring-framework-project-identity.snapshot.json'));
+ const manifest=JSON.parse(read(descriptor.manifestRef));
+ const {manifestDigest,...unsigned}=manifest;
+ if(manifestDigest!==descriptor.manifestDigest||digest(unsigned)!==manifestDigest||manifest.manifestVersion!=='1.0.0'||!Array.isArray(manifest.rules)||manifest.rules.length!==1)throw Error('CORPUS_MANIFEST_INTEGRITY');
+ const r=manifest.rules[0],c=r.sourceCommitments;
+ const expectedClasses=['lot-b-maven-central-observation',...descriptor.sources.map(x=>x.evidenceClass),'approved-project-identity-snapshot'];
+ if(r.authorityRuleId!==descriptor.authorityRuleId||r.authorityRuleVersion!=='1.0.0'||r.contractDomain!==descriptor.contractDomain||r.predicate!=='attributedToProjectIdentity'||!exact(r.scope,descriptor.scope)||!exact(r.allowedEvidenceClasses,expectedClasses)||r.approvalProvenance?.status!=='APPROVED_H2'||r.approvalProvenance.decisionRef!==descriptor.approvalDecisionRef||r.validationRequirements?.allClassesRequired!==true||r.validationRequirements.exactOpaqueProjectIdentity!==true||r.validationRequirements.explicitBridgeEvidence!==true||r.validationRequirements.offlineReplay!==true)throw Error('CORPUS_MANIFEST_CONTRACT');
+ if(claim.projectIdentityId!==descriptor.projectIdentityId)return null;
+ const snapshot=JSON.parse(read(descriptor.sourceBase+'/'+descriptor.snapshot));
  require('./project-identity.js').validateProjectIdentitySnapshot(snapshot);
- const c=r.sourceCommitments;
- if(snapshot.snapshotDigest!==c.projectSnapshotDigest||snapshot.projects.length!==1||snapshot.projects[0].id!==r.scope.projectIdentityId||snapshot.links.length!==0)throw Error('SPRING_H2_Y_BINDING');
- const sourceFiles=[
-  ['spring-framework-v6.1.3-readme.md','officialReadmeGitBlob'],
-  ['spring-framework-v6.1.3-gradle.properties','officialVersionGitBlob'],
-  ['spring-framework-v6.1.3-settings.gradle','officialSettingsGitBlob'],
-  ['spring-framework-v6.1.3-spring-core.gradle','officialModuleGitBlob'],
-  ['spring-framework-v6.1.3-build.gradle','officialBuildGitBlob']
- ];
- const blob=b=>crypto.createHash('sha1').update(Buffer.concat([Buffer.concat([Buffer.from('blob '+b.length),Buffer.from([0])]),b])).digest('hex');
- const sources=sourceFiles.map(([file,key])=>({file,bytes:read(file),expected:c[key]}));
- for(const source of sources)if(blob(source.bytes)!==source.expected)throw Error('SPRING_H2_SOURCE_INTEGRITY');
- if(sha(sources[0].bytes)!==c.projectReadmeSha256||snapshot.projects[0].attributionContext.projectSourceSha256!==c.projectReadmeSha256||snapshot.projects[0].attributionContext.scope!=='independent-project-identity-only')throw Error('SPRING_H2_Y_INDEPENDENCE');
- const [readme,version,settings,module,build]=sources.map(x=>x.bytes.toString('utf8'));
- if(!readme.includes('This is the home of the Spring Framework')||!version.split('\n').includes('version=6.1.3')||!settings.includes('include "spring-core"')||!module.includes('description = "Spring Core"')||!build.includes('group = "org.springframework"'))throw Error('SPRING_H2_OFFICIAL_MODULE_CHAIN');
- const observed=JSON.parse(read('maven-central/spring-core-6.1.3.observation.json'));
- const pom=read('maven-central/spring-core-6.1.3.pom');
- if(observed.acquisition.status!==200||observed.acquisition.providerId!=='maven-central'||observed.acquisition.query.namespace!=='org.springframework'||observed.acquisition.query.name!=='spring-core'||observed.acquisition.query.version!=='6.1.3'||sha(pom)!==c.mavenBodySha256||sha(Buffer.from(observed.acquisition.body,'utf8'))!==c.mavenBodySha256||!pom.toString('utf8').includes('<groupId>org.springframework</groupId>')||!pom.toString('utf8').includes('<artifactId>spring-core</artifactId>')||!pom.toString('utf8').includes('<version>6.1.3</version>'))throw Error('SPRING_H2_MAVEN_BINDING');
- const paths=['maven-central/spring-core-6.1.3.observation.json',...sourceFiles.map(x=>x[0]),'spring-framework-project-identity.snapshot.json'];
+ if(snapshot.snapshotDigest!==c.projectSnapshotDigest||snapshot.projects.length!==1||snapshot.projects[0].id!==descriptor.projectIdentityId||snapshot.links.length!==0||snapshot.projects[0].attributionContext.scope!=='independent-project-identity-only')throw Error('CORPUS_Y_INTEGRITY');
+ const sources=descriptor.sources.map(x=>({definition:x,bytes:read(descriptor.sourceBase+'/'+x.file)}));
+ for(const x of sources)if(gitBlob(x.bytes)!==c[x.definition.commitment]||!x.bytes.toString('utf8').includes(x.definition.assertion))throw Error('CORPUS_OFFICIAL_SOURCE_INTEGRITY');
+ if(sha(sources[0].bytes)!==c.projectReadmeSha256||snapshot.projects[0].attributionContext.projectSourceSha256!==c.projectReadmeSha256)throw Error('CORPUS_Y_SOURCE_INTEGRITY');
+ const observed=JSON.parse(read(descriptor.sourceBase+'/'+descriptor.observation));
+ const pom=read(descriptor.sourceBase+'/'+descriptor.pom),acq=observed.acquisition;
+ if(acq?.status!==200||acq.providerId!=='maven-central'||acq.query.namespace!==descriptor.maven.groupId||acq.query.name!==descriptor.maven.artifactId||acq.query.version!==descriptor.maven.version||sha(pom)!==c.mavenBodySha256||sha(Buffer.from(acq.body,'utf8'))!==c.mavenBodySha256||observed.bodySha256!==c.mavenBodySha256||observed.reference?.contentHash!==c.mavenBodySha256||observed.reference?.id!=='observation:'+observed.reference.sha256)throw Error('CORPUS_MAVEN_INTEGRITY');
+ const xml=pom.toString('utf8');
+ if(!xml.includes('<groupId>'+descriptor.maven.groupId+'</groupId>')||!xml.includes('<artifactId>'+descriptor.maven.artifactId+'</artifactId>')||!xml.includes('<version>'+descriptor.maven.version+'</version>'))throw Error('CORPUS_MAVEN_COORDINATES');
+ const sourcePaths=[descriptor.observation,...descriptor.sources.map(x=>x.file),descriptor.snapshot];
  const hashes=[c.mavenBodySha256,...sources.map(x=>sha(x.bytes)),snapshot.snapshotDigest];
- const evidence=r.allowedEvidenceClasses.map((evidenceClass,i)=>({evidenceClass,evidenceId:'sha256:'+hashes[i],sha256:hashes[i],sourceRef:'fixtures/c01/spring/'+paths[i]}));
- const body={status:'APPROVED',approvalStatus:'APPROVED',approvalSource:'js/c01-approved-authorities.js:SPRING_APPROVED_DIGEST',manifestRef:'fixtures/c01/spring/spring-h2-authority-manifest.json',manifestDigest:manifest.manifestDigest,ruleId:r.authorityRuleId,ruleVersion:r.authorityRuleVersion,contractDomain:r.contractDomain,predicate:r.predicate,packageIdentityId:SPRING_PACKAGE,projectIdentityId:r.scope.projectIdentityId,projectSnapshotDigest:snapshot.snapshotDigest,requiredEvidenceClasses:r.allowedEvidenceClasses,evidence};
+ const evidence=expectedClasses.map((evidenceClass,i)=>({evidenceClass,evidenceId:'sha256:'+hashes[i],sha256:hashes[i],sourceRef:descriptor.sourceBase+'/'+sourcePaths[i]}));
+ const body={status:'APPROVED',approvalStatus:'APPROVED',approvalSource:'js/c01-corpus-registry.js:approved',manifestRef:descriptor.manifestRef,manifestDigest,ruleId:r.authorityRuleId,ruleVersion:r.authorityRuleVersion,contractDomain:r.contractDomain,predicate:r.predicate,packageIdentityId:descriptor.packageIdentityId,projectIdentityId:descriptor.projectIdentityId,projectSnapshotDigest:snapshot.snapshotDigest,requiredEvidenceClasses:expectedClasses,evidence};
  return Object.freeze({...body,resolutionDigest:digest(body)});
 }
-
 module.exports={validateManifest,loadRepositoryCandidate,evaluate,resolveApprovedAuthority,resolveRepositoryEvidenceBinding,isApprovedBridgeRule};
