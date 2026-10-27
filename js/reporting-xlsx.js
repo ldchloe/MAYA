@@ -41,7 +41,7 @@ function buildComex(a){
  const p=a.portfolio,summary=a.executiveSummary,diag=a.diagnostics,rows=[];
  const add=(...values)=>rows.push(values);
  add(title('MAYA  |  TRUST & EXPOSURE ANALYSIS'));
- add('EXECUTIVE BRIEF  •  DEMO / TEST DATA');
+ add(/^b06-|^cyclonedx-valid/i.test(a.fileName)?'EXECUTIVE BRIEF  •  DEMO / TEST DATA':'EXECUTIVE BRIEF  •  USER-SUPPLIED SBOM');
  add('SBOM',a.fileName,'Mode',a.analysisMode,'Policy',p.policyVersion);
  add('Source digest',a.sourceDigest);
  add();
