@@ -30,3 +30,18 @@ test('LOG-03 official tagged Apache project root and module archives are immutab
  const module=fs.readFileSync(path.join(base,'apache-log4j-core-pom.xml'),'utf8');
  assert.match(root,/log4j-core/);assert.match(module,/<artifactId>log4j-core<\/artifactId>/);
 });
+
+test('LOG-03 L3/L4/L5 official module parent revision matches published Maven Central release',()=>{
+ const root=fs.readFileSync(path.join(base,'apache-log4j-parent-pom.xml'),'utf8');
+ const module=fs.readFileSync(path.join(base,'apache-log4j-core-pom.xml'),'utf8');
+ const published=fs.readFileSync(path.join(base,'maven-central/log4j-core-2.23.1.pom'),'utf8');
+ assert.ok(root.includes('<revision>2.23.1</revision>'));
+ assert.ok(root.includes('<module>log4j-core</module>'));
+ assert.ok(root.includes('<groupId>org.apache.logging.log4j</groupId>'));
+ assert.ok(module.includes('<artifactId>log4j-core</artifactId>'));
+ assert.ok(module.includes('<version>${revision}</version>'));
+ assert.ok(published.includes('<groupId>org.apache.logging.log4j</groupId>'));
+ assert.ok(published.includes('<artifactId>log4j-core</artifactId>'));
+ assert.ok(published.includes('<version>2.23.1</version>'));
+ assert.ok(published.includes('<artifactId>log4j</artifactId>'));
+});
