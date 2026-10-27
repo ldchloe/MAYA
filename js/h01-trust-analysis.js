@@ -35,16 +35,16 @@ function evaluateFact(type,x,policy){
  const reasons=[],factsUsed=[],rules=[];
  let status=f.status,riskScore=null;
  if(status==='VERIFIED'){
-  if(f.riskScore!==undefined){if(!Number.isInteger(f.riskScore)||f.riskScore<0||f.riskScore>5)throw Error('INVALID_H01_RISK_SCORE');riskScore=f.riskScore;reasons.push('EXPLICIT_VERIFIED_RISK_INPUT');rules.push('explicit-risk-input')}
+  if(f.riskScore!==undefined){if(!refs.length&&!evidenceIds.length)throw Error('UNSOURCED_H01_RISK');if(!Number.isInteger(f.riskScore)||f.riskScore<0||f.riskScore>5)throw Error('INVALID_H01_RISK_SCORE');riskScore=f.riskScore;reasons.push('EXPLICIT_VERIFIED_RISK_INPUT');rules.push('explicit-risk-input')}
   else if(type==='TECHNICAL_RISK'){
    if(f.licenseStatus==='CONFLICTED'){status='CONFLICTED';reasons.push('LICENSE_CONFLICT');rules.push('technical.licenseConflict')}
-   else if(f.licenseStatus==='RESOLVED'){riskScore=0;reasons.push('DECLARED_LICENSE_RESOLVED');rules.push('technical.licenseResolved')}
+   else if(f.licenseStatus==='RESOLVED'){riskScore=policy.riskRules.technical.licenseResolved;reasons.push('DECLARED_LICENSE_RESOLVED');rules.push('technical.licenseResolved')}
   }else if(type==='GOVERNANCE_RISK'){
    if(f.governanceConflict){status='CONFLICTED';reasons.push('GOVERNANCE_CONFLICT')}
-   else if(f.verifiedGovernance===true){riskScore=0;reasons.push('VERIFIED_GOVERNANCE_RELATION')}
+   else if(f.verifiedGovernance===true){riskScore=policy.riskRules.governance.verifiedGovernance;reasons.push('VERIFIED_GOVERNANCE_RELATION')}
   }else if(type==='SUPPLY_CHAIN_RISK'){
    const events=Array.isArray(f.events)?f.events:[];
-   const admissible=events.filter(e=>isObj(e)&&e.status==='VERIFIED'&&!e.testOnly);
+   const admissible=events.filter(e=>isObj(e)&&e.status==='VERIFIED'&&!e.testOnly&&Array.isArray(e.evidenceIds)&&e.evidenceIds.length>0);
    if(admissible.length===events.length&&admissible.length){
     const scores=admissible.map(e=>policy.riskRules.supplyChain[e.eventType]).filter(Number.isFinite);
     if(scores.length===events.length){riskScore=Math.max(...scores);reasons.push(...sortUnique(admissible.map(e=>'EVENT_'+e.eventType)));rules.push('supplyChain.eventType');factsUsed.push(...admissible.map(e=>e.eventId).filter(Boolean))}
@@ -62,7 +62,7 @@ function evaluateFact(type,x,policy){
     if(region!=='UNKNOWN'){riskScore=policy.riskRules.geopolitical[region];reasons.push('VERIFIED_LEGAL_JURISDICTION_'+region);rules.push('geopolitical.'+region);factsUsed.push({relationship:f.relationship,countryCode:f.countryCode,region})}
    }
   }else if(type==='CRITICALITY_RISK'){
-   if(Object.hasOwn(policy.riskRules.criticality,f.level)){riskScore=policy.riskRules.criticality[f.level];reasons.push('EXPLICIT_CRITICALITY_'+f.level);rules.push('criticality.'+f.level)}
+   if(evidenceIds.length&&Object.hasOwn(policy.riskRules.criticality,f.level)){riskScore=policy.riskRules.criticality[f.level];reasons.push('EXPLICIT_CRITICALITY_'+f.level);rules.push('criticality.'+f.level)}
   }
   if(riskScore===null){status='UNKNOWN';reasons.push('INSUFFICIENT_VERIFIED_FACTS')}
  }else reasons.push(status==='CONFLICTED'?'CONFLICTING_FACTS':status==='NOT_APPLICABLE'?'NOT_APPLICABLE':'MISSING_VERIFIED_FACTS');
