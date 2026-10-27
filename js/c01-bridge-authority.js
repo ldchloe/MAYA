@@ -1,5 +1,6 @@
 'use strict';
 const crypto=require('node:crypto');
+const repositoryAuthority=require('./c01-approved-authorities.js');
 const POLICY_ID='maya.c01.bridge-authority',POLICY_VERSION='1.0.0';
 const sha=x=>crypto.createHash('sha256').update(Buffer.from(x,'utf8')).digest('hex');
 const fields=['sourceType','verificationMethod','verificationId','sourceRef','sourceDigest','predicate','packageIdentityId','externalIdentityId','projectIdentityId','versionScope'];
@@ -21,6 +22,10 @@ function evaluate(evidence,claim,rules=[],options={}){
  const observation=JSON.parse(evidence.content);
  if(observation.predicate!==claim.predicate||observation.packageIdentityId!==claim.packageIdentityId||observation.externalIdentityId!==claim.externalIdentityId||observation.projectIdentityId!==claim.projectIdentityId)throw Error('BRIDGE_AUTHORITY_CLAIM_MISMATCH');
  const applicable=rules.some(r=>(!options.requireProvenance||provenanceApplicable(options.provenance,options.trustedAuthorityDigest,claim,r.id))&&r.sourceType===evidence.sourceType&&r.verificationMethod===evidence.verificationMethod&&r.verificationId===evidence.verificationId&&r.sourceRef===evidence.sourceRef&&r.sourceDigest===evidence.sourceDigest&&r.predicate===claim.predicate&&r.packageIdentityId===claim.packageIdentityId&&r.externalIdentityId===claim.externalIdentityId&&r.projectIdentityId===claim.projectIdentityId&&r.versionScope===evidence.versionScope);
- return applicable?'APPLICABLE':'NOT_APPLICABLE';
+ // Raw caller-supplied rules can establish only a syntactic candidate match.
+ // Contractual APPLICABLE requires repository-resolved approval; there is no legacy fallback.
+ if(!applicable)return 'NOT_APPLICABLE';
+ const approved=repositoryAuthority.resolveApprovedAuthority(claim);
+ return approved&&approved.status==='APPROVED'?'APPLICABLE':'NOT_APPLICABLE';
 }
 module.exports={POLICY_ID,POLICY_VERSION,evaluate};
