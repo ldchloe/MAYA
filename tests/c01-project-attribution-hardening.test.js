@@ -17,3 +17,11 @@ test('T39 bridge evidence and result immutable',()=>{const d=dossier();const r=a
 test('T38 incompatible bridge retained as separate assertion',()=>{const d=dossier();d.bridgeEvidence.push({...d.bridgeEvidence[0],id:'evidence:bridge2',projectIdentityId:'project:'+'c'.repeat(32)});const r=api.evaluate(d);assert.equal(r.status,'CONFLICTED');assert.equal(r.assertions.length,2);assert.deepEqual(r.conflicts[0].assertionIds,r.assertions.map(x=>x.id).sort());});
 test('T46 duplicate archive IDs rejected, never silently dropped',()=>{const d=dossier();d.archives.push({...d.archives[0]});assert.equal(api.evaluate(d).validation.VX,'FAIL');});
 test('T46 duplicate bridge IDs rejected, never silently dropped',()=>{const d=dossier();d.bridgeEvidence.push({...d.bridgeEvidence[0]});assert.equal(api.evaluate(d).validation.VXY,'FAIL');});
+
+test('T35 arbitrary archived text is not explicit bridge evidence',()=>{const d=dossier();assert.equal(api.evaluate(d).validation.VXY,'FAIL');});
+test('T35 mismatched structured bridge cannot establish another project',()=>{
+ const d=dossier(),b=d.bridgeEvidence[0];
+ b.content=JSON.stringify({predicate:'attributedToProjectIdentity',packageIdentityId:P,externalIdentityId:X,projectIdentityId:'project:'+'f'.repeat(32)});
+ b.sourceDigest=sha(b.content);
+ assert.equal(api.evaluate(d).validation.VXY,'FAIL');
+});
