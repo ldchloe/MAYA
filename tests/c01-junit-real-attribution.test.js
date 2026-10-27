@@ -10,3 +10,5 @@ test('H2-A10 caller raw rules cannot make attribution eligible',()=>{const d=dos
 test('H2-A10 real attribution deterministic offline replay',()=>assert.deepEqual(attribution.evaluate(dossier()),attribution.evaluate(dossier())));
 
 test('H2-A10 negative concurrent project claim retains conflict without selection',()=>{const d=dossier();const alternative='project:'+'f'.repeat(64);const content=JSON.stringify({...claim,projectIdentityId:alternative});d.bridgeEvidence.push({id:'negative-conflicting-claim',kind:'explicit-attribution',packageIdentityId:claim.packageIdentityId,externalIdentityId:claim.externalIdentityId,projectIdentityId:alternative,sourceRef:'negative-fixture',versionScope:'4.13.2',content,sourceDigest:sha(content)});const r=attribution.evaluate(d);assert.equal(r.status,'CONFLICTED');assert.equal(r.eligibility,'NOT_ELIGIBLE');assert.equal(r.assertions.length,2);assert.equal(r.conflicts.length,1);assert.equal(r.decision.selectedAssertionId,null);});
+
+module.exports={dossier,claim};
