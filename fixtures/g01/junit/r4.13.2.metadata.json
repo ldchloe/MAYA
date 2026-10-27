@@ -1,0 +1,10 @@
+{
+  "requestedUrl": "https://api.github.com/repos/junit-team/junit4/releases/tags/r4.13.2",
+  "finalUrl": "https://api.github.com/repos/junit-team/junit4/releases/tags/r4.13.2",
+  "httpStatus": 200,
+  "contentType": "application/json; charset=utf-8",
+  "acquiredAt": "2026-10-27T16:28:14.625046Z",
+  "sizeBytes": 2087,
+  "sha256": "570584193e1d9af512e1f16c1d492fdd04e0b4d69a7abcce05c2f084c5f01071",
+  "archiveId": "archive:570584193e1d9af512e1f16c1d492fdd04e0b4d69a7abcce05c2f084c5f01071"
+}
