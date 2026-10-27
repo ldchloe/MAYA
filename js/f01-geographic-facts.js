@@ -10,6 +10,7 @@ const log4j=registry.approved.find(x=>x.contractDomain==='C01-I06').projectIdent
 const sourceUrl='https://www.apache.org/foundation/governance/corporation.html';
 const archivePath='fixtures/f01/asf/corporation.html';
 const metadataPath='fixtures/f01/asf/corporation.metadata.json';
+const pinnedSha256='fad51bf402b0859c8bcaddc185eeb486696edf8ff1ca0922123d3cfe88d3831f';
 const foundationClaim={projectIdentityId:log4j,predicate:'governedByFoundation',object:'Apache Software Foundation',source:{archivePath:'fixtures/e01/apache/apache-logging-guidelines.html',sourceUrl:'https://logging.apache.org/guidelines.html',selector:'Logging Services is a <em>project</em> of the <a href="https://apache.org">Apache Software Foundation</a> (ASF) and composed of several <em>subprojects</em>; Log4cxx, Log4j',observedAt:'2026-10-27T13:49:41.385Z'}};
 function approvedSubject(projectIdentityId,subject,relationship){
  if(projectIdentityId!==log4j||subject!=='Apache Software Foundation'||relationship!=='LEGAL_JURISDICTION')return false;
@@ -23,7 +24,7 @@ function evidenceFor(projectIdentityId,c){
  let raw,meta;
  try{raw=fs.readFileSync(path.resolve(__dirname,'..',archivePath));meta=JSON.parse(fs.readFileSync(path.resolve(__dirname,'..',metadataPath),'utf8'))}catch{return null}
  const hash=sha256Text(raw.toString('utf8'));
- if(meta.requestedUrl!==sourceUrl||meta.finalUrl!==sourceUrl||meta.httpStatus!==200||!String(meta.contentType).includes('text/html')||meta.sha256!==hash||meta.archiveId!=='archive:'+hash||meta.sizeBytes!==raw.length||!Number.isFinite(Date.parse(meta.acquiredAt))||!raw.toString('utf8').includes(s.selector)||!raw.toString('utf8').includes('subject to DE laws'))return null;
+ if(hash!==pinnedSha256||meta.requestedUrl!==sourceUrl||meta.finalUrl!==sourceUrl||meta.httpStatus!==200||!String(meta.contentType).includes('text/html')||meta.sha256!==hash||meta.archiveId!=='archive:'+hash||meta.sizeBytes!==raw.length||!Number.isFinite(Date.parse(meta.acquiredAt))||!raw.toString('utf8').includes(s.selector)||!raw.toString('utf8').includes('subject to DE laws'))return null;
  if(s.acquiredAt!==meta.acquiredAt||s.archiveSha256!==hash)return null;
  const core={projectIdentityId,subject:c.subject,relationship:c.relationship,countryCode:'US',countryObserved:'United States',jurisdictionSubdivision:'Delaware',archivePath,archiveId:meta.archiveId,archiveSha256:hash,sourceUrl,selector:s.selector,acquiredAt:meta.acquiredAt,observedAt:meta.acquiredAt,validFrom:s.validFrom??null,validTo:s.validTo??null,verificationMethod:'official-archived-corporate-statement'};
  return {id:deterministicId('evidence',core),...core};
