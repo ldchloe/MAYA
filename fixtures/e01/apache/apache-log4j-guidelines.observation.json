@@ -1,0 +1,11 @@
+{
+  "url": "https://logging.apache.org/log4j/2.3.x/guidelines.html",
+  "finalUrl": "https://logging.apache.org/log4j/2.3.x/guidelines.html",
+  "status": 200,
+  "observedAt": "2026-10-27T13:49:41.505Z",
+  "contentType": "text/html",
+  "sha256": "9a51e1fca74ce85cc287cf2f87c405b028831746165b406e40ae5bca79e32fad",
+  "archiveId": "archive:9a51e1fca74ce85cc287cf2f87c405b028831746165b406e40ae5bca79e32fad",
+  "provider": "apache-official-http",
+  "rawPath": "fixtures/e01/apache/apache-log4j-guidelines.html"
+}
