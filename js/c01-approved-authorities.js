@@ -42,4 +42,7 @@ function resolveApprovedAuthority(claim){
  if(r.approvalProvenance.status!=='APPROVED_H2'||!APPROVED_MANIFEST_DIGESTS.includes(manifest.manifestDigest))return null;
  return Object.freeze({status:'APPROVED',manifestDigest:manifest.manifestDigest,ruleId:r.authorityRuleId,ruleVersion:r.authorityRuleVersion,domain:r.contractDomain,predicate:r.predicate,scope:Object.freeze({...r.scope}),manifestRef:'fixtures/c01/junit-h2-authority-candidate.json'});
 }
-module.exports={validateManifest,loadRepositoryCandidate,evaluate,resolveApprovedAuthority};
+// No evidence-bound repository bridge rule has been approved or issued.
+// A caller's rules cannot be promoted by the manifest's mere approval.
+function isApprovedBridgeRule(){return false;}
+module.exports={validateManifest,loadRepositoryCandidate,evaluate,resolveApprovedAuthority,isApprovedBridgeRule};
