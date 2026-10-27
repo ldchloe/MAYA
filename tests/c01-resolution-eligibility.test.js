@@ -2,7 +2,7 @@
 const test=require('node:test'),assert=require('node:assert/strict');
 const canonical=require('../js/enrichment-canonical.js');
 const {run,verifyResult}=require('../js/c01-resolution-boundary.js');
-const {POLICY_ID}=require('../js/c01-contract-dispatch.js');
+const {POLICY_ID,payloadDigest,contextDigest}=require('../js/c01-contract-dispatch.js');
 const {now}=require('./enrichment-helpers.js');
 function fixture(ids=['a1'],allowed=['a1']){
  const assertions=ids.map((id,i)=>({id,subjectType:'componentEnrichment',subjectId:'ce'+(i+1),predicate:'mapsToProject',value:'p'+(i+1),evidenceIds:['e'+id],status:'unknown',confidence:.6,conflictIds:[],policyVersion:'1.0.0'}));
@@ -12,18 +12,18 @@ function fixture(ids=['a1'],allowed=['a1']){
  const payload={assertions,evidence,evidenceRelations,verifications:[],conflicts:[],componentEnrichments};
  const validationContext={contractDomain:'maya.lot-c.documentary',policyId:POLICY_ID,policyVersion:'1.0.0',eligibleAssertionIds:allowed};
  const envelope={contractDomain:'maya.lot-c.documentary',contractVersion:'1.0.0',artifactKind:'documentary-snapshot',snapshotId:'c01:test',policyId:POLICY_ID,policyVersion:'1.0.0',payload,validationContext};
- envelope.payloadDigest=canonical.digest(payload);envelope.validationContextDigest=canonical.digest(validationContext);return envelope;
+ envelope.payloadDigest=payloadDigest(payload);envelope.validationContextDigest=contextDigest(validationContext);return envelope;
 }
-const refresh=e=>{e.payloadDigest=canonical.digest(e.payload);e.validationContextDigest=canonical.digest(e.validationContext);return e;};
+const refresh=e=>{e.payloadDigest=payloadDigest(e.payload);e.validationContextDigest=contextDigest(e.validationContext);return e;};
 test('T01 active eligible transmitted with decision',()=>{const r=run(fixture());assert.deepEqual(r.eligibleIds,['a1']);assert.deepEqual(r.transmittedIds,['a1']);assert.equal(r.engineResult.decisions.length,1);assert.equal(verifyResult(fixture(),r),true);});
 test('T02 active noneligible retained without decision',()=>{const e=fixture(['a1'],[]),r=run(e);assert.deepEqual(r.nonEligibleIds,['a1']);assert.equal(r.engineResult.decisions.length,0);assert.deepEqual(e.payload.assertions.map(x=>x.id),['a1']);});
 test('T03 mixed eligibility only one transmitted',()=>{const r=run(fixture(['a1','a2'],['a1']));assert.deepEqual(r.activeIds,['a1','a2']);assert.deepEqual(r.eligibleIds,['a1']);assert.deepEqual(r.nonEligibleIds,['a2']);assert.deepEqual(r.transmittedIds,['a1']);});
 test('T04 evidence retained',()=>{const e=fixture(['a1'],[]),before=canonical.canonicalJSON(e.payload.evidence);run(e);assert.equal(canonical.canonicalJSON(e.payload.evidence),before);});
 test('T05 supports relation retained',()=>{const e=fixture(['a1'],[]),before=canonical.canonicalJSON(e.payload.evidenceRelations);run(e);assert.equal(canonical.canonicalJSON(e.payload.evidenceRelations),before);});
-test('T06 documentary conflict retained',()=>{const e=fixture(['a1','a2'],[]);e.payload.assertions[1].subjectId='ce1';e.payload.evidenceRelations[1].subjectId='ce1';e.payload.conflicts=[{id:'documentary-conflict',subjectId:'ce1',predicate:'mapsToProject',assertionIds:['a1','a2'],conflictType:'contradictory-values',status:'conflicted',detectedAt:now}];refresh(e);const before=canonical.canonicalJSON(e.payload.conflicts),r=run(e);assert.equal(canonical.canonicalJSON(e.payload.conflicts),before);assert.equal(r.engineResult.conflicts.length,0);});
+test('T06 documentary conflict retained',()=>{const e=fixture(['a1','a2'],[]);e.payload.assertions[1].subjectId='ce1';e.payload.evidenceRelations[1].subjectId='ce1';e.payload.evidence[1].subjectId='component:1';e.payload.conflicts=[{id:'documentary-conflict',subjectId:'ce1',predicate:'mapsToProject',assertionIds:['a1','a2'],conflictType:'contradictory-values',status:'conflicted',detectedAt:now}];refresh(e);const before=canonical.canonicalJSON(e.payload.conflicts),r=run(e);assert.equal(canonical.canonicalJSON(e.payload.conflicts),before);assert.equal(r.engineResult.conflicts.length,0);});
 test('T07 default deny',()=>{assert.deepEqual(run(fixture(['a1'],[])).eligibleIds,[]);});
-test('T08 unsupported predicate denied even if listed',()=>{const e=fixture();e.payload.assertions[0].predicate='officialRepository';e.payload.evidenceRelations[0].predicate='officialRepository';refresh(e);assert.deepEqual(run(e).eligibleIds,[]);});
-test('T09 invalid contexts fail before resolution',()=>{for(const mutation of [e=>delete e.validationContext,e=>e.validationContext.eligibleAssertionIds=null,e=>e.validationContextDigest='bad',e=>e.validationContext.contractDomain='other',e=>e.policyId='other']){const e=fixture();mutation(e);assert.throws(()=>run(e),/CONTRACT_ERROR|POLICY_DOMAIN_MISMATCH|INTEGRITY_ERROR/);}});
+test('T08 unsupported predicate denied even if listed',()=>{const e=fixture();e.payload.assertions[0].predicate='officialRepository';e.payload.evidenceRelations[0].predicate='officialRepository';e.payload.evidence[0].attribute='officialRepository';refresh(e);assert.deepEqual(run(e).eligibleIds,[]);});
+test('T09 invalid contexts fail before resolution',()=>{for(const mutation of [e=>delete e.validationContext,e=>e.validationContext.eligibleAssertionIds=null,e=>e.validationContextDigest='bad',e=>e.validationContext.contractDomain='other',e=>e.policyId='other']){const e=fixture();mutation(e);assert.throws(()=>run(e),/CONTRACT_ERROR|CONTRACT_DOMAIN_MISMATCH|POLICY_DOMAIN_MISMATCH|INTEGRITY_ERROR/);}});
 test('T10 permutation canonical results',()=>{const e=fixture(['a1','a2'],['a1']);const f=JSON.parse(JSON.stringify(e));for(const k of ['assertions','evidence','evidenceRelations','componentEnrichments'])f.payload[k].reverse();f.validationContext.eligibleAssertionIds.reverse();refresh(f);assert.equal(run(e).resultDigest,run(f).resultDigest);});
 test('T12 raw resolver cannot bypass Store acceptance',()=>{const e=fixture(['a1'],[]);const raw=require('../js/enrichment-resolution.js').resolve(e.payload.assertions,e.payload.evidence,e.payload.evidenceRelations,{decidedAt:now,componentEnrichments:e.payload.componentEnrichments});assert.equal(raw.decisions.length,1);assert.throws(()=>verifyResult(e,raw),/RESOLUTION_RESULT_ERROR/);});
 test('T13 supersession preserves inactive history',()=>{const e=fixture(['a1','a2'],['a1','a2']);e.payload.assertions[1].supersedesAssertionIds=['a1'];refresh(e);const r=run(e);assert.deepEqual(r.activeIds,['a2']);assert.deepEqual(r.transmittedIds,['a2']);assert.equal(e.payload.assertions.length,2);});
