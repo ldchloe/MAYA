@@ -3,7 +3,7 @@
 ## Quick start
 
 ```bash
-node js/reporting-cli.js tests/fixtures/b06-europeana-corelib.json --output maya-analysis-example.xlsx --mode offline
+node js/reporting-cli.js tests/fixtures/b06-scanoss-java.json --output maya-analysis-example.xlsx --mode offline
 ```
 
 No npm installation is required. Output is a genuine, deterministic Office Open XML workbook with exactly two sheets: **COMEX** and **DETAIL**. It is not a spreadsheet calculation engine; it exports immutable H01 scores, coverage, dimensions and traceability.
