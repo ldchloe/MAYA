@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" type="image/png" href="../Logo-Maya.png">
+<title>MAYA for SBOM — Analyse de risques</title>
+  
+<style>
+:root{
+
+--bg:#160d2b;
+--panel:#24113e;
+--line:#563080;
+
+--text:#fff8ff;
+--muted:#c7b8dc;
+
+/* Wavestone */
+
+--cyan:#9af500;
+--blue:#a65cff;
+--orange:#ffd52a;
+--red:#ff7b31;
+}*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 85% 0,#512080 0,transparent 42%),linear-gradient(135deg,#160d2b,#211039);color:var(--text);font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}button,input,select{font:inherit}button{cursor:pointer}.app{max-width:1400px;margin:auto;padding:30px 22px 60px}.top{display:flex;justify-content:space-between;align-items:center;gap:18px;margin-bottom:28px}.brand{display:flex;align-items:center;gap:13px}.logo{width:76px;height:76px;display:flex;align-items:center;justify-content:center;flex:0 0 76px;overflow:hidden;border:1px solid #9af500;border-radius:16px;background:#24113e;padding:4px}.maya-logo{width:100%;height:100%;object-fit:contain}.eyebrow{color:var(--cyan);text-transform:uppercase;letter-spacing:.16em;font-size:11px;font-weight:800;margin:0 0 4px}h1{font-size:clamp(25px,4vw,37px);letter-spacing:-.04em;margin:0}h1 span{color:var(--cyan)}.status{border:1px solid #73552e;color:var(--orange);border-radius:30px;padding:7px 12px;font-size:12px;white-space:nowrap}.intro{color:var(--muted);max-width:800px;margin:0 0 24px}.tabs{display:flex;gap:7px;border-bottom:1px solid var(--line);margin-bottom:22px}.tab{background:none;border:0;color:var(--muted);padding:12px 16px;border-bottom:2px solid transparent}.tab.active{color:var(--cyan);border-color:var(--cyan)}.view[hidden]{display:none}.layout{display:grid;width:100%;max-width:100%;grid-template-columns:minmax(0,3fr) minmax(320px,2fr);align-items:start;gap:18px;min-width:0}.layout>div{min-width:0;width:100%}.layout .panel{width:100%;min-width:0}.drop{width:100%;max-width:100%;min-width:0;display:block}.drop>*{max-width:100%}.drop .filelabel{width:auto;max-width:100%}.drop input[type=file]{display:none}.panel{background:linear-gradient(145deg,#2b1745,#201032);border:1px solid var(--line);border-radius:17px;padding:21px;margin-bottom:18px;min-width:0}.panel h2{font-size:17px;margin:0 0 5px}.sub{color:var(--muted);font-size:13px;margin:0 0 18px}.drop{border:1px dashed #8656b4;border-radius:13px;padding:clamp(20px,4vw,34px) clamp(12px,3vw,22px);text-align:center;background:#1d102f;min-width:0;width:100%;overflow-wrap:anywhere;transition:border-color .2s,background .2s}.drop.drag{border-color:var(--cyan);background:#302047}.drop .glyph{font-size:30px;color:var(--cyan)}.drop strong{display:block;margin:7px 0}.drop p{font-size:13px;color:var(--muted);margin:0 auto 15px;max-width:100%;overflow-wrap:anywhere}.drop .filelabel{max-width:100%;justify-content:center}.filelabel{display:inline-flex;align-items:center;justify-content:center;white-space:normal}.filelabel .btn{max-width:100%}.btn{border:1px solid #563080;background:#32164e;color:var(--text);border-radius:9px;padding:9px 13px}.btn.primary{background:var(--cyan);color:#ffffff;border-color:var(--cyan);font-weight:800}.btn:disabled{opacity:.45;cursor:not-allowed}.btnrow{display:flex;gap:8px;flex-wrap:wrap}.hint{font-size:12px;color:var(--muted);margin-top:12px}.metricgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.metric{padding:14px;background:#1d102f;border:1px solid var(--line);border-radius:12px}.metric small{color:var(--muted);display:block}.metric strong{font-size:26px;letter-spacing:-.04em}.metric .unit{font-size:12px;color:var(--muted)}.weights-panel{display:block!important;visibility:visible!important;opacity:1!important;min-width:0}.weights-panel #weights{display:flex!important;flex-direction:column!important;gap:4px;width:100%;min-width:0}.weight{display:grid!important;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto 24px;align-items:center;gap:6px 12px;margin:12px 0;min-width:0;width:100%;visibility:visible!important;opacity:1!important}.weight label{font-size:13px;min-width:0}.weight input[type=range]{display:block!important;position:relative;z-index:1;visibility:visible!important;opacity:1!important;appearance:auto;-webkit-appearance:slider-horizontal;width:100%;min-width:0;height:22px;margin:0;accent-color:var(--cyan);grid-column:1;grid-row:2;cursor:pointer;opacity:1;visibility:visible}.weight output{grid-column:2;grid-row:1/3;color:var(--cyan);font-weight:800;align-self:center;white-space:nowrap;display:block;visibility:visible}.weight input[type=range]::-webkit-slider-thumb{accent-color:var(--cyan)}.weight-total{display:flex;justify-content:space-between;border-top:1px solid var(--line);padding-top:13px;font-size:13px}.weight-total strong{color:var(--cyan)}.notice{padding:11px 13px;border:1px solid #6a512e;background:#382b17;color:#ffe09a;border-radius:10px;font-size:12px;margin-top:13px}.tablewrap{overflow:auto}.source-status{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.source-chip{font-size:11px;padding:4px 8px;border:1px solid var(--line);border-radius:20px;color:var(--muted)}.vuln-card{border:1px solid var(--line);border-radius:12px;padding:14px;margin:10px 0;background:#1d102f;min-width:0}.vuln-head{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}.vuln-head a{color:var(--cyan);font-weight:800}.vuln-meta{display:flex;gap:7px;flex-wrap:wrap;margin:8px 0}.vuln-meta span{font-size:11px;border:1px solid var(--line);border-radius:7px;padding:3px 7px}.vuln-card p{color:var(--muted);font-size:13px;margin:7px 0}.vuln-card a{color:var(--cyan)}table{border-collapse:collapse;width:100%;font-size:13px;white-space:nowrap}th,td{text-align:left;padding:12px 10px;border-bottom:1px solid var(--line)}th{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.06em}tbody tr:hover{background:#301947}.score{display:inline-flex;align-items:center;justify-content:center;min-width:33px;padding:4px 7px;border-radius:7px;background:#18391e;color:#b7ff6a;font-weight:800}.score.mid{background:#493419;color:#ffd57b}.score.high{background:#4a2038;color:#ff9cb7}.global{font-weight:850}.toolbar{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin-bottom:14px}.toolbar input,.toolbar select{background:#1d102f;border:1px solid var(--line);border-radius:9px;color:var(--text);padding:9px 11px;min-width:0}.toolbar input::placeholder{color:var(--muted)}.toolbar input{flex:1;min-width:180px}.empty{text-align:center;padding:38px 12px;color:var(--muted)}.empty strong{display:block;color:var(--text);font-size:16px;margin-bottom:5px}.detail{font-size:13px;color:var(--muted);margin-top:14px}.detail strong{color:var(--text)}.foot{color:var(--muted);font-size:12px;text-align:center;margin-top:20px}.filelabel{display:inline-flex}.filelabel input{display:none}.pill{display:inline-block;border:1px solid var(--line);border-radius:20px;padding:3px 8px;color:var(--muted);font-size:11px}
+@media(max-width:1100px){.layout{grid-template-columns:minmax(0,1fr)}.layout>div{width:100%;min-width:0}}@media(max-width:850px){.layout{grid-template-columns:minmax(0,1fr)}.top{align-items:flex-start;flex-direction:column}.metricgrid{grid-template-columns:repeat(2,1fr)}}@media(max-width:480px){.app{padding:20px 12px}.panel{padding:15px}.tabs .tab{padding:11px 9px;font-size:13px}.metricgrid{grid-template-columns:1fr 1fr}}
+</style>
+<meta name="robots" content="noindex,nofollow"><title>MAYA — Prévisualisation audit PR #44</title></head>
+<body><div style="background:#f5df7c;color:#241632;padding:12px 20px;font:700 14px system-ui;text-align:center">PRÉVISUALISATION PR #44 — audit indicatif, non H01 — version de test isolée du site principal</div><main class="app">
+<header class="top"><div class="brand"><div class="logo"><img src="../Logo-Maya.png" alt="Mascotte MAYA" class="maya-logo"></div><div><p class="eyebrow">Product security · Supply chain</p><h1>MAYA <span>for SBOM</span></h1></div></div><span class="status">MAYA · MODE DÉMO</span></header><p class="intro">Importez un inventaire logiciel, identifiez les composants à examiner et obtenez une première priorisation des risques. Cette maquette utilise des heuristiques illustratives : elle ne remplace ni une analyse de vulnérabilités ni une évaluation experte.</p><nav class="tabs" aria-label="Navigation"><button class="tab active" data-view="ingest">01 · Entrée SBOM</button><button class="tab" data-view="results">02 · Analyse & résultats</button></nav>
+<section class="view" id="ingest">
+<div class="layout"><div>
+<div class="panel"><h2>Importer un SBOM</h2><p class="sub">Traitement local dans votre navigateur — le fichier n'est pas envoyé à un serveur.</p>
+<div class="drop" id="drop"><div class="glyph">⇧</div><strong>Déposez votre fichier ici</strong><p>CycloneDX JSON uniquement</p><label class="btn primary filelabel">Choisir un fichier<input id="file" type="file" accept=".json,.cdx.json"></label></div>
+<div class="btnrow" style="margin-top:14px"><button class="btn" id="demo">Charger un exemple</button><button class="btn" id="clear">Réinitialiser</button></div><p class="hint" id="fileinfo">Aucun fichier chargé.</p><div id="importReportIngest" class="notice" aria-live="polite" hidden></div></div>
+<div class="panel"><h2>Format attendu</h2><p class="sub">Import canonique CycloneDX JSON : bomFormat et specVersion obligatoires. Les autres formats ne sont pas pris en charge dans cette tranche.</p><span class="pill">CycloneDX JSON</span></div>
+</div><div>
+<div class="panel weights-panel"><h2>Configuration des poids</h2><p class="sub">Chaque dimension est notée de 0 (faible) à 5 (élevé). Ajustez la pondération selon votre contexte.</p><div id="weights"><div class="weight" style="display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto 28px;gap:6px 12px;margin:10px 0"><label for="w_tech">Technique</label><output id="o_tech">25%</output><input id="w_tech" aria-label="Pondération Technique" type="range" min="0" max="100" step="5" value="25" oninput="window.mayaWeightChange(this)" onchange="window.mayaWeightChange(this)" style="display:block;width:100%;height:24px;accent-color:#9cff00;grid-column:1;grid-row:2"></div><div class="weight" style="display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto 28px;gap:6px 12px;margin:10px 0"><label for="w_supply">Supply chain</label><output id="o_supply">25%</output><input id="w_supply" aria-label="Pondération Supply chain" type="range" min="0" max="100" step="5" value="25" oninput="window.mayaWeightChange(this)" onchange="window.mayaWeightChange(this)" style="display:block;width:100%;height:24px;accent-color:#9cff00;grid-column:1;grid-row:2"></div><div class="weight" style="display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto 28px;gap:6px 12px;margin:10px 0"><label for="w_gov">Gouvernance</label><output id="o_gov">20%</output><input id="w_gov" aria-label="Pondération Gouvernance" type="range" min="0" max="100" step="5" value="20" oninput="window.mayaWeightChange(this)" onchange="window.mayaWeightChange(this)" style="display:block;width:100%;height:24px;accent-color:#9cff00;grid-column:1;grid-row:2"></div><div class="weight" style="display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto 28px;gap:6px 12px;margin:10px 0"><label for="w_geo">Géopolitique</label><output id="o_geo">20%</output><input id="w_geo" aria-label="Pondération Géopolitique" type="range" min="0" max="100" step="5" value="20" oninput="window.mayaWeightChange(this)" onchange="window.mayaWeightChange(this)" style="display:block;width:100%;height:24px;accent-color:#9cff00;grid-column:1;grid-row:2"></div><div class="weight" style="display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto 28px;gap:6px 12px;margin:10px 0"><label for="w_dep">Dépendances</label><output id="o_dep">10%</output><input id="w_dep" aria-label="Pondération Dépendances" type="range" min="0" max="100" step="5" value="10" oninput="window.mayaWeightChange(this)" onchange="window.mayaWeightChange(this)" style="display:block;width:100%;height:24px;accent-color:#9cff00;grid-column:1;grid-row:2"></div></div><div class="weight-total"><span>Total des pondérations</span><strong id="weightTotal">100 %</strong></div><div class="notice" id="weightNotice" hidden>Le total doit être égal à 100 % pour calculer le score global.</div><button class="btn primary" id="analyze" style="width:100%;margin-top:15px">Analyser les composants →</button></div>
+<div class="panel"><h2>Cycle d'analyse</h2><p class="sub">1. Importer · 2. Identifier · 3. Analyser · 4. Scorer · 5. Prioriser.</p></div>
+</div></div></section>
+<section class="view" id="results" hidden><div id="importReport" class="notice" aria-live="polite" hidden></div>
+<div class="metricgrid" id="metrics"><div class="metric"><small>Composants analysés</small><strong id="mCount">0</strong></div><div class="metric"><small>Risque élevé</small><strong id="mHigh">0</strong></div><div class="metric"><small>Score moyen</small><strong id="mAvg">—</strong><span class="unit">/ 5</span></div></div>
+<div class="panel" style="margin-top:18px"><h2>Inventaire & priorisation</h2><p class="sub">Sélectionnez un composant pour consulter ses scores indicatifs.</p><div class="toolbar"><input id="search" placeholder="Rechercher un composant, une version, un fournisseur…"><select id="filter"><option value="all">Tous les risques</option><option value="high">Élevé (≥ 3,5)</option><option value="medium">Modéré (2–3,49)</option><option value="low">Faible (&lt; 2)</option></select><button class="btn" id="export">Exporter CSV</button></div><div class="tablewrap"><table><thead><tr><th>Composant</th><th>Version</th><th>Technique</th><th>Supply chain</th><th>Gouvernance</th><th>Géopolitique</th><th>Dépendances</th><th>Global / 5</th></tr></thead><tbody id="rows"></tbody></table><div class="empty" id="empty"><strong>Aucun composant à afficher</strong>Importez un SBOM ou chargez l'exemple de démonstration.</div></div><div class="detail" id="detail">Aucun composant sélectionné.</div><section class="detail" id="auditPanel" aria-live="polite" style="margin-top:12px"><h3>Audit des résultats — traçabilité</h3><p>Sélectionnez un composant pour examiner les données disponibles et les limites des scores. Cette interface ne prétend pas produire une évaluation H01 sans exécution du moteur H01.</p></section></div>
+<div class="panel" id="securityPanel"><h2>Enrichissement sécurité</h2><p class="sub">Recherche de vulnérabilités connues via OSV, NVD, CISA KEV et FIRST EPSS. Une correspondance ne confirme pas à elle seule l’applicabilité au produit.</p><div class="btnrow"><button class="btn primary" id="enrich">Rechercher les vulnérabilités connues →</button><span class="hint" id="enrichStatus" aria-live="polite">Importez un SBOM ou chargez l’exemple avant de lancer la recherche.</span></div><div id="sourceStatus" class="source-status" aria-live="polite"></div><div id="vulnResults"><div class="empty"><strong>Aucun enrichissement lancé</strong>Les résultats de sécurité apparaîtront ici avec leurs sources et leur niveau de confirmation.</div></div></div><div class="panel"><h2>À propos des scores</h2><p class="sub">Les scores sont des estimations heuristiques déterministes fondées sur les métadonnées disponibles (ex. présence d'une version, licence, identifiant de paquet et nombre de composants). Ils ne vérifient pas les CVE, l'activité des mainteneurs, les sanctions ni la provenance réelle. Les dimensions supply chain, gouvernance et géopolitique doivent être alimentées par des sources externes avant tout usage décisionnel.</p></div>
+</section><p class="foot">MAYA for SBOM · Prototype autonome · Aucune base de vulnérabilités ou de renseignements tiers connectée</p></main>
+<script src="../js/sbom-model.js"></script>
+<script src="../js/cyclonedx-json.js"></script>
+<script src="../js/sbom-compat.js"></script>
+<script src="../js/import-coordinator.js"></script>
+<script>
+const dims=[{k:'tech',n:'Technique',w:25},{k:'supply',n:'Supply chain',w:25},{k:'gov',n:'Gouvernance',w:20},{k:'geo',n:'Géopolitique',w:20},{k:'dep',n:'Dépendances',w:10}];
+const importCoordinator=MayaImportCoordinator.createImportCoordinator();
+let canonicalDocument=null,importReport=null,packages=[],selected=null,securityFindings=[],weights=Object.fromEntries(dims.map(d=>[d.k,d.w]));
+const $=id=>document.getElementById(id);
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function norm(p){return {name:String(p.name??p.packageName??p.component??p['Package Name']??p.Name??p.title??'Composant sans nom'),version:String(p.version??p.packageVersion??p['Package Version']??p.Version??'Inconnue'),supplier:String(p.supplier?.name??p.supplier??p.publisher??p.manufacturer??p.Supplier??''),purl:String(p.purl??p.PURL??''),license:String(p.licenseConcluded??p.licenseDeclared??p.licenses?.[0]?.license?.id??p.license??p.License??''),group:String(p.group??p.namespace??''),raw:p}}
+function parseCSV(text){const lines=text.replace(/^\uFEFF/,'').split(/\r?\n/).filter(x=>x.trim());if(!lines.length)return [];function split(line){let a=[],s='',q=false;for(let i=0;i<line.length;i++){let c=line[i];if(c==='"'&&q&&line[i+1]==='"'){s+='"';i++}else if(c==='"')q=!q;else if((c===','||c===';'||c==='\t')&&!q){a.push(s.trim());s=''}else s+=c}a.push(s.trim());return a}const h=split(lines.shift()).map(x=>x.toLowerCase().replace(/[^a-z0-9]/g,''));return lines.map(line=>Object.fromEntries(split(line).map((v,i)=>[h[i]||'col'+i,v])))}
+function parseXML(text){const doc=new DOMParser().parseFromString(text,'application/xml');if(doc.querySelector('parsererror'))throw Error('XML invalide');return [...doc.getElementsByTagNameNS('*','component')].filter(e=>e.getAttribute('type')!=='operating-system').map(e=>({name:e.getElementsByTagNameNS('*','name')[0]?.textContent||'',version:e.getElementsByTagNameNS('*','version')[0]?.textContent||'',purl:e.getElementsByTagNameNS('*','purl')[0]?.textContent||'',supplier:e.getElementsByTagNameNS('*','supplier')[0]?.textContent||''}))}
+function parseSBOM(text,name){
+ const lower=String(name||'').toLowerCase();
+ if(lower.endsWith('.csv')||lower.endsWith('.txt'))return parseCSV(text);
+ if(lower.endsWith('.xml'))return parseXML(text);
+ let o;try{o=JSON.parse(String(text).replace(/^\\uFEFF/,''))}catch(e){throw Error('JSON invalide : '+e.message)}
+ // Accepte CycloneDX, SPDX, tableaux d'objets et enveloppes courantes.
+ const candidates=[o,o?.bom,o?.sbom,o?.document,o?.data,o?.result,o?.SPDX,o?.spdx];
+ let arr=null;
+ for(const c of candidates){if(Array.isArray(c)) {arr=c;break} if(c&&typeof c==='object'){
+  for(const k of ['components','packages','Packages','package','software','items','dependencies'])if(Array.isArray(c[k])&&c[k].length){arr=c[k];break}
+  if(arr)break;
+ }}
+ if(!arr&&Array.isArray(o?.['@graph']))arr=o['@graph'];
+ if(!arr)throw Error('Structure JSON non reconnue. Attendu : CycloneDX (components) ou SPDX (packages).');
+ if(!arr.length)throw Error('Le JSON est valide mais la liste des composants est vide.');
+ const result=arr.filter(p=>p&&typeof p==='object').map(p=>{
+  const ext=Array.isArray(p.externalRefs)?p.externalRefs.find(x=>/purl/i.test(x.referenceType||x.referenceCategory||''))?.referenceLocator:'';
+  const lic=Array.isArray(p.licenses)?p.licenses.map(x=>x.expression||x.license?.id||x.license?.name).filter(Boolean).join(', '):'';
+  const sup=typeof p.supplier==='object'?(p.supplier.name||''):p.supplier;
+  return {...p,name:p.name??p.PackageName??p.packageName??p.spdxid??p.SPDXID??p.title??p.component?.name,
+   version:p.version??p.versionInfo??p.PackageVersion??p.packageVersion??p.component?.version??'Inconnue',
+   supplier:sup??p.originator??p.publisher??p.manufacturer?.name??'',
+   purl:p.purl??p.PURL??ext??'',
+   license:p.licenseConcluded??p.licenseDeclared??p.licenseInfoInFile??lic};
+ });
+ if(!result.length)throw Error('Aucun objet composant trouvé dans le JSON.');
+ return result;
+}
+function score(p,i,n){const seed=[...p.name+p.version+p.supplier+p.purl+p.license].reduce((a,c)=>a+c.charCodeAt(0),0);const stable=x=>Math.min(5,Math.max(0,x));return {tech:stable(1.1+(p.version==='Inconnue'?1.4:0)+(p.purl?0:.5)+(seed%19)/10),supply:stable(1.2+(!p.supplier?1.1:.2)+(seed%17)/10),gov:stable(1.0+(!p.license?1.6:.2)+(seed%13)/10),geo:stable(1.4+(!p.supplier?1:.1)+(seed%11)/10),dep:stable(.8+Math.min(2.5,n/35)+(seed%9)/10)}}
+function prepare(arr){if(!Array.isArray(arr))throw Error('Le fichier ne contient pas une liste de composants exploitable.');let map=new Map();for(const raw of arr){const p=norm(raw);if(!p.name||p.name==='Composant sans nom')continue;const key=[p.name,p.version].join('@');if(!map.has(key))map.set(key,p)}if(!map.size)throw Error('Aucun composant exploitable trouvé. Vérifiez que le JSON contient des composants avec un champ name ou des packages SPDX avec un nom.');packages=[...map.values()].map((p,i,a)=>({...p,scores:score(p,i,a.length)}));selected=null;renderRows()}
+function totalWeight(){return dims.reduce((s,d)=>s+weights[d.k],0)}
+function global(p){return dims.reduce((s,d)=>s+p.scores[d.k]*weights[d.k],0)/100}
+function scoreHTML(n){let cls=n>=3.5?'high':n>=2?'mid':'';return '<span class="score '+cls+'">'+n.toFixed(1)+'</span>'}
+
+function purlInfo(p){let raw=p.purl||'';if(!raw)return null;let m=raw.match(/^pkg:([^/]+)\/([^@]+)@([^?]+)/i);if(!m)return null;let type=m[1].toLowerCase(),name=m[2].replace(/\/+/g,'/'),version=m[3];const eco={npm:'npm',pypi:'PyPI',maven:'Maven',golang:'Go',cargo:'crates.io',nuget:'NuGet',gem:'RubyGems',composer:'Packagist',hex:'Hex',pub:'Pub'};return {type,name,version,ecosystem:eco[type]||null}}
+async function fetchJSON(url,opts={}){const r=await fetch(url,opts);if(!r.ok)throw Error('HTTP '+r.status);return r.json()}
+function cveId(v){let ids=[v.id,...(v.aliases||[])].filter(Boolean);return ids.find(x=>/^CVE-\\d{4}-\\d{4,}$/i.test(x))||null}
+function sourceChip(name,state){return '<span class="source-chip">'+esc(name)+' · '+esc(state)+'</span>'}
+async function enrichSecurity(){
+ if(!packages.length){$('enrichStatus').textContent='Importez un SBOM ou chargez l’exemple avant de lancer la recherche.';return}
+ const btn=$('enrich');btn.disabled=true;securityFindings=[];$('vulnResults').innerHTML='<div class="empty"><strong>Recherche en cours…</strong>Interrogation des sources publiques de vulnérabilités.</div>';$('enrichStatus').textContent='Analyse de '+packages.length+' composants…';
+ const status={OSV:'en cours',NVD:'en cours','CISA KEV':'en cours','FIRST EPSS':'en cours'};let osvOK=0,nvdOK=0,kevOK=0,epssOK=0;
+ try{
+  let kevSet=new Set();try{const k=await fetchJSON('https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json');(k.vulnerabilities||[]).forEach(v=>kevSet.add(v.cveID));kevOK=1;status['CISA KEV']='disponible'}catch(e){status['CISA KEV']='indisponible (réseau/CORS)'}
+  for(let i=0;i<packages.length;i++){
+   const p=packages[i],pi=purlInfo(p);let ovs=[];
+   try{
+    if(pi){const cleanPurl=p.purl.split('?')[0].replace(/@[^/@]+$/, '');const body={package:{purl:cleanPurl},version:p.version!=='Inconnue'?p.version:pi.version};const data=await fetchJSON('https://api.osv.dev/v1/query',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});ovs=(data.vulns||[]);osvOK++}
+    else if(p.name){const data=await fetchJSON('https://api.osv.dev/v1/query',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({package:{name:p.name}})});ovs=(data.vulns||[]).filter(v=>!v.affected||v.affected.some(a=>!a.versions||a.versions.includes(p.version)));osvOK++}
+   }catch(e){}
+   for(const v of ovs){
+    let cve=cveId(v),epss=null,nvd=null;let isKev=!!(cve&&kevSet.has(cve));
+    if(cve){try{const ed=await fetchJSON('https://api.first.org/data/v1/epss?cve='+encodeURIComponent(cve));epss=ed.data?.[0]?.epss??null;if(epss!==null)epssOK++}catch(e){}
+     try{const nd=await fetchJSON('https://services.nvd.nist.gov/rest/json/cves/2.0?cveId='+encodeURIComponent(cve));nvd=nd.vulnerabilities?.[0]?.cve||null;if(nvd)nvdOK++}catch(e){}
+    }
+    const desc=(v.summary||v.details||nvd?.descriptions?.find(x=>x.lang==='en')?.value||'Aucun résumé fourni par la source.').slice(0,500);
+    const cvss=nvd?.metrics?.cvssMetricV31?.[0]?.cvssData?.baseScore??nvd?.metrics?.cvssMetricV30?.[0]?.cvssData?.baseScore??nvd?.metrics?.cvssMetricV2?.[0]?.cvssData?.baseScore??null;
+    const refs=(v.references||[]).map(x=>x.url).filter(Boolean).slice(0,3);
+    securityFindings.push({component:p.name,version:p.version,id:v.id,cve,summary:desc,cvss,epss,isKev,modified:v.modified||'',refs,source:'OSV',applicability:'À confirmer',url:cve?'https://nvd.nist.gov/vuln/detail/'+cve:'https://osv.dev/vulnerability/'+encodeURIComponent(v.id)});
+   }
+   $('enrichStatus').textContent='Composant '+(i+1)+'/'+packages.length+' · '+securityFindings.length+' avis candidats trouvés';
+  }
+  status.OSV=osvOK?'consulté ('+osvOK+' composants)':'aucun rapprochement ou source indisponible';
+  status.NVD=nvdOK?'consulté ('+nvdOK+' CVE)':'aucun détail récupéré';
+  status['FIRST EPSS']=epssOK?'consulté ('+epssOK+' scores)':'aucun score récupéré';
+  renderSecurity(status);
+  $('enrichStatus').textContent=securityFindings.length+' avis candidats associés. Applicabilité au produit à confirmer.';
+ }catch(e){$('enrichStatus').textContent='L’enrichissement a rencontré une erreur : '+e.message;renderSecurity(status)}
+ finally{btn.disabled=false}
+}
+function renderSecurity(status={}){
+ $('sourceStatus').innerHTML=Object.entries(status).map(([k,v])=>sourceChip(k,v)).join('');
+ const arr=[...securityFindings].sort((a,b)=>(b.isKev-a.isKev)||((b.cvss||0)-(a.cvss||0))||((b.epss||0)-(a.epss||0)));
+ if(!arr.length){$('vulnResults').innerHTML='<div class="empty"><strong>Aucun avis associé avec les critères actuels</strong>Ce résultat ne prouve pas l’absence de vulnérabilités : couverture des sources, identifiants PURL, versions et disponibilité réseau peuvent limiter la recherche.</div>';return}
+ $('vulnResults').innerHTML='<p class="hint">'+arr.length+' avis candidats · applicability non confirmée automatiquement. Les résultats dépendent des identifiants et versions présents dans le SBOM.</p>'+arr.map(v=>'<article class="vuln-card"><div class="vuln-head"><a href="'+esc(v.url)+'" target="_blank" rel="noopener">'+esc(v.cve||v.id)+'</a><strong>'+(v.cvss!==null?'CVSS '+esc(v.cvss):'CVSS indisponible')+'</strong></div><div><strong>'+esc(v.component)+' @ '+esc(v.version)+'</strong></div><div class="vuln-meta"><span>Source : '+esc(v.source)+'</span><span>Applicabilité : à confirmer</span>'+(v.isKev?'<span style="color:#ff9cb7;border-color:#ff7b31">CISA KEV · exploitation connue</span>':'')+(v.epss!==null?'<span>EPSS : '+(Number(v.epss)*100).toFixed(2)+'%</span>':'')+'</div><p>'+esc(v.summary)+'</p><p>Version affectée : à vérifier dans l’avis fournisseur et les plages de versions publiées. Le rapprochement par nom/PURL ne suffit pas à conclure que le produit est exploitable.</p><div>'+v.refs.map(u=>'<a href="'+esc(u)+'" target="_blank" rel="noopener">Référence ↗</a>').join(' · ')+'</div></article>').join('');
+}
+function renderWeights(){
+ const host=$('weights');if(!host)return;
+ host.style.cssText='display:flex!important;flex-direction:column!important;gap:12px!important;width:100%;min-width:0;visibility:visible;opacity:1';
+ host.innerHTML=dims.map(d=>'<div class="weight" style="display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;grid-template-rows:auto 28px!important;align-items:center!important;gap:6px 12px!important;width:100%!important;margin:10px 0!important;visibility:visible!important;opacity:1!important"><label for="w_'+d.k+'" style="display:block!important;grid-column:1!important;grid-row:1!important;visibility:visible!important;color:var(--text);font-size:14px">'+d.n+'</label><output id="o_'+d.k+'" style="display:block!important;grid-column:2!important;grid-row:1/3!important;align-self:center!important;color:var(--lime);font-weight:800;font-size:16px;visibility:visible!important">'+weights[d.k]+'%</output><input id="w_'+d.k+'" aria-label="Pondération '+d.n+'" type="range" min="0" max="100" step="5" value="'+weights[d.k]+'" style="display:block!important;visibility:visible!important;opacity:1!important;appearance:auto!important;-webkit-appearance:slider-horizontal!important;grid-column:1!important;grid-row:2!important;width:100%!important;min-width:0!important;height:24px!important;margin:0!important;accent-color:var(--lime)!important;cursor:pointer!important"></div>').join('');
+ dims.forEach(d=>{const input=$('w_'+d.k);if(!input)return;input.addEventListener('input',e=>{weights[d.k]=Number(e.target.value);$('o_'+d.k).textContent=weights[d.k]+'%';$('weightTotal').textContent=totalWeight()+' %';$('weightNotice').hidden=totalWeight()===100;$('analyze').disabled=totalWeight()!==100;renderRows()})});
+ $('weightTotal').textContent=totalWeight()+' %';$('analyze').disabled=totalWeight()!==100;
+}
+function renderRows(){const q=$('search').value.toLowerCase(),f=$('filter').value;let arr=packages.filter(p=>(p.name+' '+p.version+' '+p.supplier+' '+p.purl).toLowerCase().includes(q)).filter(p=>{let s=global(p);return f==='all'||f==='high'&&s>=3.5||f==='medium'&&s>=2&&s<3.5||f==='low'&&s<2}).sort((a,b)=>global(b)-global(a));$('rows').innerHTML=arr.map((p)=>'<tr data-key="'+esc(p.occurrenceId||p.name+'@'+p.version)+'" tabindex="0"><td><strong>'+esc(p.name)+'</strong><br><span class="hint">'+esc(p.supplier||'Fournisseur inconnu')+'</span></td><td>'+esc(p.version)+'</td>'+dims.map(d=>'<td>'+scoreHTML(p.scores[d.k])+'</td>').join('')+'<td class="global">'+scoreHTML(global(p))+'</td></tr>').join('');$('empty').hidden=arr.length>0;[...$('rows').querySelectorAll('tr')].forEach(tr=>{const pick=()=>showDetail(packages.find(p=>(p.occurrenceId||p.name+'@'+p.version)===tr.dataset.key));tr.onclick=pick;tr.onkeydown=e=>{if(e.key==='Enter')pick()}});$('mCount').textContent=packages.length;$('mHigh').textContent=packages.filter(p=>global(p)>=3.5).length;$('mAvg').textContent=packages.length?(packages.reduce((s,p)=>s+global(p),0)/packages.length).toFixed(1):'—';if(selected&&!packages.includes(selected))selected=null;if(!selected){$('detail').textContent='Sélectionnez une ligne pour afficher les métadonnées.';renderAuditPanel(null)}}
+function showDetail(p){
+ selected=p;if(!p)return;
+ $('detail').innerHTML='<strong>'+esc(p.name)+' @ '+esc(p.version)+'</strong><br>Fournisseur : '+esc(p.supplier||'non renseigné')+' · PURL : '+esc(p.purl||'non renseigné')+' · Licence : '+esc(p.license||'non renseignée')+'<br>Score pondéré : <strong>'+global(p).toFixed(2)+'/5</strong>. Les scores individuels sont indicatifs.';
+ renderAuditPanel(p);
+}
+function renderAuditPanel(p){
+ const host=$('auditPanel');if(!host)return;
+ if(!p){host.innerHTML='<h3>Audit des résultats — traçabilité</h3><p>Sélectionnez un composant pour examiner les données disponibles et les limites des scores.</p>';return}
+ const known=v=>v&&v!=='Inconnue'&&v!=='inconnu'&&v!=='non renseigné';
+ const fields=[['Nom',p.name],['Version',p.version],['Fournisseur',p.supplier],['PURL',p.purl],['Licence',p.license]];
+ const fieldHTML=fields.map(([name,value])=>'<li><strong>'+esc(name)+'</strong> : '+(known(value)?esc(value):'<em>Non renseigné — information manquante</em>')+'</li>').join('');
+ const scores=dims.map(d=>'<tr><td>'+esc(d.n)+'</td><td>'+Number(p.scores[d.k]).toFixed(2)+'/5</td><td>Heuristique locale ; aucune preuve H01 liée à ce score</td></tr>').join('');
+ host.innerHTML='<h3>Audit du composant : '+esc(p.name)+' @ '+esc(p.version)+'</h3>'+
+ '<p><strong>Statut : audit H01 non disponible dans cette vue.</strong> Les cinq scores ci-dessous sont des heuristiques du prototype, pas les six dimensions du Trust Assessment H01. Ne pas les interpréter comme une validation de risque.</p>'+
+ '<h4>Métadonnées observables du SBOM</h4><ul>'+fieldHTML+'</ul>'+
+ '<h4>Scores indicatifs et justification</h4><div class="tablewrap"><table><thead><tr><th>Dimension affichée</th><th>Score</th><th>Traçabilité</th></tr></thead><tbody>'+scores+'</tbody></table></div>'+
+ '<h4>Éléments H01 à auditer</h4><ul><li>Evidence IDs et Decision IDs : <strong>non disponibles dans cet écran</strong>.</li><li>Six dimensions H01, Trust Score /100, Evidence Coverage et Confidence : <strong>non calculés par cette vue</strong>.</li><li>Statuts VERIFIED, UNKNOWN, CONFLICTED, NOT_APPLICABLE : <strong>non disponibles ici</strong>.</li></ul>'+
+ '<p>Pour une véritable évaluation H01, exécuter le pipeline de reporting du dépôt (Node.js 22) sur le SBOM CycloneDX JSON, puis examiner les résultats H01 et les feuilles Excel COMEX/DETAIL. Exemple : <code>node js/reporting-cli.js mon-sbom.json --output maya-audit.xlsx --mode offline</code>. Une absence de preuve ne doit jamais être considérée comme une preuve d’absence de risque.</p>';
+}
+
+function switchView(v){document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.view===v));document.querySelectorAll('.view').forEach(s=>s.hidden=s.id!==v)}
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>switchView(b.dataset.view));
+$('enrich').onclick=enrichSecurity;$('search').oninput=renderRows;$('filter').onchange=renderRows;$('analyze').onclick=()=>{if(totalWeight()!==100)return;switchView('results');renderRows()};
+function renderImportReport(report){
+ importReport=report;
+ const panels=[$('importReport'),$('importReportIngest')];
+ if(!report){panels.forEach(panel=>{panel.hidden=true;panel.textContent='' });return}
+ panels.forEach(panel=>{panel.hidden=false});
+ const fields=[
+  ['Statut',report.status],['Niveau de validation',report.validationLevel],['Format détecté',report.detectedFormat||'Non renseigné'],
+  ['Version CycloneDX',report.specVersion||'Non renseignée'],
+  ['Composants lus',report.componentsRead],['Composants créés',report.componentsCreated],
+  ['Déclarations de dépendances lues',report.dependencyDeclarationsRead],
+  ['Relations créées',report.dependencyRelationsCreated],
+  ['Déclarations invalides',report.invalidDependencyDeclarations],
+  ['Déclarations vides',report.emptyDependencyDeclarations],
+  ['Entités absentes du graphe',report.entitiesAbsentFromDependencyGraph],
+  ['Références manquantes',report.missingReferences],
+  ['Références ambiguës',report.ambiguousReferences],
+  ['Dépendances déclarées',report.dependenciesDeclared],
+  ['Dépendances résolues',report.dependenciesResolved],
+  ['Références non résolues',report.unresolvedReferences],
+  ['Avertissements',report.warnings.length],['Erreurs',report.errors.length]
+ ];
+ const html='<strong>Rapport d’import</strong><br>'+fields.map(([label,value])=>esc(label)+' : '+esc(value)).join('<br>')+
+  [...report.errors,...report.warnings].map(item=>'<br>• '+esc(item.code)+' : '+esc(item.message)).join('');
+ panels.forEach(panel=>{panel.innerHTML=html});
+}
+function prepareCanonical(document){
+ canonicalDocument=document;
+ const projected=MayaSbomCompat.toLegacyPackages(document);
+ packages=projected.map((p,i,a)=>({...p,scores:score(p,i,a.length)}));
+ selected=null;
+ renderRows();
+}
+function failedImportReport(error){
+ console.error('MAYA CycloneDX import failed:',error);
+ const report=MayaSbomModel.createReport();
+ MayaSbomModel.issue(report,'error','UNEXPECTED_IMPORT_ERROR',
+   'Échec de l’import. Vérifiez le fichier ou consultez la console pour le diagnostic.','$');
+ return MayaSbomModel.finalizeReport(report,true);
+}
+async function importCycloneDxFile(file){
+ if(!file)return;
+ const attempt=importCoordinator.begin();
+ try{
+  canonicalDocument=null;packages=[];selected=null;renderRows();
+  const text=await file.text();
+  if(!importCoordinator.isActive(attempt))return;
+  const {document,report}=MayaCycloneDx.importCycloneDxJson(text,file.name);
+  if(!importCoordinator.isActive(attempt))return;
+  if(!document){
+   renderImportReport(report);
+   $('fileinfo').textContent='Échec de l’import : '+file.name;
+   switchView('ingest');
+   return;
+  }
+  // Compute scores before publishing any canonical or display state.
+  const projected=MayaSbomCompat.toLegacyPackages(document);
+  const nextPackages=projected.map((p,i,a)=>({...p,scores:score(p,i,a.length)}));
+  if(!importCoordinator.isActive(attempt))return;
+  canonicalDocument=document;packages=nextPackages;selected=null;
+  renderRows();
+  renderImportReport(report);
+  $('fileinfo').textContent='✓ '+file.name+' · '+packages.length+' composants affichés';
+  switchView('results');
+ }catch(error){
+  if(!importCoordinator.isActive(attempt))return;
+  canonicalDocument=null;packages=[];selected=null;
+  const report=failedImportReport(error);
+  try{
+   renderRows();renderImportReport(report);
+   $('fileinfo').textContent='Échec de l’import : '+file.name;
+   switchView('ingest');
+  }catch(displayError){
+   console.error('MAYA failed to render import error:',displayError);
+   // Keep the failure visible even if the normal renderer itself fails.
+   const fallback=$('importReportIngest');
+   if(fallback){fallback.hidden=false;fallback.textContent='Statut : failed — erreur d’import.'}
+  }
+ }finally{
+  // Also reset on failure or stale attempts, but never clear a newer selection.
+  if(importCoordinator.isActive(attempt))$('file').value='';
+ }
+}
+$('file').onchange=e=>importCycloneDxFile(e.target.files[0]);
+const drop=$('drop');
+['dragenter','dragover'].forEach(name=>drop.addEventListener(name,e=>{e.preventDefault();drop.classList.add('drag')}));
+['dragleave','drop'].forEach(name=>drop.addEventListener(name,e=>{e.preventDefault();drop.classList.remove('drag')}));
+drop.addEventListener('drop',e=>{const file=e.dataTransfer.files[0];if(file)importCycloneDxFile(file)});
+$('demo').onclick=()=>{importCoordinator.invalidate();canonicalDocument=null;renderImportReport(null);prepare([{name:'openssl',version:'3.0.12',supplier:'OpenSSL Project',purl:'pkg:generic/openssl@3.0.12',license:'Apache-2.0'},{name:'log4j-core',version:'2.14.1',supplier:'Apache Software Foundation',purl:'pkg:maven/org.apache.logging.log4j/log4j-core@2.14.1',license:'Apache-2.0'},{name:'left-pad',version:'1.3.0',supplier:'',purl:'pkg:npm/left-pad@1.3.0',license:'WTFPL'},{name:'libxml2',version:'2.9.10',supplier:'GNOME',purl:'pkg:generic/libxml2@2.9.10',license:''},{name:'internal-auth-sdk',version:'Inconnue',supplier:'',purl:'',license:''},{name:'react',version:'18.2.0',supplier:'Meta',purl:'pkg:npm/react@18.2.0',license:'MIT'},{name:'zlib',version:'1.2.13',supplier:'zlib.net',purl:'pkg:generic/zlib@1.2.13',license:'Zlib'}]);$('fileinfo').textContent='Exemple de démonstration · '+packages.length+' composants';switchView('results')};
+$('clear').onclick=()=>{importCoordinator.invalidate();canonicalDocument=null;renderImportReport(null);packages=[];selected=null;$('file').value='';$('fileinfo').textContent='Aucun fichier chargé.';renderRows();switchView('ingest')};
+$('export').onclick=()=>{const header=['name','version','supplier',...dims.map(d=>d.k),'global'];const lines=[header,...packages.map(p=>[p.name,p.version,p.supplier,...dims.map(d=>p.scores[d.k].toFixed(2)),global(p).toFixed(2)])].map(row=>row.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(','));const blob=new Blob(['\ufeff'+lines.join('\r\n')],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='maya-for-sbom-analysis.csv';a.click();URL.revokeObjectURL(url)};
+// Callback global + delegation: keep slider updates working even if the controls are recreated.
+window.mayaWeightChange=function(el){
+ if(!el||!el.id)return;
+ const key=el.id.slice(2);
+ const output=$('o_'+key);
+ weights[key]=Number(el.value);
+ if(output)output.textContent=weights[key]+'%';
+ const total=dims.reduce((sum,d)=>sum+Number($('w_'+d.k)?.value??weights[d.k]),0);
+ $('weightTotal').textContent=total+' %';
+ $('weightNotice').hidden=total===100;
+ $('analyze').disabled=total!==100;
+ if(packages.length)renderRows();
+};
+$('weights').addEventListener('input',e=>{
+ if(e.target instanceof HTMLInputElement && e.target.matches('input[type="range"]')) {
+   const key=e.target.id.replace(/^w_/,'');
+   weights[key]=Number(e.target.value);
+   const output=$('o_'+key);if(output)output.textContent=weights[key]+'%';
+   const total=dims.reduce((sum,d)=>sum+Number($('w_'+d.k)?.value??weights[d.k]),0);
+   $('weightTotal').textContent=total+' %';
+   $('weightNotice').hidden=total===100;
+   $('analyze').disabled=total!==100;
+   if(packages.length)renderRows();
+ }
+});
+renderWeights();renderRows();
+</script></body></html>
