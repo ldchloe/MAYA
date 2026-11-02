@@ -19,9 +19,9 @@ jobs:
         run: node --check js/identity-mvp.js
       - name: Maven tests
         run: node --test tests/identity-maven.test.js
-      -      - name: Complete suite
+      - name: Complete suite
         run: node --test tests/*.test.js
-              - name: MVP baseline regression and blocked-network offline replay
+      - name: MVP baseline regression and blocked-network offline replay
         run: node --test tests/baseline/baseline-regression.test.js
       - name: Productization syntax
         run: |
