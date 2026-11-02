@@ -38,7 +38,7 @@
 </div></div></section>
 <section class="view" id="results" hidden><div id="importReport" class="notice" aria-live="polite" hidden></div>
 <div class="metricgrid" id="metrics"><div class="metric"><small>Composants analysés</small><strong id="mCount">0</strong></div><div class="metric"><small>Risque élevé</small><strong id="mHigh">0</strong></div><div class="metric"><small>Score moyen</small><strong id="mAvg">—</strong><span class="unit">/ 5</span></div></div>
-<div class="panel" style="margin-top:18px"><h2>Inventaire & priorisation</h2><p class="sub">Sélectionnez un composant pour consulter ses scores indicatifs.</p><div class="toolbar"><input id="search" placeholder="Rechercher un composant, une version, un fournisseur…"><select id="filter"><option value="all">Tous les risques</option><option value="high">Élevé (≥ 3,5)</option><option value="medium">Modéré (2–3,49)</option><option value="low">Faible (&lt; 2)</option></select><button class="btn" id="export">Exporter CSV</button></div><div class="tablewrap"><table><thead><tr><th>Composant</th><th>Version</th><th>Technique</th><th>Supply chain</th><th>Gouvernance</th><th>Géopolitique</th><th>Dépendances</th><th>Global / 5</th></tr></thead><tbody id="rows"></tbody></table><div class="empty" id="empty"><strong>Aucun composant à afficher</strong>Importez un SBOM ou chargez l'exemple de démonstration.</div></div><div class="detail" id="detail">Aucun composant sélectionné.</div><section class="detail" id="auditPanel" aria-live="polite" style="margin-top:12px"><h3>Audit des résultats — traçabilité</h3><p>Sélectionnez un composant pour examiner les données disponibles et les limites des scores. Cette interface ne prétend pas produire une évaluation H01 sans exécution du moteur H01.</p></section></div>
+<div class="panel" style="margin-top:18px"><h2>Inventaire & priorisation</h2><p class="sub">Sélectionnez un composant pour consulter ses scores indicatifs.</p><div class="toolbar"><input id="search" placeholder="Rechercher un composant, une version, un fournisseur…"><select id="filter"><option value="all">Tous les risques</option><option value="high">Élevé (≥ 3,5)</option><option value="medium">Modéré (2–3,49)</option><option value="low">Faible (&lt; 2)</option></select><button class="btn" id="export">Exporter CSV</button></div><div class="tablewrap"><table><thead><tr><th>Composant</th><th>Version</th><th>Technique</th><th>Supply chain</th><th>Gouvernance</th><th>Géopolitique</th><th>Dépendances</th><th>Global / 5</th></tr></thead><tbody id="rows"></tbody></table><div class="empty" id="empty"><strong>Aucun composant à afficher</strong>Importez un SBOM ou chargez l'exemple de démonstration.</div></div><div class="detail" id="detail">Aucun composant sélectionné.</div><div class="toolbar" style="margin:12px 0"><label for="auditJson" class="btn">Charger les preuves H01 (JSON)</label><input type="file" id="auditJson" accept=".json,application/json" style="max-width:260px"><span id="auditStatus" class="hint">Aucune évaluation H01 chargée.</span></div><section class="detail" id="auditPanel" aria-live="polite" style="margin-top:12px"><h3>Audit des résultats — traçabilité</h3><p>Sélectionnez un composant pour examiner les données disponibles et les limites des scores. Cette interface ne prétend pas produire une évaluation H01 sans exécution du moteur H01.</p></section></div>
 <div class="panel" id="securityPanel"><h2>Enrichissement sécurité</h2><p class="sub">Recherche de vulnérabilités connues via OSV, NVD, CISA KEV et FIRST EPSS. Une correspondance ne confirme pas à elle seule l’applicabilité au produit.</p><div class="btnrow"><button class="btn primary" id="enrich">Rechercher les vulnérabilités connues →</button><span class="hint" id="enrichStatus" aria-live="polite">Importez un SBOM ou chargez l’exemple avant de lancer la recherche.</span></div><div id="sourceStatus" class="source-status" aria-live="polite"></div><div id="vulnResults"><div class="empty"><strong>Aucun enrichissement lancé</strong>Les résultats de sécurité apparaîtront ici avec leurs sources et leur niveau de confirmation.</div></div></div><div class="panel"><h2>À propos des scores</h2><p class="sub">Les scores sont des estimations heuristiques déterministes fondées sur les métadonnées disponibles (ex. présence d'une version, licence, identifiant de paquet et nombre de composants). Ils ne vérifient pas les CVE, l'activité des mainteneurs, les sanctions ni la provenance réelle. Les dimensions supply chain, gouvernance et géopolitique doivent être alimentées par des sources externes avant tout usage décisionnel.</p></div>
 </section><p class="foot">MAYA for SBOM · Prototype autonome · Aucune base de vulnérabilités ou de renseignements tiers connectée</p></main>
 <script src="js/sbom-model.js"></script>
@@ -143,20 +143,40 @@ function showDetail(p){
  $('detail').innerHTML='<strong>'+esc(p.name)+' @ '+esc(p.version)+'</strong><br>Fournisseur : '+esc(p.supplier||'non renseigné')+' · PURL : '+esc(p.purl||'non renseigné')+' · Licence : '+esc(p.license||'non renseignée')+'<br>Score pondéré : <strong>'+global(p).toFixed(2)+'/5</strong>. Les scores individuels sont indicatifs.';
  renderAuditPanel(p);
 }
+let h01Audit=null;
 function renderAuditPanel(p){
  const host=$('auditPanel');if(!host)return;
- if(!p){host.innerHTML='<h3>Audit des résultats — traçabilité</h3><p>Sélectionnez un composant pour examiner les données disponibles et les limites des scores.</p>';return}
- const known=v=>v&&v!=='Inconnue'&&v!=='inconnu'&&v!=='non renseigné';
+ if(!p){host.innerHTML='<h3>Audit H01</h3><p>Sélectionnez un composant. Chargez un export H01 JSON calculé sur le même SBOM.</p>';return}
+ const known=v=>v&&v!=='Inconnue'&&v!=='inconnu';
  const fields=[['Nom',p.name],['Version',p.version],['Fournisseur',p.supplier],['PURL',p.purl],['Licence',p.license]];
- const fieldHTML=fields.map(([name,value])=>'<li><strong>'+esc(name)+'</strong> : '+(known(value)?esc(value):'<em>Non renseigné — information manquante</em>')+'</li>').join('');
- const scores=dims.map(d=>'<tr><td>'+esc(d.n)+'</td><td>'+Number(p.scores[d.k]).toFixed(2)+'/5</td><td>Heuristique locale ; aucune preuve H01 liée à ce score</td></tr>').join('');
- host.innerHTML='<h3>Audit du composant : '+esc(p.name)+' @ '+esc(p.version)+'</h3>'+
- '<p><strong>Statut : audit H01 non disponible dans cette vue.</strong> Les cinq scores ci-dessous sont des heuristiques du prototype, pas les six dimensions du Trust Assessment H01. Ne pas les interpréter comme une validation de risque.</p>'+
- '<h4>Métadonnées observables du SBOM</h4><ul>'+fieldHTML+'</ul>'+
- '<h4>Scores indicatifs et justification</h4><div class="tablewrap"><table><thead><tr><th>Dimension affichée</th><th>Score</th><th>Traçabilité</th></tr></thead><tbody>'+scores+'</tbody></table></div>'+
- '<h4>Éléments H01 à auditer</h4><ul><li>Evidence IDs et Decision IDs : <strong>non disponibles dans cet écran</strong>.</li><li>Six dimensions H01, Trust Score /100, Evidence Coverage et Confidence : <strong>non calculés par cette vue</strong>.</li><li>Statuts VERIFIED, UNKNOWN, CONFLICTED, NOT_APPLICABLE : <strong>non disponibles ici</strong>.</li></ul>'+
- '<p>Pour une véritable évaluation H01, exécuter le pipeline de reporting du dépôt (Node.js 22) sur le SBOM CycloneDX JSON, puis examiner les résultats H01 et les feuilles Excel COMEX/DETAIL. Exemple : <code>node js/reporting-cli.js mon-sbom.json --output maya-audit.xlsx --mode offline</code>. Une absence de preuve ne doit jamais être considérée comme une preuve d’absence de risque.</p>';
+ const fieldHTML=fields.map(([n,v])=>'<li><strong>'+esc(n)+'</strong> : '+(known(v)?esc(v):'<em>Non renseigné</em>')+'</li>').join('');
+ const entry=h01Audit?.entries.find(e=>e.componentId===p.occurrenceId);
+ let html='<h3>Audit du composant : '+esc(p.name)+' @ '+esc(p.version)+'</h3><h4>Métadonnées du SBOM</h4><ul>'+fieldHTML+'</ul>';
+ if(!entry){host.innerHTML=html+'<p><strong>Évaluation H01 indisponible pour ce composant.</strong> Chargez un export H01 du même SBOM. Les scores /5 du tableau sont uniquement des heuristiques et ne constituent pas des preuves.</p>';return}
+ const a=entry.assessment,e=entry.enrichment;
+ const val=x=>x===null||x===undefined?'Non calculé':esc(x);
+ html+='<p><strong>Trust Score : '+val(a.trustScore)+'/100</strong> · Couverture des preuves : '+val(a.evidenceCoverage)+'% · Confiance : '+val(a.confidence)+'</p>';
+ html+='<p>Assessment ID : <code>'+esc(a.assessmentId)+'</code> · Politique : '+esc(a.policyVersion)+' · Moteur : '+esc(a.engineVersion)+'</p>';
+ html+='<h4>Six dimensions H01 et provenance</h4><div class="tablewrap"><table><thead><tr><th>Dimension</th><th>Statut</th><th>Risque</th><th>Evidence IDs</th><th>Decision IDs</th><th>Raisons</th></tr></thead><tbody>'+
+ a.dimensions.map(d=>'<tr><td>'+esc(d.type)+'</td><td>'+esc(d.status)+'</td><td>'+val(d.riskScore)+'</td><td>'+((d.evidenceIds||[]).map(x=>'<code>'+esc(x)+'</code>').join('<br>')||'—')+'</td><td>'+((d.decisionIds||[]).map(x=>'<code>'+esc(x)+'</code>').join('<br>')||'—')+'</td><td>'+((d.reasonCodes||[]).map(esc).join(', ')||'—')+'</td></tr>').join('')+'</tbody></table></div>';
+ html+='<h4>Traçabilité complémentaire</h4><p>Preuves du pipeline : '+((e.evidenceIds||[]).map(x=>'<code>'+esc(x)+'</code>').join(', ')||'Aucune')+'</p><p>Décisions du pipeline : '+((e.decisionIds||[]).map(x=>'<code>'+esc(x)+'</code>').join(', ')||'Aucune')+'</p>';
+ html+='<p class="hint">Les identifiants et statuts proviennent du pipeline H01. Ils ne signifient pas que le contenu des archives de preuves est embarqué dans cet export. UNKNOWN ou CONFLICTED ne sont pas des preuves de faible risque.</p>';
+ host.innerHTML=html;
 }
+$('auditJson').addEventListener('change',async ev=>{
+ const file=ev.target.files[0];if(!file)return;
+ try{
+  const data=JSON.parse(await file.text());
+  if(data.schema!=='maya-h01-audit-v1'||typeof data.sourceDigest!=='string'||!Array.isArray(data.entries)||data.entries.some(e=>!e||typeof e.componentId!=='string'||!e.assessment||!Array.isArray(e.assessment.dimensions)||!e.enrichment))throw Error('Format export H01 non reconnu');
+  if(!canonicalDocument)throw Error('Importez d’abord le SBOM correspondant');
+  const ids=new Set(canonicalDocument.components.filter(c=>!c.isRoot).map(c=>c.id));
+  if(data.entries.length!==ids.size||data.entries.some(e=>!ids.has(e.componentId))||new Set(data.entries.map(e=>e.componentId)).size!==ids.size)throw Error('Composants différents : export H01 non associé au SBOM courant');
+  h01Audit=data;
+  $('auditStatus').textContent='H01 chargé : '+data.entries.length+' évaluations, source '+data.sourceDigest.slice(0,12)+'…';
+  renderAuditPanel(selected);
+ }catch(error){h01Audit=null;$('auditStatus').textContent='Erreur : '+error.message;renderAuditPanel(selected)}
+ ev.target.value='';
+});
 
 function switchView(v){document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.view===v));document.querySelectorAll('.view').forEach(s=>s.hidden=s.id!==v)}
 document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>switchView(b.dataset.view));
@@ -187,7 +207,7 @@ function renderImportReport(report){
  panels.forEach(panel=>{panel.innerHTML=html});
 }
 function prepareCanonical(document){
- canonicalDocument=document;
+ canonicalDocument=document;h01Audit=null;
  const projected=MayaSbomCompat.toLegacyPackages(document);
  packages=projected.map((p,i,a)=>({...p,scores:score(p,i,a.length)}));
  selected=null;
@@ -204,7 +224,7 @@ async function importCycloneDxFile(file){
  if(!file)return;
  const attempt=importCoordinator.begin();
  try{
-  canonicalDocument=null;packages=[];selected=null;renderRows();
+  canonicalDocument=null;packages=[];selected=null;h01Audit=null;renderRows();
   const text=await file.text();
   if(!importCoordinator.isActive(attempt))return;
   const {document,report}=MayaCycloneDx.importCycloneDxJson(text,file.name);
@@ -219,7 +239,7 @@ async function importCycloneDxFile(file){
   const projected=MayaSbomCompat.toLegacyPackages(document);
   const nextPackages=projected.map((p,i,a)=>({...p,scores:score(p,i,a.length)}));
   if(!importCoordinator.isActive(attempt))return;
-  canonicalDocument=document;packages=nextPackages;selected=null;
+  canonicalDocument=document;packages=nextPackages;selected=null;h01Audit=null;
   renderRows();
   renderImportReport(report);
   $('fileinfo').textContent='✓ '+file.name+' · '+packages.length+' composants affichés';
