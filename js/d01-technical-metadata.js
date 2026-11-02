@@ -1,6 +1,13 @@
 /* Lot D technical metadata: source-preserving, deterministic and network-free. */
 'use strict';
 const {digest,deterministicId}=require('./enrichment-canonical.js');
+// Cache only by canonical document object identity; preserves the exact historical digest.
+const documentDigests=new WeakMap();
+function cachedDocumentDigest(document){
+ let value=documentDigests.get(document);
+ if(value===undefined){value=digest(JSON.parse(JSON.stringify(document)));documentDigests.set(document,value)}
+ return value;
+}
 const plain=x=>x!==null&&typeof x==='object'&&!Array.isArray(x);
 const norm=x=>typeof x==='string'&&x.trim()&&x!=='NOASSERTION'&&x!=='NONE'?x.trim():null;
 function validExpression(input){
@@ -16,7 +23,7 @@ function resolveTechnicalMetadata(document,componentId){
  if(!plain(document)||!Array.isArray(document.components))throw Error('INVALID_CANONICAL_DOCUMENT');
  const component=document.components.find(x=>x.id===componentId);
  if(!component||!plain(component.raw))throw Error('UNKNOWN_COMPONENT');
- const documentDigest=digest(JSON.parse(JSON.stringify(document))),raw=component.raw,observations=[];
+ const documentDigest=cachedDocumentDigest(document),raw=component.raw,observations=[];
  const push=(field,value,semantic,sourcePath)=>{const v=norm(value);if(v!==null)observations.push({field,value:v,semantic,sourcePath})};
  if(document.format==='cyclonedx-json'){
   const licenses=Array.isArray(document.licenses)?document.licenses.filter(x=>x.componentId===componentId):[];
