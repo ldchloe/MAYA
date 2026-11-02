@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="fr">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" type="image/png" href="../Logo-Maya.png">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" type="image/png" href="../../Logo-Maya.png">
 <title>MAYA for SBOM — Analyse de risques</title>
   
 <style>
@@ -25,7 +25,7 @@
 </style>
 <meta name="robots" content="noindex,nofollow"><title>MAYA — Prévisualisation audit PR #44</title></head>
 <body><div style="background:#f5df7c;color:#241632;padding:12px 20px;font:700 14px system-ui;text-align:center">PRÉVISUALISATION PR #44 — audit indicatif, non H01 — version de test isolée du site principal</div><main class="app">
-<header class="top"><div class="brand"><div class="logo"><img src="../Logo-Maya.png" alt="Mascotte MAYA" class="maya-logo"></div><div><p class="eyebrow">Product security · Supply chain</p><h1>MAYA <span>for SBOM</span></h1></div></div><span class="status">MAYA · MODE DÉMO</span></header><p class="intro">Importez un inventaire logiciel, identifiez les composants à examiner et obtenez une première priorisation des risques. Cette maquette utilise des heuristiques illustratives : elle ne remplace ni une analyse de vulnérabilités ni une évaluation experte.</p><nav class="tabs" aria-label="Navigation"><button class="tab active" data-view="ingest">01 · Entrée SBOM</button><button class="tab" data-view="results">02 · Analyse & résultats</button></nav>
+<header class="top"><div class="brand"><div class="logo"><img src="../../Logo-Maya.png" alt="Mascotte MAYA" class="maya-logo"></div><div><p class="eyebrow">Product security · Supply chain</p><h1>MAYA <span>for SBOM</span></h1></div></div><span class="status">MAYA · MODE DÉMO</span></header><p class="intro">Importez un inventaire logiciel, identifiez les composants à examiner et obtenez une première priorisation des risques. Cette maquette utilise des heuristiques illustratives : elle ne remplace ni une analyse de vulnérabilités ni une évaluation experte.</p><nav class="tabs" aria-label="Navigation"><button class="tab active" data-view="ingest">01 · Entrée SBOM</button><button class="tab" data-view="results">02 · Analyse & résultats</button></nav>
 <section class="view" id="ingest">
 <div class="layout"><div>
 <div class="panel"><h2>Importer un SBOM</h2><p class="sub">Traitement local dans votre navigateur — le fichier n'est pas envoyé à un serveur.</p>
@@ -41,10 +41,10 @@
 <div class="panel" style="margin-top:18px"><h2>Inventaire & priorisation</h2><p class="sub">Sélectionnez un composant pour consulter ses scores indicatifs.</p><div class="toolbar"><input id="search" placeholder="Rechercher un composant, une version, un fournisseur…"><select id="filter"><option value="all">Tous les risques</option><option value="high">Élevé (≥ 3,5)</option><option value="medium">Modéré (2–3,49)</option><option value="low">Faible (&lt; 2)</option></select><button class="btn" id="export">Exporter CSV</button></div><div class="tablewrap"><table><thead><tr><th>Composant</th><th>Version</th><th>Technique</th><th>Supply chain</th><th>Gouvernance</th><th>Géopolitique</th><th>Dépendances</th><th>Global / 5</th></tr></thead><tbody id="rows"></tbody></table><div class="empty" id="empty"><strong>Aucun composant à afficher</strong>Importez un SBOM ou chargez l'exemple de démonstration.</div></div><div class="detail" id="detail">Aucun composant sélectionné.</div><section class="detail" id="auditPanel" aria-live="polite" style="margin-top:12px"><h3>Audit des résultats — traçabilité</h3><p>Sélectionnez un composant pour examiner les données disponibles et les limites des scores. Cette interface ne prétend pas produire une évaluation H01 sans exécution du moteur H01.</p></section></div>
 <div class="panel" id="securityPanel"><h2>Enrichissement sécurité</h2><p class="sub">Recherche de vulnérabilités connues via OSV, NVD, CISA KEV et FIRST EPSS. Une correspondance ne confirme pas à elle seule l’applicabilité au produit.</p><div class="btnrow"><button class="btn primary" id="enrich">Rechercher les vulnérabilités connues →</button><span class="hint" id="enrichStatus" aria-live="polite">Importez un SBOM ou chargez l’exemple avant de lancer la recherche.</span></div><div id="sourceStatus" class="source-status" aria-live="polite"></div><div id="vulnResults"><div class="empty"><strong>Aucun enrichissement lancé</strong>Les résultats de sécurité apparaîtront ici avec leurs sources et leur niveau de confirmation.</div></div></div><div class="panel"><h2>À propos des scores</h2><p class="sub">Les scores sont des estimations heuristiques déterministes fondées sur les métadonnées disponibles (ex. présence d'une version, licence, identifiant de paquet et nombre de composants). Ils ne vérifient pas les CVE, l'activité des mainteneurs, les sanctions ni la provenance réelle. Les dimensions supply chain, gouvernance et géopolitique doivent être alimentées par des sources externes avant tout usage décisionnel.</p></div>
 </section><p class="foot">MAYA for SBOM · Prototype autonome · Aucune base de vulnérabilités ou de renseignements tiers connectée</p></main>
-<script src="../js/sbom-model.js"></script>
-<script src="../js/cyclonedx-json.js"></script>
-<script src="../js/sbom-compat.js"></script>
-<script src="../js/import-coordinator.js"></script>
+<script src="../../js/sbom-model.js"></script>
+<script src="../../js/cyclonedx-json.js"></script>
+<script src="../../js/sbom-compat.js"></script>
+<script src="../../js/import-coordinator.js"></script>
 <script>
 const dims=[{k:'tech',n:'Technique',w:25},{k:'supply',n:'Supply chain',w:25},{k:'gov',n:'Gouvernance',w:20},{k:'geo',n:'Géopolitique',w:20},{k:'dep',n:'Dépendances',w:10}];
 const importCoordinator=MayaImportCoordinator.createImportCoordinator();
