@@ -1,0 +1,268 @@
+{
+  "version": "v0.1.0-mvp",
+  "originalMvpCommit": "2cf1a7eac3b2fba867a9e848d4c13d88bb1f6e11",
+  "primaryFixture": {
+    "path": "tests/fixtures/b06-scanoss-java.json",
+    "sha256": "e901093f120c15bd039da2d702a723205c2478425db3a9f0520bfdcd8196dfa3"
+  },
+  "analysisMode": "OFFLINE",
+  "policies": [
+    {
+      "path": "config/h01-risk-policy.json",
+      "sha256": "69084a072e4a20fa53ecf919bd4b19309a8b4063f6f14757cd84863d4e0cd4e3",
+      "version": "H01-RISK-1"
+    },
+    {
+      "path": "config/h01-geopolitical-policy.json",
+      "sha256": "3c1ad5b6000a17b37fec3c9a1566330eb3e631063bb3fab346d3ed161b8940a8",
+      "version": "H01-EUROPE-1"
+    }
+  ],
+  "engineVersion": "H01-1",
+  "assessmentSchemaFields": [
+    "assessmentId",
+    "subjectId",
+    "dimensions",
+    "trustScore",
+    "evidenceCoverage",
+    "confidence",
+    "reasonCodes",
+    "inputDecisionIds",
+    "evidenceIds",
+    "policyVersion",
+    "engineVersion",
+    "inputDigest",
+    "policyDigest",
+    "geoPolicyVersion",
+    "geoPolicyDigest",
+    "scoreBreakdown",
+    "coverageBreakdown",
+    "resultDigest"
+  ],
+  "nodeRuntimeValidated": "v22.16.0",
+  "archives": [
+    {
+      "path": "fixtures/c01/.gitattributes",
+      "sha256": "7a73014753332608ce53ddb0f4d9da2024e7537ab9bf80c1a85286c76678d108"
+    },
+    {
+      "path": "fixtures/c01/junit-h2-authority-candidate.json",
+      "sha256": "5549db2df711bed393efd28c26b8bc516b0aa717ca758066047c96d20f017f29"
+    },
+    {
+      "path": "fixtures/c01/junit4-project-identity.snapshot.json",
+      "sha256": "23ec132eab0b1e8e2cc0180a3c156a88b7e6b31f66f4f4aa51725c5e0e623ab0"
+    },
+    {
+      "path": "fixtures/c01/junit4-r4.13.2-official-release-api.json",
+      "sha256": "570584193e1d9af512e1f16c1d492fdd04e0b4d69a7abcce05c2f084c5f01071"
+    },
+    {
+      "path": "fixtures/c01/junit4-r4.13.2-project-readme.md",
+      "sha256": "63feaf908bda828d78adf9989bf404ffd4e4ac4ad76b0d7bed74cf5b4f611723"
+    },
+    {
+      "path": "fixtures/c01/junit4-r4.13.2-tag-provenance.json",
+      "sha256": "1492ed78f2404e554b111fd2502caa74dd90f06f68eb6d5cafb0a6fe5b22f1a0"
+    },
+    {
+      "path": "fixtures/c01/junit4-r4.13.2-upstream-pom.xml",
+      "sha256": "569b6977ee4603c965c1c46c3058fa6e969291b0160eb6964dd092cd89eadd94"
+    },
+    {
+      "path": "fixtures/c01/log4j/acquisition-manifest.json",
+      "sha256": "68bdad35449d5df5567b50dfde3222d20fd1530fc4419ad36f88e65e52a1716e"
+    },
+    {
+      "path": "fixtures/c01/log4j/apache-log4j-core-pom.xml",
+      "sha256": "cb853eb528a22f7b414c8e944da9a1cec171c9f4b751feb827da952b5438fa2b"
+    },
+    {
+      "path": "fixtures/c01/log4j/apache-log4j-parent-pom.xml",
+      "sha256": "ff5cceb935c95662980febe740b82c610021c9bb2db3f1fd1976ad7438dc108e"
+    },
+    {
+      "path": "fixtures/c01/log4j/apache-log4j-project-identity.snapshot.json",
+      "sha256": "61fd01b28ce6fbb74a87fd383255442f4d42db60bcca608fe26b60e425018428"
+    },
+    {
+      "path": "fixtures/c01/log4j/apache-log4j-readme.adoc",
+      "sha256": "cf6ba510571fff70a2579ba38795ab66354812db4228c3604cfb7e164f89f6fd"
+    },
+    {
+      "path": "fixtures/c01/log4j/log4j-h2-authority-manifest.json",
+      "sha256": "cee92b5484f2c849d9a21765dd41b39085a61100954a50cb27a57e4ebf7d0655"
+    },
+    {
+      "path": "fixtures/c01/log4j/maven-central/log4j-core-2.23.1.observation.json",
+      "sha256": "3437a1d983cf88d059ea3e21b8bb81601526f2e15ed373da3808cf3970a528f2"
+    },
+    {
+      "path": "fixtures/c01/log4j/maven-central/log4j-core-2.23.1.pom",
+      "sha256": "c89ba0c23757511b9252b27a731d01e863b28ddfce503e7dee94ae2318c82ddc"
+    },
+    {
+      "path": "fixtures/c01/maven-central/junit-4.13.2.observation.json",
+      "sha256": "dd3704b0cc8aff3a0425415a7d542038dc5ffcb83616df45fafb62a8d034bfe7"
+    },
+    {
+      "path": "fixtures/c01/maven-central/junit-4.13.2.reference.json",
+      "sha256": "ef467bde6a5ef84741b36028a143c3179621be5188bcd7936b6fb55f0d6c2504"
+    },
+    {
+      "path": "fixtures/c01/official-p1/acquisition.json",
+      "sha256": "0fbfc001d2785fdc0c33f1009e75a40a0f910c2227a617013a516a87cdab9ac7"
+    },
+    {
+      "path": "fixtures/c01/official-p1/dependency-info.html",
+      "sha256": "3ee70e885ef7b4371841131dcad80fc83b341ca33736db3aa051ff06dc56ac52"
+    },
+    {
+      "path": "fixtures/c01/official-p1/headers.txt",
+      "sha256": "15b90abf34d8d9c907c4a9de799cc78f7b843f8d2d992028cee8b64a9d4c04ec"
+    },
+    {
+      "path": "fixtures/c01/official-p1/transport.txt",
+      "sha256": "828347952be48c7456b527a9d6d5ac95d9a372b1ae0dfb51f8170797edb7e356"
+    },
+    {
+      "path": "fixtures/c01/spring/maven-central/spring-core-6.1.3.observation.json",
+      "sha256": "a1fe846918c9dee29864b2498b5f2410194bcb6efda705d47b7f2ecce7d8f4b7"
+    },
+    {
+      "path": "fixtures/c01/spring/maven-central/spring-core-6.1.3.pom",
+      "sha256": "e218e29adafcc0512596aa2e4458e8394521d6131491fce63ac7ecc3ed1bbdab"
+    },
+    {
+      "path": "fixtures/c01/spring/spring-framework-project-identity.snapshot.json",
+      "sha256": "d16dec4a188a8900f9dcf0942502e25cbef6d0583207f37147ef0558a87ba48c"
+    },
+    {
+      "path": "fixtures/c01/spring/spring-framework-v6.1.3-build.gradle",
+      "sha256": "a9a05788620345879942a30d811eea9810f0eea01c6cab6eb24b9d5ff1f146de"
+    },
+    {
+      "path": "fixtures/c01/spring/spring-framework-v6.1.3-gradle.properties",
+      "sha256": "c56bcfde514fea931af0a1937356a7324c2f52c0e05467c0ae9f2ba1d641c9f4"
+    },
+    {
+      "path": "fixtures/c01/spring/spring-framework-v6.1.3-readme.md",
+      "sha256": "0ffa0a454d3024752f85f8d2588e20032dd09b98b0bbc4b20cf2ac061143ef66"
+    },
+    {
+      "path": "fixtures/c01/spring/spring-framework-v6.1.3-settings.gradle",
+      "sha256": "18d78033e6b69cb31f94e72b1878a31ee268df5bd1a9e9809d0b31138e842335"
+    },
+    {
+      "path": "fixtures/c01/spring/spring-framework-v6.1.3-spring-core.gradle",
+      "sha256": "f4c6d0dca7e2f54f094ee033f8f64e79fd4fa15ed0fdc86bda39c681de919ed1"
+    },
+    {
+      "path": "fixtures/c01/spring/spring-h2-authority-manifest.json",
+      "sha256": "78611be6dfceff064eb150344648bc07d0c7700b838bfc8ec9f6a8c2f68662fc"
+    },
+    {
+      "path": "fixtures/e01/apache/apache-log4j-guidelines.html",
+      "sha256": "9a51e1fca74ce85cc287cf2f87c405b028831746165b406e40ae5bca79e32fad"
+    },
+    {
+      "path": "fixtures/e01/apache/apache-log4j-guidelines.observation.json",
+      "sha256": "1dd1ee0d6f39d11384ce5751a1f68ab02883bfcdc7c49d3690ade1dd642620ba"
+    },
+    {
+      "path": "fixtures/e01/apache/apache-logging-charter.html",
+      "sha256": "b2bbf5c22c56729e3d92693ad1b302004cbb8f1c3e99d6c43c2e64dce6974df4"
+    },
+    {
+      "path": "fixtures/e01/apache/apache-logging-charter.observation.json",
+      "sha256": "14e476496f48e05d3e396d1a16a3ed26e527bd9afb26ab73caa72a5d32cee791"
+    },
+    {
+      "path": "fixtures/e01/apache/apache-logging-guidelines.html",
+      "sha256": "55d5377bdf82ec38d4bd8357c97095a6a059b86c2e771598c848f94a872102f3"
+    },
+    {
+      "path": "fixtures/e01/apache/apache-logging-guidelines.observation.json",
+      "sha256": "5569f3af59b5018b91840ef81452f4c6844c5f05c1055942a90bd60e9cf47cac"
+    },
+    {
+      "path": "fixtures/f01/asf/corporation.html",
+      "sha256": "fad51bf402b0859c8bcaddc185eeb486696edf8ff1ca0922123d3cfe88d3831f"
+    },
+    {
+      "path": "fixtures/f01/asf/corporation.metadata.json",
+      "sha256": "105f4a6433c536f5fe7e91fcb4d3820167b1702d7c08e9e4512856b71eae62c9"
+    },
+    {
+      "path": "fixtures/g01/junit/r4.13.1.json",
+      "sha256": "789aeef92cde549bffb0691fc7f8a917867ac8a364ada4afe1bf15fece79689e"
+    },
+    {
+      "path": "fixtures/g01/junit/r4.13.1.metadata.json",
+      "sha256": "d5fa37d664089d7bd2be4c310b428b438ecb4d7e3268913d4e4b9f51819d5e93"
+    },
+    {
+      "path": "fixtures/g01/junit/r4.13.2.json",
+      "sha256": "570584193e1d9af512e1f16c1d492fdd04e0b4d69a7abcce05c2f084c5f01071"
+    },
+    {
+      "path": "fixtures/g01/junit/r4.13.2.metadata.json",
+      "sha256": "a5cfb49b4aa8ddd7889df826c00f83f53d3970b3d9893078e56bb1567617fcb6"
+    }
+  ],
+  "evidenceIds": [
+    "evidence:1fb2ee979caedc45b819eec37bdd5493ee139fb1f46d7e424458cccd9423d959",
+    "evidence:3ee69864f1e70f1d46f7b441a6ab77dcd352242ecf3df95ef4832b1465ae0e9c",
+    "evidence:5ab134c90b52fde2c833713010ddef6a6e383b1411cfc03cda0701fbbefe33eb",
+    "evidence:65ad37f1c402a75ec009eb69898c3249ef7eaa7bc45d8c38e134d1447c8f1f3e",
+    "evidence:67aa26d9f8bab559e87b0af7e460e888f8367e01afc2c2efaafbc9478c1d6d05",
+    "evidence:7ff9ad6db605d5c78edcfc68ba16b34e83e916d132b52aa2519f8c5a50656b03",
+    "evidence:85102ea273cdf845a7268f26b849f5192d0b17bd0321c8f0b3c7f36a1328a811",
+    "evidence:8b2b9afd1425a0c4da8d46981215dce36e7668f22b5a404a88b8f045d9a24faa",
+    "evidence:b30b789708ca3f27d8c5b93325e140150b9da55bcb38ee1366fc63504cd44cb8",
+    "evidence:c953f5ddc2a0f3f9f25a1a630f2c58a3017b24ad8622ea508ce327361415c0e7",
+    "evidence:d11e2248d6a40fff40e29c6b2c5472be44306c80f4417e5af1e1334f007647c4",
+    "evidence:ed18f13610c263450a447cca2d10cc403e5adb170bd5ae1aedebf72acc00ab29"
+  ],
+  "decisionIds": [
+    "decision:3a4846634cb37f583b3193cc2164b330c73bb80be03b47bc2654a5fcca6265a5",
+    "decision:5f1cb324d00306fc9af50eb94533fee7eadcc93491b692861173ea8be44c28b6",
+    "decision:623a9d6e4f5a69c0e74d9e37005a9f52e4640b0640290be153dd5870cc88e534",
+    "decision:908ef211205cb10ef4f3bf15c2734f2efe575549e04abb50b71e1516d8f1b299",
+    "decision:973a198b5867ec71eaa9b421f3e3ea5c8e324bccf57b6d83115e5911024e5c93",
+    "decision:aa6744d33a6134ed06ade2a376ab4c35a46149db25f30eeca17e029ad3ddb6a2",
+    "decision:b555a7e79e96510b65643e377540e535ffa68bb1c959b01135686463fc967be4",
+    "decision:bceba43e1df3496054d9fb370f10aa9947a9cb519ea76c97098886150bbcdf9b",
+    "decision:d2ad4f0603304014204a5d2d85a961e078d533c6748a552927b587607d1d5370",
+    "decision:da0a5034faca893706281f3a14c619b193d03676c5b4752b531021c8400b4a5e",
+    "decision:e59f2b8e5fd856824d170dd5b691511a1b7ccaca2d43dd89575ecba218d6b157",
+    "decision:ec2ffd0ad07fda731c83733a13d46e7107ccd59b3bd4ffa716312f079bffaded"
+  ],
+  "assessmentIds": [
+    "trust-assessment:00ae0abaa3a34d7816b0bbf131dce6c831ade7e166fb27e9deec09782cdaa998",
+    "trust-assessment:04c9e3639eae1899e55a81e0592dcc802612b19e26a6264a0d13aef15f154e29",
+    "trust-assessment:7286b4649f37316200fac6a56d5c34ef982158df7752f7f251661bfe87617731",
+    "trust-assessment:7a70a6888de4552a4b46d5d277a81f4c2d1af5932a40f6b51a5f4f3213b1555f",
+    "trust-assessment:7d0a289e8467fb6189908dfa884f8fc7e59b0d2595a4b9857c7bf223ce5d38c3",
+    "trust-assessment:7f57b1975566e159b42a37284a8517c3b179143db88f4814930f3dc9e88c35ed",
+    "trust-assessment:8763b7ee412b0f27f6e01dce1cba2ba963f93ed070bf86b9026d8e4382086046",
+    "trust-assessment:8cc4fc240f99d6104d8c07734b7631ae3d6027a5d775bc2f0361efc6b66aba82",
+    "trust-assessment:9487848272d5281c2d2141a1b853602115f88f75f24d6c0d91426cc547c1c92d",
+    "trust-assessment:a06eb183dc052d02e9af69863a2e730acd96c167739b09d8197c7a4d978280c3",
+    "trust-assessment:cabf21c4544dcd4de3207a39f9da2dd5a0ddd370ad7cc058d3d269363e853d5f",
+    "trust-assessment:dd0d30eff8e511cae71259b226e528eb3232ffe4313ec2f09f4ccb62284bd008"
+  ],
+  "xlsx": {
+    "mode": "semantic-and-structure",
+    "sha256": "3543601866dfc2fbfc8e483e554e6dc84634779871cd549e3cc8b9ce3e960a78",
+    "byteIdenticalOnTwoGenerations": true
+  },
+  "limitations": [
+    "Only CycloneDX JSON canonical import supported",
+    "Online acquisition not configured",
+    "Approved identities limited to pinned corpus",
+    "UNKNOWN coverage may be high",
+    "ZIP export is a deterministic snapshot, not Excel scoring",
+    "ZIP archive has no .git metadata: original commit verified externally, not from ZIP"
+  ]
+}
