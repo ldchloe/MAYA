@@ -4,8 +4,9 @@ const fs=require('node:fs'),path=require('node:path');
 const {analyzeSbom}=require('./reporting-product.js');
 const {createWorkbook,inspectWorkbook}=require('./reporting-xlsx.js');
 function main(args=process.argv.slice(2)){
- const input=args.find(x=>!x.startsWith('--')&&x!==args[args.indexOf('--output')+1]&&x!==args[args.indexOf('--mode')+1]&&x!==args[args.indexOf('--audit-json')+1]);
  const option=name=>{const i=args.indexOf(name);return i<0?null:args[i+1]};
+ const optionValues=new Set(['--output','--mode','--audit-json'].flatMap(flag=>{const i=args.indexOf(flag);return i>=0&&args[i+1]?[args[i+1]]:[]}));
+ const input=args.find(x=>!x.startsWith('--')&&!optionValues.has(x));
  if(!input||args.includes('--help')){process.stdout.write('Usage: node js/reporting-cli.js input.json --output report.xlsx [--mode offline|online]\nOptional: --audit-json audit.json (H01 assessments, provenance IDs). Supported: CycloneDX JSON. XML/SPDX not supported by existing canonical import.\n');return input?0:1}
  const output=option('--output')||'maya-report.xlsx',mode=option('--mode')||'offline',auditJson=option('--audit-json');
  try{
