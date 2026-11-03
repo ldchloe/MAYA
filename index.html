@@ -161,6 +161,10 @@ function renderAuditPanel(p){
  html+='<p>Assessment ID : <code>'+esc(a.assessmentId)+'</code> · Politique : '+esc(a.policyVersion)+' · Moteur : '+esc(a.engineVersion)+'</p>';
  html+='<h4>Six dimensions H01 et provenance</h4><div class="tablewrap"><table><thead><tr><th>Dimension</th><th>Statut</th><th>Risque</th><th>Evidence IDs</th><th>Decision IDs</th><th>Raisons</th></tr></thead><tbody>'+
  a.dimensions.map(d=>'<tr><td>'+esc(d.type)+'</td><td>'+esc(d.status)+'</td><td>'+val(d.riskScore)+'</td><td>'+((d.evidenceIds||[]).map(x=>'<code>'+esc(x)+'</code>').join('<br>')||'—')+'</td><td>'+((d.decisionIds||[]).map(x=>'<code>'+esc(x)+'</code>').join('<br>')||'—')+'</td><td>'+((d.reasonCodes||[]).map(esc).join(', ')||'—')+'</td></tr>').join('')+'</tbody></table></div>';
+ const declared=entry.declaredFacts?.claims||[];
+ html+='<h4>Informations déclarées dans le SBOM — non vérifiées</h4>';
+ html+='<p class="hint">Ces champs proviennent du SBOM et ne constituent pas une preuve indépendante. Ils ne modifient ni les scores ni les statuts H01.</p>';
+ html+=declared.length?'<ul>'+declared.map(c=>'<li><strong>'+esc(c.dimension+' / '+c.field)+'</strong> : '+esc(c.value)+' <small>(DECLARED_UNVERIFIED, '+esc(c.sourcePath)+')</small></li>').join('')+'</ul>':'<p>Aucune déclaration supplémentaire dans cet export. Les anciens JSON doivent être régénérés pour afficher cette section.</p>';
  html+='<h4>Traçabilité complémentaire</h4><p>Preuves du pipeline : '+((e.evidenceIds||[]).map(x=>'<code>'+esc(x)+'</code>').join(', ')||'Aucune')+'</p><p>Décisions du pipeline : '+((e.decisionIds||[]).map(x=>'<code>'+esc(x)+'</code>').join(', ')||'Aucune')+'</p>';
  html+='<p class="hint">Les identifiants et statuts proviennent du pipeline H01. Ils ne signifient pas que le contenu des archives de preuves est embarqué dans cet export. UNKNOWN ou CONFLICTED ne sont pas des preuves de faible risque.</p>';
  host.innerHTML='<button type="button" onclick="closeAudit()" style="float:right">Fermer ×</button>'+html;
