@@ -161,6 +161,16 @@ function renderAuditPanel(p){
  html+='<p>Assessment ID : <code>'+esc(a.assessmentId)+'</code> · Politique : '+esc(a.policyVersion)+' · Moteur : '+esc(a.engineVersion)+'</p>';
  html+='<h4>Six dimensions H01 et provenance</h4><div class="tablewrap"><table><thead><tr><th>Dimension</th><th>Statut</th><th>Risque</th><th>Evidence IDs</th><th>Decision IDs</th><th>Raisons</th></tr></thead><tbody>'+
  a.dimensions.map(d=>'<tr><td>'+esc(d.type)+'</td><td>'+esc(d.status)+'</td><td>'+val(d.riskScore)+'</td><td>'+((d.evidenceIds||[]).map(x=>'<code>'+esc(x)+'</code>').join('<br>')||'—')+'</td><td>'+((d.decisionIds||[]).map(x=>'<code>'+esc(x)+'</code>').join('<br>')||'—')+'</td><td>'+((d.reasonCodes||[]).map(esc).join(', ')||'—')+'</td></tr>').join('')+'</tbody></table></div>';
+ const technical=entry.technicalProvenance;
+ html+='<h4>Nature de la vérification technique</h4>';
+ html+='<p><strong>TECHNICAL_RISK VERIFIED = licence déclarée résolue dans le SBOM.</strong> Ce statut ne démontre ni une confirmation indépendante par l’éditeur, ni l’absence de vulnérabilités. Une preuve de type <code>declarative</code> reste une déclaration du SBOM.</p>';
+ if(technical){
+  const evidence=technical.evidence||[],license=technical.decisions?.license;
+  html+='<p><strong>Décision de licence :</strong> '+esc(license?.status||'UNKNOWN')+' · Déclarée : '+esc(technical.licenses?.declared||'Non renseignée')+' · Conclue : '+esc(technical.licenses?.concluded||'Non renseignée')+'</p>';
+  html+='<h4>Preuves techniques consultables ('+evidence.length+')</h4>';
+  html+=evidence.length?evidence.map(ev=>'<details style="margin:8px 0;padding:10px;border:1px solid #73578d;border-radius:8px"><summary style="cursor:pointer;overflow-wrap:anywhere"><strong>'+esc(ev.semantic)+' : '+esc(ev.value)+'</strong> — '+esc(ev.id)+'</summary><dl><dt>Nature</dt><dd>Déclaration SBOM, non confirmée indépendamment</dd><dt>Champ et chemin source</dt><dd>'+esc(ev.field)+' · <code>'+esc(ev.sourcePath)+'</code></dd><dt>Méthode</dt><dd>'+esc(ev.method)+'</dd><dt>Evidence ID</dt><dd><code style="overflow-wrap:anywhere">'+esc(ev.id)+'</code></dd><dt>Empreinte de l’enregistrement</dt><dd><code style="overflow-wrap:anywhere">'+esc(ev.sourceDigest)+'</code></dd><dt>Empreinte du document canonique</dt><dd><code style="overflow-wrap:anywhere">'+esc(ev.documentDigest)+'</code></dd></dl></details>').join(''):'<p>Aucune observation technique associée.</p>';
+  html+='<p class="hint">Les empreintes identifient le contenu exporté ; leur présence ne constitue pas une authentification externe. Les archives officielles ne sont pas incluses.</p>';
+ }else html+='<p class="hint">Cet ancien export contient uniquement les identifiants. Régénérez le JSON pour consulter les preuves techniques détaillées.</p>';
  const declared=entry.declaredFacts?.claims||[];
  html+='<h4>Informations déclarées dans le SBOM — non vérifiées</h4>';
  html+='<p class="hint">Ces champs proviennent du SBOM et ne constituent pas une preuve indépendante. Ils ne modifient ni les scores ni les statuts H01.</p>';
