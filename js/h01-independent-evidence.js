@@ -11,7 +11,7 @@ function safeUrl(value){
 }
 function normalizeLicense(s){return typeof s==='string'?s.trim().replace(/\\s+/g,' '):''}
 function verifySnapshot(record,baseDir){
- if(!record||typeof record!=='object'||!safeUrl(record.sourceUrl)||typeof record.archivePath!=='string'||path.isAbsolute(record.archivePath)||record.archivePath.split(/[\\/]+/).includes('..')||!/^([a-f0-9]{64})$/.test(record.sha256||'')||!Number.isFinite(Date.parse(record.acquiredAt))||!['license','governance'].includes(record.dimension)||typeof record.field!=='string'||typeof record.value!=='string'||!record.value.trim()||typeof record.selector!=='string'||record.selector.length<4)return {status:'UNKNOWN',reason:'INVALID_SOURCE_METADATA'};
+ if(!record||typeof record!=='object'||!safeUrl(record.sourceUrl)||typeof record.archivePath!=='string'||path.isAbsolute(record.archivePath)||record.archivePath.split(/[\\/]+/).includes('..')||!/^([a-f0-9]{64})$/.test(record.sha256||'')||!Number.isFinite(Date.parse(record.acquiredAt))||!['technical','governance'].includes(record.dimension)||typeof record.field!=='string'||typeof record.value!=='string'||!record.value.trim()||typeof record.selector!=='string'||record.selector.length<4)return {status:'UNKNOWN',reason:'INVALID_SOURCE_METADATA'};
  const resolved=path.resolve(baseDir,record.archivePath),root=path.resolve(baseDir);
  if(!resolved.startsWith(root+path.sep))return {status:'UNKNOWN',reason:'INVALID_ARCHIVE_PATH'};
  let body;try{body=fs.readFileSync(resolved,'utf8')}catch{return {status:'UNKNOWN',reason:'ARCHIVE_NOT_FOUND'}};
