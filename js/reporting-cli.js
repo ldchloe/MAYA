@@ -2,6 +2,7 @@
 'use strict';
 const fs=require('node:fs'),path=require('node:path');
 const {analyzeSbom}=require('./reporting-product.js');
+const {collectDeclaredFacts}=require('./a01-declared-facts.js');
 const {createWorkbook,inspectWorkbook}=require('./reporting-xlsx.js');
 function main(args=process.argv.slice(2)){
  const option=name=>{const i=args.indexOf(name);return i<0?null:args[i+1]};
@@ -15,7 +16,7 @@ function main(args=process.argv.slice(2)){
   if(check.detailRows!==a.diagnostics.componentsTotal||check.sheets.join(',')!=='COMEX,DETAIL')throw Error('XLSX_VALIDATION_FAILED');
   fs.writeFileSync(output,bytes);
   if(auditJson){
-   const entries=a.components.map((c,i)=>({componentId:c.id,assessment:a.assessments[i],enrichment:a.enrichments[i]}));
+   const entries=a.components.map((c,i)=>({componentId:c.id,assessment:a.assessments[i],enrichment:a.enrichments[i],declaredFacts:collectDeclaredFacts(a.canonical,c)}));
    const audit={schema:'maya-h01-audit-v1',sourceDigest:a.sourceDigest||null,analysisMode:a.analysisMode,policyVersion:a.assessments[0]?.policyVersion||null,entries};
    fs.writeFileSync(auditJson,JSON.stringify(audit,null,2)+'\n');
   }
