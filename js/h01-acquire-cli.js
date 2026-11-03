@@ -24,7 +24,7 @@ async function main(args=process.argv.slice(2)){
  fs.mkdirSync(outputDir,{recursive:true});
  const records=[];
  for(const [i,r] of requests.entries()){
-  if(!r||!safeUrl(r.sourceUrl)||!['license','governance'].includes(r.dimension)||typeof r.componentId!=='string'||!r.componentId||!r.identity||r.identity.confirmedByOperator!==true||typeof r.identity.name!=='string'||typeof r.identity.version!=='string'||typeof r.field!=='string'||typeof r.value!=='string'||typeof r.selector!=='string')throw Error('INVALID_ACQUISITION_REQUEST_'+i);
+  if(!r||!safeUrl(r.sourceUrl)||!['technical','governance'].includes(r.dimension)||typeof r.componentId!=='string'||!r.componentId||!r.identity||r.identity.confirmedByOperator!==true||typeof r.identity.name!=='string'||typeof r.identity.version!=='string'||typeof r.field!=='string'||typeof r.value!=='string'||typeof r.selector!=='string')throw Error('INVALID_ACQUISITION_REQUEST_'+i);
   const body=await fetchText(r.sourceUrl);
   const sha256=sha256Text(body),archivePath='sources/'+sha256+'.txt';
   fs.mkdirSync(path.join(outputDir,'sources'),{recursive:true});
