@@ -33,7 +33,7 @@ Créer `requests.json` avec des objets de la forme :
 ]
 ```
 
-**Attention :** la dimension des déclarations A01 est `technical` ou `governance`. Le collecteur accepte `license` comme type de source de licence, puis la transforme en `technical` dans le manifeste. Ne jamais attribuer une identité de paquet sur la seule base du nom ou du PURL ; confirmer l'URL du projet et la version manuellement avant collecte.
+**Attention :** la dimension des déclarations A01 est `technical` ou `governance`. Le collecteur et le vérificateur utilisent tous deux `technical` pour les déclarations de licence. Ne jamais attribuer une identité de paquet sur la seule base du nom ou du PURL ; confirmer l'URL du projet et la version manuellement avant collecte.
 
 ```sh
 node js/h01-acquire-cli.js requests.json evidence-archive
