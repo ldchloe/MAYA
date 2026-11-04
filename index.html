@@ -154,7 +154,7 @@ function renderAuditPanel(p){
  const fieldHTML=fields.map(([n,v])=>'<li><strong>'+esc(n)+'</strong> : '+(known(v)?esc(v):'<em>Non renseigné</em>')+'</li>').join('');
  const entry=h01Audit?.entries.find(e=>e.componentId===p.occurrenceId);
  let html='<h3>Audit du composant : '+esc(p.name)+' @ '+esc(p.version)+'</h3><h4>Métadonnées du SBOM</h4><ul>'+fieldHTML+'</ul>';
- if(!entry){host.innerHTML='<button type="button" onclick="closeAudit()" style="float:right">Fermer ×</button>'+html+'<p><strong>Évaluation H01 indisponible pour ce composant.</strong> Chargez un export H01 du même SBOM. Les scores /5 du tableau sont uniquement des heuristiques et ne constituent pas des preuves.</p>';return}
+ if(!entry){host.innerHTML='<button type="button" onclick="closeAudit()" style="float:right;background:#c62828;color:#fff;border:1px solid #a51e1e;border-radius:6px;padding:7px 12px;font-weight:700;cursor:pointer">Fermer ×</button>'+html+'<p><strong>Évaluation H01 indisponible pour ce composant.</strong> Chargez un export H01 du même SBOM. Les scores /5 du tableau sont uniquement des heuristiques et ne constituent pas des preuves.</p>';return}
  const a=entry.assessment,e=entry.enrichment;
  const val=x=>x===null||x===undefined?'Non calculé':esc(x);
  html+='<p><strong>Trust Score : '+val(a.trustScore)+'/100</strong> · Couverture des preuves : '+val(a.evidenceCoverage)+'% · Confiance : '+val(a.confidence)+'</p>';
@@ -184,7 +184,7 @@ function renderAuditPanel(p){
  html+=declared.length?'<ul>'+declared.map(c=>'<li><strong>'+esc(c.dimension+' / '+c.field)+'</strong> : '+esc(c.value)+' <small>(DECLARED_UNVERIFIED, '+esc(c.sourcePath)+')</small></li>').join('')+'</ul>':'<p>Aucune déclaration supplémentaire dans cet export. Les anciens JSON doivent être régénérés pour afficher cette section.</p>';
  html+='<h4>Traçabilité complémentaire</h4><p>Preuves du pipeline : '+((e.evidenceIds||[]).map(x=>'<code>'+esc(x)+'</code>').join(', ')||'Aucune')+'</p><p>Décisions du pipeline : '+((e.decisionIds||[]).map(x=>'<code>'+esc(x)+'</code>').join(', ')||'Aucune')+'</p>';
  html+='<p class="hint">Les identifiants et statuts proviennent du pipeline H01. Ils ne signifient pas que le contenu des archives de preuves est embarqué dans cet export. UNKNOWN ou CONFLICTED ne sont pas des preuves de faible risque.</p>';
- host.innerHTML='<button type="button" onclick="closeAudit()" style="float:right">Fermer ×</button>'+html;
+ host.innerHTML='<button type="button" onclick="closeAudit()" style="float:right;background:#c62828;color:#fff;border:1px solid #a51e1e;border-radius:6px;padding:7px 12px;font-weight:700;cursor:pointer">Fermer ×</button>'+html;
 }
 $('auditJson').addEventListener('change',async ev=>{
  const file=ev.target.files[0];if(!file)return;
